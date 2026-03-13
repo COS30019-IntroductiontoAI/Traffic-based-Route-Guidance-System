@@ -155,7 +155,7 @@ processed_data = traffic_sorted[final_columns]
 
 print("Step 5: Saving processed dataset")
 
-output_directory = "data/processed"
+output_directory = "../data"
 output_file = output_directory + "/processed_traffic.csv"
 
 # Create folder if it does not exist
