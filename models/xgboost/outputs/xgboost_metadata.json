@@ -1,0 +1,21 @@
+{
+  "data_path": "F:\\AI_Model\\asm2\\data\\processed\\processed_traffic.csv",
+  "feature_columns": [
+    "hour",
+    "day_of_week",
+    "is_weekend",
+    "lag_1",
+    "lag_2",
+    "lag_4",
+    "lag_8",
+    "lag_96",
+    "rolling_mean_4",
+    "rolling_mean_8"
+  ],
+  "target_column": "traffic_volume",
+  "site_column": "scats_number",
+  "time_column": "datetime",
+  "train_end": "2006-10-22T23:30:00",
+  "val_end": "2006-10-27T11:45:00",
+  "row_count_after_features": 109440
+}
