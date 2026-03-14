@@ -22,13 +22,7 @@ ENV/
 
 # Jupyter Notebook
 .ipynb_checkpoints/
-*.ipynb
-
-# Data
-data/raw/
-data/processed/
-*.csv
-*.xlsx
+*.ipynb 
 
 # OS
 .DS_Store
