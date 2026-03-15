@@ -10,9 +10,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
+from src.evaluation import evaluate_tabular_predictions
 from models.xgboost_model import (
     OUTPUT_DIR,
-    calculate_metrics,
     build_feature_frame,
     get_xy,
     load_metadata,
@@ -41,8 +41,8 @@ def evaluate_model() -> dict:
     x_test, _ = get_xy(test_df)
 
     results = {
-        "validation": calculate_metrics(y_val, model.predict(x_val)),
-        "test": calculate_metrics(y_test, model.predict(x_test)),
+        "validation": evaluate_tabular_predictions(y_val.to_numpy(dtype=float), model.predict(x_val)),
+        "test": evaluate_tabular_predictions(y_test.to_numpy(dtype=float), model.predict(x_test)),
     }
     return results
 

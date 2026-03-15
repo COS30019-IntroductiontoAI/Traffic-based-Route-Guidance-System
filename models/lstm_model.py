@@ -1,10 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from src.data_loader import prepare_data
+
+TRAINED_MODELS_DIR = Path("results/trained_models")
+GRAPHS_DIR = Path("results/graphs")
 
 # ------------------------------------
 # --- 1. LOAD AND PREPARE THE DATA ---
@@ -43,7 +47,7 @@ early_stop = EarlyStopping(
 
 # Save the best model based on validation loss
 checkpoint = ModelCheckpoint(
-  "results/trained_models/lstm_model.keras", 
+  TRAINED_MODELS_DIR / "lstm_model.keras",
   monitor="val_loss",
   save_best_only=True,
   mode="min"
@@ -65,6 +69,7 @@ history = model.fit(
 # ------------------------------
 # --- 5. PLOT TRAINING CURVE ---
 # ------------------------------
+GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
 plt.figure(figsize=(10, 6))
 plt.plot(history.history["loss"], label="Training Loss")
 plt.plot(history.history["val_loss"], label="Validation Loss")
@@ -72,5 +77,5 @@ plt.title("LSTM Model Training and Validation Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.legend()
-plt.savefig("results/trained_models/lstm_training_curve.png")
-plt.show()
+plt.savefig(GRAPHS_DIR / "lstm_training_curve.png")
+plt.close()

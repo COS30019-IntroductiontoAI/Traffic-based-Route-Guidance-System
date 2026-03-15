@@ -1,10 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import GRU, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from src.data_loader import prepare_data
+
+TRAINED_MODELS_DIR = Path("results/trained_models")
+GRAPHS_DIR = Path("results/graphs")
 
 
 # ------------------------------------
@@ -44,7 +48,7 @@ early_stop = EarlyStopping(
 
 # Save the best model based on validation loss
 checkpoint = ModelCheckpoint(
-  "results/trained_models/gru_model.keras", 
+  TRAINED_MODELS_DIR / "gru_model.keras",
   monitor="val_loss",
   save_best_only=True,
   mode="min"
@@ -66,6 +70,7 @@ history = model.fit(
 # --------------------------------
 # --- 5. PLOT TRAINING HISTORY ---
 # --------------------------------
+GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
 plt.figure(figsize=(12, 6))
 plt.plot(history.history["loss"], label="Training Loss")
 plt.plot(history.history["val_loss"], label="Validation Loss")
@@ -73,5 +78,5 @@ plt.title("GRU Model Training and Validation Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.legend()
-plt.savefig("results/trained_models/gru_training_curve.png")
-plt.show()
+plt.savefig(GRAPHS_DIR / "gru_training_curve.png")
+plt.close()

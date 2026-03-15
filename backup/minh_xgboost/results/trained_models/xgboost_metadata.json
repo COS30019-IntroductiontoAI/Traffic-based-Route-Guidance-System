@@ -104,6 +104,9 @@
     "lag_1"
   ],
   "target_column": "traffic_volume",
+  "site_column": "scats_number",
+  "movement_column": "location",
+  "time_column": "datetime",
   "sequence_length": 96,
   "forecast_horizon": 1,
   "train_end": "2006-10-22T23:30:00",
