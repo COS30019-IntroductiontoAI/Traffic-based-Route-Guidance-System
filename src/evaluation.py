@@ -38,8 +38,8 @@ def evaluate_model(model_path, X_testt, y_test, scaler):
 # Plot the actual vs predicted values for visual comparison
 def plot_predictions(actual, predicted, title):
   plt.figure(figsize=(14, 5))
-  plt.plot(actual, label="Actual", color="blue")
-  plt.plot(predicted, label="Predicted", color="orange")
+  plt.plot(actual[:500], label="Actual", color="blue")
+  plt.plot(predicted[:500], label="Predicted", color="orange")
   plt.title(title)
   plt.xlabel("Time Steps")
   plt.ylabel("Traffic Volume")
