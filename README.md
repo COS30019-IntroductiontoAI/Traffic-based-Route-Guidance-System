@@ -1,11 +1,13 @@
-# Assignment 2 Part B - Traffic-Based Route Guidance System (TBRGS)
+# Traffic-Based Route Guidance System (TBRGS)
 
 ## Team Members
+
+The initial role for each member in the project
 
 | Name | Student ID | Task | Responsibility |
 |:---|:---|:---|:---|
 | Bui Quang Doan | 104993227 | Task 1 | Data Processing & Dataset Preparation |
-| Do Gia Huy | 104988294 | Task 2 | ML Implementation (LSTM/GRU) & Model Evaluation |
+| Do Gia Huy (Leader) | 104988294 | Task 2 | ML Implementation (LSTM/GRU) & Model Evaluation |
 | Huynh Doan Hoang Minh | 104777308 | Task 2 | ML Implementation & Model Evaluation |
 | Le Thanh Nam | 104999380 | Task 3 & 4 | System Integration, Travel Time Estimation & GUI |
 
