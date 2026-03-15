@@ -10,8 +10,8 @@ from xgboost import XGBRegressor
 
 
 BASE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parents[1]
-OUTPUT_DIR = BASE_DIR / "outputs"
+PROJECT_ROOT = BASE_DIR.parent
+OUTPUT_DIR = PROJECT_ROOT / "results" / "trained_models"
 DATA_PATH = PROJECT_ROOT / "data" / "processed" / "processed_traffic.csv"
 MODEL_PATH = OUTPUT_DIR / "xgboost_model.joblib"
 METADATA_PATH = OUTPUT_DIR / "xgboost_metadata.json"
