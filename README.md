@@ -18,17 +18,23 @@
 
 ---
 
+## Prerequisites & Installation
+
+### Python Version
+
+This project requires **Python 3.12** or later.
+
+### Install Dependencies
+
+Install all required packages using:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Task 1: Data Preprocessing
 
 This section covers the `preprocessing_data.py` script, which extracts, cleans, and reshapes the raw VicRoads dataset to prepare it for machine learning training.
-
-### Prerequisites
-
-Make sure Python is installed. Install the required libraries using:
-
-```bash
-pip install pandas openpyxl
-```
 
 ### How to Run
 
@@ -52,3 +58,61 @@ The script performs the following operations on the raw dataset:
 * Cleans the dataset by removing the pedestrian counting site (4335) and branches with insufficient data (less than 25 days).
 * Handles missing traffic volume values using linear interpolation, forward fill, and backward fill.
 * Generates time-based features including hour, day of week, and an `is_weekend` indicator.
+
+---
+
+## Task 2: Model Training
+
+This section covers training two deep learning models (LSTM and GRU) to predict traffic flow patterns using the preprocessed traffic data.
+
+### How to Run
+
+#### LSTM Model
+
+To train the LSTM (Long Short-Term Memory) model, execute:
+
+```bash
+python -m models.lstm_model
+```
+
+**What it does:**
+* Loads and prepares the preprocessed traffic data
+* Builds a sequential LSTM model with 2 stacked LSTM layers (64 and 32 units)
+* Uses dropout regularization (0.2) to prevent overfitting
+* Trains the model with Adam optimizer and mean squared error loss
+* Saves the best model based on validation loss to `saved/saved_lstm_model.keras`
+* Evaluates performance on test data and generates prediction visualizations
+* Results are saved to `results/test_result/` and `results/prediction/`
+
+#### GRU Model
+
+To train the GRU (Gated Recurrent Unit) model, execute:
+
+```bash
+python -m models.gru_model
+```
+
+**What it does:**
+* Loads and prepares the preprocessed traffic data
+* Builds a sequential GRU model with 2 stacked GRU layers (64 and 32 units)
+* Uses dropout regularization (0.2) to prevent overfitting
+* Trains the model with Adam optimizer and mean squared error loss
+* Saves the best model based on validation loss to `saved/saved_gru_model.keras`
+* Evaluates performance on test data and generates prediction visualizations
+* Results are saved to `results/test_result/` and `results/prediction/`
+
+### Model Architecture
+
+Both models use a similar architecture:
+* **Input:** Sequence of 96 time intervals (24 hours of 15-minute intervals)
+* **Prediction:** Next 15-minute traffic flow value
+* **Layers:** Two recurrent layers with dropout for regularization
+* **Output:** Single value (predicted traffic volume)
+
+### Model Outputs
+
+After training, the following files are generated:
+* `results/trained_models/gru_model.keras` - Trained GRU model
+* `results/trained_models/lstm_model.keras` - Trained LSTM model
+* `results/trained_models/gru_training_curve.png` - Model training graph of gru
+* `results/trained_models/lstm_training_curve.png` - Model training graph of lstm

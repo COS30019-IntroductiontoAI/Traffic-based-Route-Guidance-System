@@ -43,7 +43,7 @@ early_stop = EarlyStopping(
 
 # Save the best model based on validation loss
 checkpoint = ModelCheckpoint(
-  "../saved/saved_lstm_model.keras", 
+  "results/trained_models/lstm_model.keras", 
   monitor="val_loss",
   save_best_only=True,
   mode="min"
@@ -72,5 +72,5 @@ plt.title("LSTM Model Training and Validation Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.legend()
-plt.savefig("lstm_training_curve.png")
+plt.savefig("results/trained_models/lstm_training_curve.png")
 plt.show()

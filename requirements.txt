@@ -1,6 +1,7 @@
 pandas
+openpyxl
 numpy
 scikit-learn
 matplotlib
-tensorflow 
-keras 
+tensorflow
+keras

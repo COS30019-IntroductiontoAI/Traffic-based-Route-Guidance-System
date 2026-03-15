@@ -44,7 +44,7 @@ early_stop = EarlyStopping(
 
 # Save the best model based on validation loss
 checkpoint = ModelCheckpoint(
-  "../saved/saved_gru_model.keras", 
+  "results/trained_models/gru_model.keras", 
   monitor="val_loss",
   save_best_only=True,
   mode="min"
@@ -73,5 +73,5 @@ plt.title("GRU Model Training and Validation Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.legend()
-plt.savefig("gru_training_curve.png")
+plt.savefig("results/trained_models/gru_training_curve.png")
 plt.show()
