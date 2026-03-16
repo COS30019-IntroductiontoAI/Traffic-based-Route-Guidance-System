@@ -5,6 +5,7 @@ import {
 } from 'recharts'
 import { TrendingUp, TrendingDown, Clock, AlertTriangle } from 'lucide-react'
 import { useApp } from '../App'
+import { themeHex } from '../theme'
 
 const generatePrediction = (intersection: string, timeframe: string) => {
   const hours = timeframe === '6 Hours' ? 6 : timeframe === '12 Hours' ? 12 : timeframe === '48 Hours' ? 48 : 24
@@ -97,7 +98,8 @@ export default function TrafficPrediction() {
             </select>
           </div>
           <button onClick={handlePredict} disabled={loading}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-60 shadow-sm whitespace-nowrap">
+            className="px-6 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-60 shadow-sm whitespace-nowrap"
+            style={{ background: `linear-gradient(to right, ${themeHex.primary}, ${themeHex.grad})` }}>
             {loading ? 'Predicting...' : 'Predict'}
           </button>
         </div>
@@ -152,14 +154,15 @@ export default function TrafficPrediction() {
             <h2 className="font-semibold text-gray-900">Predicted Traffic Volume</h2>
             <p className="text-xs text-gray-400 mt-0.5">{intersection} — Actual vs Predicted</p>
           </div>
-          <span className="text-xs font-semibold text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-lg">{model}</span>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg"
+            style={{ color: themeHex.primary, backgroundColor: themeHex.primary50 }}>{model}</span>
         </div>
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="predGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.18} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0.01} />
+                <stop offset="5%"  stopColor={themeHex.chart} stopOpacity={0.18} />
+                <stop offset="95%" stopColor={themeHex.chart} stopOpacity={0.01} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -169,7 +172,7 @@ export default function TrafficPrediction() {
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
             <ReferenceLine y={avgPredicted} stroke="#e5e7eb" strokeDasharray="5 3"
               label={{ value: 'avg', position: 'right', fontSize: 9, fill: '#d1d5db' }} />
-            <Area type="monotone" dataKey="predicted" name="Predicted" stroke="#6366f1" strokeWidth={2.5} fill="url(#predGrad)" />
+            <Area type="monotone" dataKey="predicted" name="Predicted" stroke={themeHex.chart} strokeWidth={2.5} fill="url(#predGrad)" />
             <Area type="monotone" dataKey="actual"    name="Actual"    stroke="#9ca3af" strokeWidth={1.5} fill="none" strokeDasharray="4 3" />
           </AreaChart>
         </ResponsiveContainer>
@@ -185,7 +188,8 @@ export default function TrafficPrediction() {
             <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
             <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 12 }}
-              formatter={(v: number) => [`${v} vehicles`, 'Error']} />
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(v: any) => [`${v} vehicles`, 'Error']} />
             <Bar dataKey="error" name="Error" fill="#e0e7ff" radius={[4, 4, 0, 0]} maxBarSize={24} />
           </BarChart>
         </ResponsiveContainer>

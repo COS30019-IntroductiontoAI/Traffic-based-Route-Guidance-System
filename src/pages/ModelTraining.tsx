@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
 import { useApp } from '../App'
+import { themeHex } from '../theme'
 
 const generateTrainingData = () => {
   const data = []
@@ -114,7 +115,8 @@ export default function ModelTraining() {
           <button
             onClick={handleTrain}
             disabled={isTraining}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 shadow-sm"
+            className="w-full py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 shadow-sm"
+            style={{ background: `linear-gradient(to right, ${themeHex.primary}, ${themeHex.grad})` }}
           >
             {isTraining ? `Training... ${displayedEpoch}/${epochs}` : 'Initialize Training'}
           </button>
@@ -124,8 +126,11 @@ export default function ModelTraining() {
             <div>
               <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-200"
-                  style={{ width: `${(displayedEpoch / epochs) * 100}%` }}
+                  className="h-full rounded-full transition-all duration-200"
+                  style={{
+                    width: `${(displayedEpoch / epochs) * 100}%`,
+                    background: `linear-gradient(to right, ${themeHex.primary}, ${themeHex.grad})`
+                  }}
                 />
               </div>
               <p className="text-xs text-gray-400 text-center mt-1.5">
@@ -149,7 +154,7 @@ export default function ModelTraining() {
                   contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 12 }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                <Line type="monotone" dataKey="trainLoss" name="Training Loss" stroke="#6366f1" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="trainLoss" name="Training Loss" stroke={themeHex.chart} strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="valLoss" name="Validation Loss" stroke="#9ca3af" strokeWidth={2} dot={false} strokeDasharray="5 4" />
               </LineChart>
             </ResponsiveContainer>

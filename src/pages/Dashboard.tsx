@@ -4,6 +4,7 @@ import {
 } from 'recharts'
 import StatCard from '../components/StatCard'
 import { useApp } from '../App'
+import { themeHex } from '../theme'
 
 const trafficData = [
   { time: '00:00', volume: 120 }, { time: '03:00', volume: 80 },  { time: '06:00', volume: 200 },
@@ -54,19 +55,23 @@ export default function Dashboard() {
       {/* Action buttons */}
       <div className="flex gap-3">
         <button onClick={() => { navigate('data-processing');    toast('Navigating to Data Processing', 'info') }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm">
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
+          style={{ backgroundColor: themeHex.primary }}>
           <DbIcon size={15} /> Load Dataset
         </button>
         <button onClick={() => { navigate('model-training');     toast('Navigating to Model Training', 'info') }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm">
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
+          style={{ backgroundColor: themeHex.primary }}>
           <BrainCircuit size={15} /> Train Models
         </button>
         <button onClick={() => { navigate('traffic-prediction'); toast('Navigating to Traffic Prediction', 'info') }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm">
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
+          style={{ backgroundColor: themeHex.primary }}>
           <BarChart2 size={15} /> Run Prediction
         </button>
         <button onClick={() => { navigate('route-guidance');     toast('Navigating to Route Guidance', 'info') }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all shadow-sm">
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
+          style={{ background: `linear-gradient(to right, ${themeHex.primary}, ${themeHex.grad})` }}>
           <Navigation size={15} /> Find Routes
         </button>
       </div>
@@ -80,14 +85,15 @@ export default function Dashboard() {
               <h2 className="font-semibold text-gray-900">Traffic Flow</h2>
               <p className="text-xs text-gray-400 mt-0.5">24-hour volume pattern</p>
             </div>
-            <span className="text-xs text-indigo-500 font-semibold bg-indigo-50 px-2 py-0.5 rounded-lg">Today</span>
+            <span className="text-xs text-indigo-500 font-semibold bg-indigo-50 px-2 py-0.5 rounded-lg"
+              style={{ color: themeHex.primary, backgroundColor: themeHex.primary50 }}>Today</span>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={trafficData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="trafficGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.02} />
+                  <stop offset="5%"  stopColor={themeHex.chart} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={themeHex.chart} stopOpacity={0.02} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -96,7 +102,7 @@ export default function Dashboard() {
               <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 12 }}
                 labelStyle={{ color: '#374151', fontWeight: 600 }} />
               <ReferenceLine y={500} stroke="#e5e7eb" strokeDasharray="4 3" label={{ value: 'avg', position: 'right', fontSize: 9, fill: '#d1d5db' }} />
-              <Area type="monotone" dataKey="volume" stroke="#6366f1" strokeWidth={2.5} fill="url(#trafficGrad)" />
+              <Area type="monotone" dataKey="volume" stroke={themeHex.chart} strokeWidth={2.5} fill="url(#trafficGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -117,15 +123,15 @@ export default function Dashboard() {
             <BarChart data={modelData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="barGrad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
+                  <stop offset="0%"   stopColor={themeHex.primary} />
+                  <stop offset="100%" stopColor={themeHex.grad} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="model" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
               <YAxis domain={[80, 100]} tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 12 }}
-                formatter={(v: number | string | undefined) => [`${v}%`, 'Accuracy']} />
+                formatter={(v) => [`${v}%`, 'Accuracy']} />
               <Bar dataKey="accuracy" fill="url(#barGrad1)" radius={[6, 6, 0, 0]} maxBarSize={48} />
             </BarChart>
           </ResponsiveContainer>

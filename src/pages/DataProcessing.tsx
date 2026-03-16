@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Database, FileText, CheckCircle, RefreshCw, Clock, HardDrive, Trash2, FolderOpen } from 'lucide-react'
 import StatCard from '../components/StatCard'
 import { useApp } from '../App'
+import { themeHex } from '../theme'
 
 type DatasetStatus = 'synced' | 'processing' | 'pending'
 
@@ -25,7 +26,7 @@ const initialDatasets: Dataset[] = [
 
 const statusConfig: Record<DatasetStatus, { icon: React.ReactNode; label: string; textColor: string; bg: string }> = {
   synced:     { icon: <CheckCircle size={14} />, label: 'Synced',     textColor: 'text-emerald-600', bg: 'bg-emerald-50' },
-  processing: { icon: <RefreshCw   size={14} className="animate-spin" />, label: 'Processing', textColor: 'text-indigo-600', bg: 'bg-indigo-50' },
+  processing: { icon: <RefreshCw   size={14} className="animate-spin" />, label: 'Processing', textColor: 'text-blue-600',    bg: 'bg-blue-50'    },
   pending:    { icon: <Clock       size={14} />, label: 'Pending',    textColor: 'text-amber-600',   bg: 'bg-amber-50'   },
 }
 
@@ -118,14 +119,14 @@ export default function DataProcessing() {
                   {dataset.status === 'processing' && dataset.progress !== undefined && (
                     <div className="mt-2">
                       <div className="flex justify-between mb-1">
-                        <span className="text-xs text-indigo-500 font-medium">Processing...</span>
-                        <span className="text-xs text-indigo-500 font-semibold">{dataset.progress}%</span>
+                        <span className="text-xs font-medium" style={{ color: themeHex.primary }}>Processing...</span>
+                        <span className="text-xs font-semibold" style={{ color: themeHex.primary }}>{dataset.progress}%</span>
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-indigo-500 rounded-full transition-all duration-300"
-                          style={{ width: `${dataset.progress}%` }}
-                        />
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{ width: `${dataset.progress}%`, backgroundColor: themeHex.primary }}
+                      />
                       </div>
                     </div>
                   )}
@@ -166,7 +167,8 @@ export default function DataProcessing() {
             setDatasets(prev => [...prev, newDs])
             toast('New dataset slot added', 'success')
           }}
-          className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-2"
+          className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-all shadow-sm flex items-center gap-2 hover:opacity-90 active:scale-95"
+          style={{ backgroundColor: themeHex.primary }}
         >
           <Database size={16} /> Load New Dataset
         </button>

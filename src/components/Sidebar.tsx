@@ -1,5 +1,6 @@
 import React from 'react'
 import { LayoutDashboard, Database, BrainCircuit, BarChart2, Navigation, Zap } from 'lucide-react'
+import { themeHex } from '../theme'
 
 type Page = 'dashboard' | 'data-processing' | 'model-training' | 'traffic-prediction' | 'route-guidance'
 
@@ -22,7 +23,10 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
 
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-200">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md"
+          style={{ background: `linear-gradient(135deg, ${themeHex.primary}, ${themeHex.grad})` }}
+        >
           <Zap size={17} className="text-white" />
         </div>
         <div>
@@ -39,20 +43,27 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
-                isActive
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
-              }`}
+              className="relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group"
+              style={isActive ? {
+                backgroundColor: themeHex.primary50,
+                color: themeHex.primary,
+              } : {}}
+              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f9fafb' }}
+              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '' }}
             >
               {/* Active left bar */}
               {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-500 rounded-r-full" />
+                <span
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full"
+                  style={{ backgroundColor: themeHex.primary }}
+                />
               )}
-              <span className={`transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`}>
+              <span style={{ color: isActive ? themeHex.primary : '#9ca3af' }}>
                 {item.icon}
               </span>
-              {item.label}
+              <span className={isActive ? '' : 'text-gray-500'}>
+                {item.label}
+              </span>
             </button>
           )
         })}
@@ -61,7 +72,10 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
       {/* Bottom version badge */}
       <div className="px-4 py-4 border-t border-gray-100">
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+          <div
+            className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: `linear-gradient(135deg, ${themeHex.primary}, ${themeHex.grad})` }}
+          >
             <Zap size={12} className="text-white" />
           </div>
           <div className="flex-1 min-w-0">
