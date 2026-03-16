@@ -14,13 +14,14 @@ METRICS_DIR = Path("results/metrics")
 
 # Inverse transform the data using the scaler
 def inverse_transform(scaler, data: np.ndarray) -> np.ndarray:
-  # Create a dummy array with the same shape as the original features, where the first column is the data to be inverse transformed and the rest are zeros
-  dummy = np.zeros((len(data), 4))
-  dummy[:, 0] = data.flatten()
-  
-  # Inverse transform the data and return only the traffic volume column
-  inverse = scaler.inverse_transform(dummy)[:, 0]
-  return inverse
+  flat = data.flatten()
+
+  dummy = np.zeros((len(flat), scaler.n_features_in_))
+  dummy[:, 0] = flat   
+
+  inversed = scaler.inverse_transform(dummy)
+
+  return inversed[:, 0]
 
 
 # Compute evaluation metrics: MAE, RMSE, and MAPE

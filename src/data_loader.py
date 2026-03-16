@@ -18,24 +18,21 @@ def normalize_data(features: np.ndarray) -> Tuple[np.ndarray, MinMaxScaler]:
 # Create the sequences for training model
 def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int):
   X, y = [], []
-  
-  # Loop through the data to create sequences of the specified length and corresponding targets
+
   for i in range(len(data) - seq_len - forecast_horizon + 1):
     X.append(data[i:i + seq_len])
-    y.append(data[i + seq_len + forecast_horizon - 1])
-    
+    y.append(data[i + seq_len + forecast_horizon - 1, 0]) 
+
   X = np.array(X)
   y = np.array(y)
-  
-  # 70% for training, 10% for validation, and 20% for testing
+
   train_end = int(len(X) * 0.7)
   val_end = int(len(X) * 0.8)
-  
-  # Split the data into training, validation, and testing sets
+
   X_train, y_train = X[:train_end], y[:train_end]
   X_val, y_val = X[train_end:val_end], y[train_end:val_end]
   X_test, y_test = X[val_end:], y[val_end:]
-  
+
   return (X_train, y_train), (X_val, y_val), (X_test, y_test)
 
 

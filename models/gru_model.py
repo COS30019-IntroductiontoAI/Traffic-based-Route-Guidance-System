@@ -21,9 +21,9 @@ from src.data_loader import prepare_data
 # --- 2. BUILD THE GRU MODEL ---
 # ------------------------------
 model = Sequential([
-  GRU(units=64, return_sequences=True, input_shape=(192, 4)),
+  GRU(units=128, return_sequences=True, input_shape=(192, 4)),
   Dropout(0.3),
-  GRU(units=32, return_sequences=False),
+  GRU(units=64, return_sequences=False),
   Dropout(0.3),
   Dense(units=1)
 ])

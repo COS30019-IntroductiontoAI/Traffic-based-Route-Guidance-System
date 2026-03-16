@@ -6,6 +6,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from src.data_loader import prepare_data
 
+
 # ------------------------------------
 # --- 1. LOAD AND PREPARE THE DATA ---
 # ------------------------------------
@@ -20,9 +21,9 @@ from src.data_loader import prepare_data
 # --- 2. BUILD THE LSTM MODEL ---
 # -------------------------------
 model = Sequential([
-  LSTM(units=64, return_sequences=True, input_shape=(192, 4)),
+  LSTM(units=128, return_sequences=True, input_shape=(192, 4)),
   Dropout(0.3),
-  LSTM(units=32, return_sequences=False),
+  LSTM(units=64, return_sequences=False),
   Dropout(0.3),
   Dense(units=1)
 ])
