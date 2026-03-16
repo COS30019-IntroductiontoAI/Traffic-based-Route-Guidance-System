@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -11,7 +11,7 @@ from src.data_loader import prepare_data
 # ------------------------------------
 (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler = prepare_data(
   "data/processed/processed_traffic.csv",
-  seq_len=96,             # Using past 24 hours of data (96 intervals of 15 minutes)
+  seq_len=192,            # Using past 48 hours of data (192 intervals of 15 minutes)
   forecast_horizon=1      # Predicting the next 15 minutes (1 interval ahead)
 )
 
@@ -20,15 +20,15 @@ from src.data_loader import prepare_data
 # --- 2. BUILD THE LSTM MODEL ---
 # -------------------------------
 model = Sequential([
-  LSTM(units=64, return_sequences=True, input_shape=(96, 1)),
-  Dropout(0.2),
+  LSTM(units=64, return_sequences=True, input_shape=(192, 4)),
+  Dropout(0.3),
   LSTM(units=32, return_sequences=False),
-  Dropout(0.2),
+  Dropout(0.3),
   Dense(units=1)
 ])
 
 # Compile the model with Adam optimizer and mean squared error loss function
-model.compile(optimizer=Adam(learning_rate=0.001), loss="mse")
+model.compile(optimizer=Adam(learning_rate=0.0005), loss="mse")
 model.summary()
 
 
@@ -57,7 +57,7 @@ history = model.fit(
   X_train, y_train,
   validation_data=(X_val, y_val),
   epochs=100,
-  batch_size=32,
+  batch_size=1024,
   callbacks=[early_stop, checkpoint]
 )
 

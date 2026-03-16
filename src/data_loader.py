@@ -5,12 +5,12 @@ from typing import Tuple
 
 
 # Normalize the data using MinMaxScaler
-def normalize_data(series: np.ndarray) -> Tuple[np.ndarray, MinMaxScaler]:
+def normalize_data(features: np.ndarray) -> Tuple[np.ndarray, MinMaxScaler]:
   # Define the scaler and fit it to the data
   scaler = MinMaxScaler()
   
   # Reshape the data to fit the scaler and transform it
-  normalized_data = scaler.fit_transform(series.values.reshape(-1, 1))
+  normalized_data = scaler.fit_transform(features)
   
   return normalized_data, scaler
 
@@ -43,10 +43,12 @@ def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int):
 def prepare_data(filepath: str, seq_len: int, forecast_horizon: int):
   # Load the data from the processed csv file
   df = pd.read_csv(filepath, parse_dates=["datetime"], index_col="datetime")
-  series = df["traffic_volume"]
+  
+  # Select the relevant features for modeling (traffic volume, hour of the day, and day of the week)
+  features = df[["traffic_volume", "hour", "day_of_week", "is_weekend"]].values
   
   # Normalize the data
-  scaled, scaler = normalize_data(series)
+  scaled, scaler = normalize_data(features)
 
   # Create the sequences for training, validation, and testing
   (X_train, y_train), (X_val, y_val), (X_test, y_test) = create_sequences(scaled, seq_len, forecast_horizon)
