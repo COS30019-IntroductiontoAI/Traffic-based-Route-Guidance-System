@@ -3,8 +3,22 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.losses import Huber
 from src.data_loader import prepare_data
+from src.model_config import (
+  SEQ_LEN,
+  FORECAST_HORIZON,
+  INPUT_FEATURES,
+  EPOCHS,
+  BATCH_SIZE,
+  LEARNING_RATE,
+  DROPOUT_RATE,
+  EARLY_STOP_PATIENCE,
+  LR_REDUCE_PATIENCE,
+  LR_REDUCE_FACTOR,
+  MIN_LR,
+)
 
 
 # ------------------------------------
@@ -12,8 +26,8 @@ from src.data_loader import prepare_data
 # ------------------------------------
 (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler = prepare_data(
   "data/processed/processed_traffic.csv",
-  seq_len=192,            # Using past 48 hours of data (192 intervals of 15 minutes)
-  forecast_horizon=1      # Predicting the next 15 minutes (1 interval ahead)
+  seq_len=SEQ_LEN,
+  forecast_horizon=FORECAST_HORIZON
 )
 
 
@@ -21,15 +35,23 @@ from src.data_loader import prepare_data
 # --- 2. BUILD THE LSTM MODEL ---
 # -------------------------------
 model = Sequential([
-  LSTM(units=128, return_sequences=True, input_shape=(192, 4)),
-  Dropout(0.3),
-  LSTM(units=64, return_sequences=False),
-  Dropout(0.3),
+  LSTM(units=128, return_sequences=True, input_shape=(SEQ_LEN, INPUT_FEATURES)),
+  Dropout(DROPOUT_RATE),
+  LSTM(units=64, return_sequences=True),
+  Dropout(DROPOUT_RATE),
+  LSTM(units=32, return_sequences=False),
+  Dense(units=32, activation="relu"),
   Dense(units=1)
 ])
 
-# Compile the model with Adam optimizer and mean squared error loss function
-model.compile(optimizer=Adam(learning_rate=0.0005), loss="mse")
+optimizer = Adam(learning_rate=LEARNING_RATE)
+
+# Huber loss is less sensitive to outliers than MSE, which is beneficial for traffic data with spikes
+model.compile(
+  optimizer=optimizer,
+  loss=Huber(),
+  metrics=["mae", "mape"]
+)
 model.summary()
 
 
@@ -38,8 +60,17 @@ model.summary()
 # --------------------
 early_stop = EarlyStopping(
   monitor="val_loss",
-  patience=10,
+  patience=EARLY_STOP_PATIENCE,
   restore_best_weights=True
+)
+
+# Reduce learning rate when validation loss plateaus
+reduce_lr = ReduceLROnPlateau(
+  monitor="val_loss",
+  factor=LR_REDUCE_FACTOR,
+  patience=LR_REDUCE_PATIENCE,
+  min_lr=MIN_LR,
+  verbose=1
 )
 
 # Save the best model based on validation loss
@@ -57,9 +88,10 @@ checkpoint = ModelCheckpoint(
 history = model.fit(
   X_train, y_train,
   validation_data=(X_val, y_val),
-  epochs=100,
-  batch_size=1024,
-  callbacks=[early_stop, checkpoint]
+  epochs=EPOCHS,
+  batch_size=BATCH_SIZE,
+  callbacks=[early_stop, reduce_lr, checkpoint],
+  shuffle=True
 )
 
 

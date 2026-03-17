@@ -6,6 +6,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from tensorflow.keras.models import load_model
 
 from src.data_loader import prepare_data
+from src.model_config import SEQ_LEN, FORECAST_HORIZON
 
 
 GRAPH_DIR = Path("results/graphs")
@@ -30,8 +31,8 @@ def compute_metrics(actual: np.ndarray, predicted: np.ndarray) -> dict:
   rmse = np.sqrt(mean_squared_error(actual, predicted))
   
   # Filter out zero values before computing MAPE
-  mask           = actual != 0         
-  actual_masked  = actual[mask]
+  mask = actual != 0         
+  actual_masked = actual[mask]
   predicted_masked = predicted[mask]
   
   mape = np.mean(np.abs((actual_masked - predicted_masked) / actual_masked)) * 100
@@ -89,8 +90,8 @@ def evaluate_saved_models(graph_dir: Path = GRAPH_DIR, metrics_dir: Path = METRI
   print("Loading test data...")
   (_, _), (_, _), (X_test, y_test), scaler = prepare_data(
     filepath="data/processed/processed_traffic.csv",
-    seq_len=96,
-    forecast_horizon=1
+    seq_len=SEQ_LEN,
+    forecast_horizon=FORECAST_HORIZON
   )
   print(f"X_test shape : {X_test.shape}")
   print(f"y_test shape : {y_test.shape}")
