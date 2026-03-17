@@ -9,10 +9,12 @@ INPUT_FEATURES = 8        # traffic_volume, hour, day_of_week, is_weekend, hour_
 EPOCHS = 120
 BATCH_SIZE = 256
 LEARNING_RATE = 0.001
-DROPOUT_RATE = 0.2
+DROPOUT_RATE = 0.25
+L2_REG = 1e-4
 
 # Callback tuning
-EARLY_STOP_PATIENCE = 15
-LR_REDUCE_PATIENCE = 5
+EARLY_STOP_PATIENCE = 12
+LR_REDUCE_PATIENCE = 6
 LR_REDUCE_FACTOR = 0.5
-MIN_LR = 1e-5 
+MIN_LR = 1e-5
+MONITOR_METRIC = "val_loss" 

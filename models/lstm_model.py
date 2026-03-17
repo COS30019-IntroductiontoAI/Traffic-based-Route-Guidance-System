@@ -4,7 +4,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from tensorflow.keras.losses import Huber
+from tensorflow.keras import regularizers
 from src.data_loader import prepare_data
 from src.model_config import (
   SEQ_LEN,
@@ -14,10 +14,12 @@ from src.model_config import (
   BATCH_SIZE,
   LEARNING_RATE,
   DROPOUT_RATE,
+  L2_REG,
   EARLY_STOP_PATIENCE,
   LR_REDUCE_PATIENCE,
   LR_REDUCE_FACTOR,
   MIN_LR,
+  MONITOR_METRIC,
 )
 
 
@@ -35,23 +37,35 @@ from src.model_config import (
 # --- 2. BUILD THE LSTM MODEL ---
 # -------------------------------
 model = Sequential([
-  LSTM(units=128, return_sequences=True, input_shape=(SEQ_LEN, INPUT_FEATURES)),
+  LSTM(
+    units=128,
+    return_sequences=True,
+    input_shape=(SEQ_LEN, INPUT_FEATURES),
+    kernel_regularizer=regularizers.l2(L2_REG),
+    recurrent_regularizer=regularizers.l2(L2_REG),
+  ),
   Dropout(DROPOUT_RATE),
-  LSTM(units=64, return_sequences=True),
+  LSTM(
+    units=64,
+    return_sequences=True,
+    kernel_regularizer=regularizers.l2(L2_REG),
+    recurrent_regularizer=regularizers.l2(L2_REG),
+  ),
   Dropout(DROPOUT_RATE),
-  LSTM(units=32, return_sequences=False),
-  Dense(units=32, activation="relu"),
+  LSTM(
+    units=32,
+    return_sequences=False,
+    kernel_regularizer=regularizers.l2(L2_REG),
+    recurrent_regularizer=regularizers.l2(L2_REG),
+  ),
+  Dense(units=32, activation="relu", kernel_regularizer=regularizers.l2(L2_REG)),
   Dense(units=1)
 ])
 
 optimizer = Adam(learning_rate=LEARNING_RATE)
 
-# Huber loss is less sensitive to outliers than MSE, which is beneficial for traffic data with spikes
-model.compile(
-  optimizer=optimizer,
-  loss=Huber(),
-  metrics=["mae", "mape"]
-)
+# Use MAE loss to better align optimization with MAPE while remaining stable on low-volume periods
+model.compile(optimizer=optimizer, loss="mae", metrics=["mae", "mape"])
 model.summary()
 
 
@@ -59,14 +73,15 @@ model.summary()
 # --- 3. CALLBACKS ---
 # --------------------
 early_stop = EarlyStopping(
-  monitor="val_loss",
+  monitor=MONITOR_METRIC,
   patience=EARLY_STOP_PATIENCE,
-  restore_best_weights=True
+  restore_best_weights=True,
+  mode="min"
 )
 
 # Reduce learning rate when validation loss plateaus
 reduce_lr = ReduceLROnPlateau(
-  monitor="val_loss",
+  monitor=MONITOR_METRIC,
   factor=LR_REDUCE_FACTOR,
   patience=LR_REDUCE_PATIENCE,
   min_lr=MIN_LR,
@@ -76,7 +91,7 @@ reduce_lr = ReduceLROnPlateau(
 # Save the best model based on validation loss
 checkpoint = ModelCheckpoint(
   "results/trained_models/lstm_model.keras", 
-  monitor="val_loss",
+  monitor=MONITOR_METRIC,
   save_best_only=True,
   mode="min"
 )
