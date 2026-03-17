@@ -87,14 +87,16 @@ def save_metrics_json(model_name: str, metrics: dict, output_dir: Path = METRICS
 
 
 def evaluate_saved_models(graph_dir: Path = GRAPH_DIR, metrics_dir: Path = METRICS_DIR):
-  print("Loading test data...")
-  (_, _), (_, _), (X_test, y_test), scaler = prepare_data(
+  print("Loading validation and test data...")
+  (_, _), (X_val, y_val), (X_test, y_test), scaler = prepare_data(
     filepath="data/processed/processed_traffic.csv",
     seq_len=SEQ_LEN,
     forecast_horizon=FORECAST_HORIZON
   )
-  print(f"X_test shape : {X_test.shape}")
-  print(f"y_test shape : {y_test.shape}")
+  print(f"X_val shape : {X_val.shape}")
+  print(f"y_val shape : {y_val.shape}")
+  print(f"X_test shape: {X_test.shape}")
+  print(f"y_test shape: {y_test.shape}")
 
   models = [
     ("LSTM", "results/trained_models/lstm_model.keras"),
@@ -103,22 +105,32 @@ def evaluate_saved_models(graph_dir: Path = GRAPH_DIR, metrics_dir: Path = METRI
 
   for model_name, model_path in models:
     print(f"\nEvaluating {model_name} model...")
-    actual, predicted, metrics = evaluate_model(model_path, X_test, y_test, scaler)
+    metrics_bundle = {}
 
-    plot_path = plot_predictions(
-      actual,
-      predicted,
-      title=f"{model_name} Predictions",
-      output_dir=graph_dir,
-      filename=f"{model_name.lower()}_predictions.png",
-      show=False,
-    )
-    metrics_path = save_metrics_json(model_name, metrics, output_dir=metrics_dir)
+    for split_name, (X_split, y_split) in {
+      "validation": (X_val, y_val),
+      "test": (X_test, y_test),
+    }.items():
+      actual, predicted, split_metrics = evaluate_model(model_path, X_split, y_split, scaler)
+      metrics_bundle[split_name] = split_metrics
 
-    print(f"MAE  : {metrics['MAE']:.4f}")
-    print(f"RMSE : {metrics['RMSE']:.4f}")
-    print(f"MAPE : {metrics['MAPE']:.4f}%")
-    print(f"Saved plot -> {plot_path}")
+      # Only plot test predictions to keep artifacts light
+      if split_name == "test":
+        plot_path = plot_predictions(
+          actual,
+          predicted,
+          title=f"{model_name} Predictions ({split_name})",
+          output_dir=graph_dir,
+          filename=f"{model_name.lower()}_{split_name}_predictions.png",
+          show=False,
+        )
+        print(f"{split_name.capitalize()} plot -> {plot_path}")
+
+      print(f"{model_name} {split_name} MAE  : {split_metrics['MAE']:.4f}")
+      print(f"{model_name} {split_name} RMSE : {split_metrics['RMSE']:.4f}")
+      print(f"{model_name} {split_name} MAPE : {split_metrics['MAPE']:.4f}%")
+
+    metrics_path = save_metrics_json(model_name, metrics_bundle, output_dir=metrics_dir)
     print(f"Saved metrics -> {metrics_path}")
 
   print("\nDone!")

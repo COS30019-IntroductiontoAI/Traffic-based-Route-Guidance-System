@@ -41,8 +41,14 @@ def prepare_data(filepath: str, seq_len: int, forecast_horizon: int):
   # Load the data from the processed csv file
   df = pd.read_csv(filepath, parse_dates=["datetime"], index_col="datetime")
   
-  # Select the relevant features for modeling (traffic volume, hour of the day, and day of the week)
-  features = df[["traffic_volume", "hour", "day_of_week", "is_weekend"]].values
+  # Add cyclical encodings for hour/day to better capture periodicity
+  df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
+  df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
+  df["dow_sin"]  = np.sin(2 * np.pi * df["day_of_week"] / 7)
+  df["dow_cos"]  = np.cos(2 * np.pi * df["day_of_week"] / 7)
+  
+  # Select the relevant features for modeling
+  features = df[["traffic_volume", "hour", "day_of_week", "is_weekend", "hour_sin", "hour_cos", "dow_sin", "dow_cos"]].values
   
   # Normalize the data
   scaled, scaler = normalize_data(features)
