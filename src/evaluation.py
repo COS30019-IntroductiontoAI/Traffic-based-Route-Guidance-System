@@ -14,15 +14,14 @@ METRICS_DIR = Path("results/metrics")
 
 
 # Inverse transform the data using the scaler
-def inverse_transform(scaler, data: np.ndarray) -> np.ndarray:
+def inverse_transform(scaler, data):
   flat = data.flatten()
-
   dummy = np.zeros((len(flat), scaler.n_features_in_))
-  dummy[:, 0] = flat   
-
-  inversed = scaler.inverse_transform(dummy)
-
-  return inversed[:, 0]
+  dummy[:, 0] = flat
+  inversed = scaler.inverse_transform(dummy)[:, 0]
+  
+  # Undo the log1p transform
+  return np.expm1(inversed)
 
 
 # Compute evaluation metrics: MAE, RMSE, and MAPE

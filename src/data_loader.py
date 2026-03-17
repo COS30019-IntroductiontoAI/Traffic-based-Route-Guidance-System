@@ -37,23 +37,47 @@ def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int):
 
 
 # Main function to prepare the data for training the models
-def prepare_data(filepath: str, seq_len: int, forecast_horizon: int):
-  # Load the data from the processed csv file
+def prepare_data(filepath, seq_len, forecast_horizon):
   df = pd.read_csv(filepath, parse_dates=["datetime"], index_col="datetime")
   
-  # Add cyclical encodings for hour/day to better capture periodicity
   df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
   df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
   df["dow_sin"]  = np.sin(2 * np.pi * df["day_of_week"] / 7)
   df["dow_cos"]  = np.cos(2 * np.pi * df["day_of_week"] / 7)
   
-  # Select the relevant features for modeling
+  # log1p handles zeros safely, compresses spikes, lifts low values
+  df["traffic_volume"] = np.log1p(df["traffic_volume"])
+  
   features = df[["traffic_volume", "hour", "day_of_week", "is_weekend", "hour_sin", "hour_cos", "dow_sin", "dow_cos"]].values
-  
-  # Normalize the data
-  scaled, scaler = normalize_data(features)
 
-  # Create the sequences for training, validation, and testing
-  (X_train, y_train), (X_val, y_val), (X_test, y_test) = create_sequences(scaled, seq_len, forecast_horizon)
+  # Split into sequences and then normalize using the scaler fitted on the training data
+  sequences = create_sequences(features, seq_len, forecast_horizon)
+  (X_train, y_train), (X_val, y_val), (X_test, y_test) = sequences
+
+  # Fit scaler on train rows only
+  n_train = X_train.shape[0]
+  scaler = MinMaxScaler()
+  train_2d = features[:n_train + seq_len]   
+  scaler.fit(train_2d)
   
+  # Transform all splits using the train-fitted scaler
+  def scale_X(X):
+    shape = X.shape
+    return scaler.transform(X.reshape(-1, shape[-1])).reshape(shape)
+  
+  X_train = scale_X(X_train)
+  X_val   = scale_X(X_val)
+  X_test  = scale_X(X_test)
+  
+  # Scale y values using only feature 0 (traffic_volume)
+  dummy = np.zeros((len(y_train), scaler.n_features_in_))
+  dummy[:, 0] = y_train
+  y_train = scaler.transform(dummy)[:, 0] 
+  dummy = np.zeros((len(y_val), scaler.n_features_in_))
+  dummy[:, 0] = y_val
+  y_val = scaler.transform(dummy)[:, 0]
+  dummy = np.zeros((len(y_test), scaler.n_features_in_))
+  dummy[:, 0] = y_test
+  y_test = scaler.transform(dummy)[:, 0]
+
   return (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler
