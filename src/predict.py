@@ -12,7 +12,11 @@ import pandas as pd
 
 # Convert normalized values back to the original traffic scale.
 def inverse_transform(scaler, data: np.ndarray) -> np.ndarray:
-    return scaler.inverse_transform(data.reshape(-1, 1)).flatten()
+    flat = data.flatten()
+    dummy = np.zeros((len(flat), scaler.n_features_in_))
+    dummy[:, 0] = flat
+    inversed = scaler.inverse_transform(dummy)[:, 0]
+    return np.expm1(inversed)
 
 
 # Load a saved sequence model and return actual and predicted values on the original scale.
@@ -27,9 +31,9 @@ def predict_sequence_model(model_path: str | Path, x_test: np.ndarray, y_test: n
     return actual_real, predicted_real
 
 
-# --------------------------------
-# --- XGBoost Prediction Helper ---
-# --------------------------------
+# ------------------------------
+# --- Tabular Prediction Helper ---
+# ------------------------------
 
 # Predict traffic values from a tabular feature frame.
 def predict_tabular_model(model, feature_df: pd.DataFrame, feature_columns: list[str]) -> np.ndarray:

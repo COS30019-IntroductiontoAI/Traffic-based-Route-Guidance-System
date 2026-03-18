@@ -1,14 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import GRU, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras import regularizers
 from src.data_loader import prepare_data
-
-TRAINED_MODELS_DIR = Path("results/trained_models")
-GRAPHS_DIR = Path("results/graphs")
+from src.model_config import (
+  SEQ_LEN,
+  FORECAST_HORIZON,
+  INPUT_FEATURES,
+  EPOCHS,
+  BATCH_SIZE,
+  LEARNING_RATE,
+  DROPOUT_RATE,
+  L2_REG,
+  EARLY_STOP_PATIENCE,
+  LR_REDUCE_PATIENCE,
+  LR_REDUCE_FACTOR,
+  MIN_LR,
+  MONITOR_METRIC,
+)
 
 
 # ------------------------------------
@@ -16,24 +28,42 @@ GRAPHS_DIR = Path("results/graphs")
 # ------------------------------------
 (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler = prepare_data(
   "data/processed/processed_traffic.csv",
-  seq_len=96,             # Using past 24 hours of data (96 intervals of 15 minutes)
-  forecast_horizon=1      # Predicting the next 15 minutes (1 interval ahead)
+  seq_len=SEQ_LEN,
+  forecast_horizon=FORECAST_HORIZON
 )
 
-
+  
 # ------------------------------
 # --- 2. BUILD THE GRU MODEL ---
 # ------------------------------
 model = Sequential([
-  GRU(units=64, return_sequences=True, input_shape=(96, 1)),
-  Dropout(0.2),
-  GRU(units=32, return_sequences=False),
-  Dropout(0.2),
+  GRU(
+    units=128,
+    return_sequences=True,
+    input_shape=(SEQ_LEN, INPUT_FEATURES),
+    kernel_regularizer=regularizers.l2(L2_REG),
+    recurrent_regularizer=regularizers.l2(L2_REG),
+  ),
+  Dropout(DROPOUT_RATE),
+  GRU(
+    units=64,
+    return_sequences=True,
+    kernel_regularizer=regularizers.l2(L2_REG),
+    recurrent_regularizer=regularizers.l2(L2_REG),
+  ),
+  Dropout(DROPOUT_RATE),
+  GRU(
+    units=32,
+    return_sequences=False,
+    kernel_regularizer=regularizers.l2(L2_REG),
+    recurrent_regularizer=regularizers.l2(L2_REG),
+  ),
+  Dense(units=32, activation="relu", kernel_regularizer=regularizers.l2(L2_REG)),
   Dense(units=1)
 ])
 
-# Compile the model with Adam optimizer and mean squared error loss function
-model.compile(optimizer=Adam(learning_rate=0.001), loss="mse")
+optimizer = Adam(learning_rate=LEARNING_RATE)
+model.compile(optimizer=optimizer, loss="mae", metrics=["mae", "mape"])
 model.summary()
 
 
@@ -41,15 +71,25 @@ model.summary()
 # --- 3. CALLBACKS ---
 # --------------------
 early_stop = EarlyStopping(
-  monitor="val_loss",
-  patience=10,
-  restore_best_weights=True
+  monitor=MONITOR_METRIC,
+  patience=EARLY_STOP_PATIENCE,
+  restore_best_weights=True,
+  mode="min"
+)
+
+# Reduce learning rate when validation loss plateaus
+reduce_lr = ReduceLROnPlateau(
+  monitor=MONITOR_METRIC,
+  factor=LR_REDUCE_FACTOR,
+  patience=LR_REDUCE_PATIENCE,
+  min_lr=MIN_LR,
+  verbose=1
 )
 
 # Save the best model based on validation loss
 checkpoint = ModelCheckpoint(
-  TRAINED_MODELS_DIR / "gru_model.keras",
-  monitor="val_loss",
+  "results/trained_models/gru_model.keras", 
+  monitor=MONITOR_METRIC,
   save_best_only=True,
   mode="min"
 )
@@ -61,16 +101,16 @@ checkpoint = ModelCheckpoint(
 history = model.fit(
   X_train, y_train,
   validation_data=(X_val, y_val),
-  epochs=100,
-  batch_size=32,
-  callbacks=[early_stop, checkpoint]
+  epochs=EPOCHS,
+  batch_size=BATCH_SIZE,
+  callbacks=[early_stop, reduce_lr, checkpoint],
+  shuffle=True
 )
 
 
 # --------------------------------
 # --- 5. PLOT TRAINING HISTORY ---
 # --------------------------------
-GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
 plt.figure(figsize=(12, 6))
 plt.plot(history.history["loss"], label="Training Loss")
 plt.plot(history.history["val_loss"], label="Validation Loss")
@@ -78,5 +118,5 @@ plt.title("GRU Model Training and Validation Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.legend()
-plt.savefig(GRAPHS_DIR / "gru_training_curve.png")
-plt.close()
+plt.savefig("results/trained_models/gru_training_curve.png")
+plt.show()
