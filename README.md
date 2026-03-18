@@ -12,7 +12,7 @@
 ## Project Overview
 * **Goal:** Build a Traffic-Based Route Guidance System (TBRGS) for the city of Boroondara.
 * **Data:** Use historical SCATS traffic flow data (October 2006) to train machine learning models.
-* **Prediction:** Train models such as LSTM, GRU, and XGBoost to predict future traffic flow.
+* **Prediction:** Train models such as LSTM, GRU, and LightGBM to predict future traffic flow.
 * **Integration:** Convert predicted traffic flow into travel time and use the A* algorithm to find optimal routes.
 * **Note:** This repository currently contains Task 1 and initial Task 2 model implementations.
 
@@ -99,18 +99,18 @@ python -m models.gru_model
 * Saves the best model based on validation loss to `results/trained_models/gru_model.keras`
 * Saves the GRU training curve to `results/graphs/gru_training_curve.png`
 
-#### XGBoost Model
+#### LightGBM Model
 
-To train the XGBoost baseline model, execute:
+To train the LightGBM tabular model, execute:
 
 ```bash
-python -m models.xgboost_model
+python -m models.lightgbm_model
 ```
 
 **What it does:**
 * Loads the preprocessed traffic data from `data/processed/processed_traffic.csv`
 * Builds a movement-level tabular feature set from sequence windows of the previous 96 traffic values
-* Trains an XGBoost regressor to predict the next 15-minute traffic flow value
+* Trains a LightGBM regressor to predict the next 15-minute traffic flow value
 * Evaluates performance using MAE, RMSE, and MAPE
 * Generates a prediction plot on the test set in the same flow style as the sequence models
 * Saves the model and metadata to `results/trained_models/`
@@ -119,7 +119,7 @@ python -m models.xgboost_model
 
 #### Compare All 3 Models
 
-To evaluate LSTM, GRU, and compare them with XGBoost in one plot, execute:
+To evaluate LSTM, GRU, and compare them with LightGBM in one plot, execute:
 
 ```bash
 python src/compare_all_models.py
@@ -128,7 +128,7 @@ python src/compare_all_models.py
 **What it does:**
 * Evaluates the saved LSTM model on the test set
 * Evaluates the saved GRU model on the test set
-* Loads the saved XGBoost test metrics
+* Loads the saved LightGBM test metrics
 * Saves `lstm_metrics.json` and `gru_metrics.json` to `results/metrics/`
 * Saves a grouped comparison chart to `results/graphs/all_models_metrics_comparison.png`
 
@@ -137,7 +137,7 @@ python src/compare_all_models.py
 The current Task 2 models use two different modelling styles:
 
 * **LSTM / GRU:** Sequence models using 96 time intervals (24 hours of 15-minute intervals) to predict the next 15-minute traffic flow value
-* **XGBoost:** A movement-level tabular regression baseline that flattens the previous 96 traffic values into feature columns
+* **LightGBM:** A movement-level tabular regression model that flattens the previous 96 traffic values into feature columns
 
 ### Model Outputs
 
@@ -147,15 +147,15 @@ After training and evaluation, the following files are generated:
 * `results/trained_models/lstm_model.keras` - Trained LSTM model
 * `results/graphs/gru_training_curve.png` - GRU training curve
 * `results/graphs/lstm_training_curve.png` - LSTM training curve
-* `results/trained_models/xgboost_model.joblib` - Trained XGBoost model
-* `results/trained_models/xgboost_metadata.json` - XGBoost metadata and split configuration
+* `results/trained_models/lightgbm_model.txt` - Trained LightGBM model
+* `results/trained_models/lightgbm_metadata.json` - LightGBM metadata and split configuration
 * `results/metrics/lstm_metrics.json` - LSTM evaluation metrics
 * `results/metrics/gru_metrics.json` - GRU evaluation metrics
-* `results/metrics/xgboost_metrics.json` - XGBoost evaluation metrics
+* `results/metrics/lightgbm_metrics.json` - LightGBM evaluation metrics
 * `results/graphs/all_models_metrics_comparison.png` - Bar chart comparing all 3 models
-* `results/graphs/xgboost_predictions.png` - XGBoost prediction plot
+* `results/graphs/lightgbm_predictions.png` - LightGBM prediction plot
 
 ### Notes
 
-* The XGBoost baseline currently uses movement-level prediction.
-* It converts sequence history into tabular lag features so the same 15-minute traffic history can be used by XGBoost.
+* The LightGBM model currently uses movement-level prediction.
+* It converts sequence history into tabular lag features so the same 15-minute traffic history can be used by LightGBM.

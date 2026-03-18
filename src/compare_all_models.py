@@ -28,25 +28,30 @@ def save_metrics(metrics: dict, output_path: Path) -> None:
 
 # Evaluate one saved sequence model and store its metrics JSON.
 def evaluate_sequence_metrics(model_name: str, model_filename: str) -> dict:
-    (_, _), (_, _), (x_test, y_test), scaler = prepare_data(
+    (_, _), (x_val, y_val), (x_test, y_test), scaler = prepare_data(
         str(DATA_PATH),
         seq_len=96,
         forecast_horizon=1,
     )
 
     model_path = TRAINED_MODELS_DIR / model_filename
-    _, _, metrics = evaluate_model(model_path, x_test, y_test, scaler)
+    _, _, val_metrics = evaluate_model(model_path, x_val, y_val, scaler)
+    _, _, test_metrics = evaluate_model(model_path, x_test, y_test, scaler)
+
+    metrics = {
+        "validation": val_metrics,
+        "test": test_metrics,
+    }
 
     metrics_path = METRICS_DIR / f"{model_name}_metrics.json"
     save_metrics(metrics, metrics_path)
     return metrics
 
 
-# Load the saved XGBoost test metrics from disk.
-def load_xgboost_metrics() -> dict:
-    xgboost_metrics_path = METRICS_DIR / "xgboost_metrics.json"
-    metrics = json.loads(xgboost_metrics_path.read_text(encoding="utf-8"))
-    return metrics["test"]
+# Load the saved LightGBM metrics bundle from disk.
+def load_lightgbm_metrics() -> dict:
+    lightgbm_metrics_path = METRICS_DIR / "lightgbm_metrics.json"
+    return json.loads(lightgbm_metrics_path.read_text(encoding="utf-8"))
 
 
 # Plot MAE, RMSE, and MAPE for all three models in one grouped bar chart.
@@ -61,7 +66,7 @@ def plot_all_model_metrics(all_metrics: dict[str, dict]) -> None:
     plt.figure(figsize=(10, 6))
 
     for index, model_name in enumerate(model_names):
-        values = [all_metrics[model_name][metric] for metric in metric_names]
+        values = [all_metrics[model_name]["test"][metric] for metric in metric_names]
         plt.bar(x + (index - 1) * width, values, width=width, label=model_name)
 
     plt.xticks(x, metric_names)
@@ -73,7 +78,7 @@ def plot_all_model_metrics(all_metrics: dict[str, dict]) -> None:
     plt.close()
 
 
-# Evaluate the sequence models, load XGBoost metrics, and create one comparison plot.
+# Evaluate the sequence models, load LightGBM metrics, and create one comparison plot.
 def main() -> None:
     METRICS_DIR.mkdir(parents=True, exist_ok=True)
     GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
@@ -84,20 +89,20 @@ def main() -> None:
     print("Evaluating GRU model...")
     gru_metrics = evaluate_sequence_metrics("gru", "gru_model.keras")
 
-    print("Loading XGBoost metrics...")
-    xgboost_metrics = load_xgboost_metrics()
+    print("Loading LightGBM metrics...")
+    lightgbm_metrics = load_lightgbm_metrics()
 
     all_metrics = {
         "LSTM": lstm_metrics,
         "GRU": gru_metrics,
-        "XGBoost": xgboost_metrics,
+        "LightGBM": lightgbm_metrics,
     }
 
     plot_all_model_metrics(all_metrics)
 
     print("LSTM metrics:", lstm_metrics)
     print("GRU metrics:", gru_metrics)
-    print("XGBoost metrics:", xgboost_metrics)
+    print("LightGBM metrics:", lightgbm_metrics)
     print("Comparison plot saved to:", COMPARISON_PLOT_PATH.name)
 
 
