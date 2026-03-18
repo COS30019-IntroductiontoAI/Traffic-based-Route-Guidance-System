@@ -77,6 +77,7 @@ def plot_predictions(actual, predicted, title, output_dir: Path = GRAPH_DIR, fil
   return save_path
   
 
+# Save the evaluation metrics to a JSON file for easy reference and comparison
 def save_metrics_json(model_name: str, metrics: dict, output_dir: Path = METRICS_DIR) -> Path:
   output_dir.mkdir(parents=True, exist_ok=True)
   metrics_path = output_dir / f"{model_name.lower()}_metrics.json"
@@ -85,6 +86,7 @@ def save_metrics_json(model_name: str, metrics: dict, output_dir: Path = METRICS
   return metrics_path
 
 
+# Main function to evaluate all saved models and generate metrics and plots
 def evaluate_saved_models(graph_dir: Path = GRAPH_DIR, metrics_dir: Path = METRICS_DIR):
   print("Loading validation and test data...")
   (_, _), (X_val, y_val), (X_test, y_test), scaler = prepare_data(
@@ -102,6 +104,7 @@ def evaluate_saved_models(graph_dir: Path = GRAPH_DIR, metrics_dir: Path = METRI
     ("GRU", "results/trained_models/gru_model.keras"),
   ]
 
+  # Evaluate each model on both validation and test sets, compute metrics, and generate plots
   for model_name, model_path in models:
     print(f"\nEvaluating {model_name} model...")
     metrics_bundle = {}
