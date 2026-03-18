@@ -1,33 +1,25 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-from typing import Tuple
 
 
-# Normalize the data using MinMaxScaler
-def normalize_data(features: np.ndarray) -> Tuple[np.ndarray, MinMaxScaler]:
-  # Define the scaler and fit it to the data
-  scaler = MinMaxScaler()
-  
-  # Reshape the data to fit the scaler and transform it
-  normalized_data = scaler.fit_transform(features)
-  
-  return normalized_data, scaler
-
-
-# Create the sequences for training model
 def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int):
+  """
+  Build sliding window sequences without crossing group boundaries.
+  Expects `data` to contain rows from a single (scats_number, location) group.
+  """
   X, y = [], []
 
   for i in range(len(data) - seq_len - forecast_horizon + 1):
     X.append(data[i:i + seq_len])
-    y.append(data[i + seq_len + forecast_horizon - 1, 0]) 
+    y.append(data[i + seq_len + forecast_horizon - 1, 0])  # target is traffic_volume
 
-  X = np.array(X)
-  y = np.array(y)
+  return np.array(X), np.array(y)
 
-  train_end = int(len(X) * 0.7)
-  val_end = int(len(X) * 0.8)
+
+def split_sequences(X: np.ndarray, y: np.ndarray, train_ratio: float = 0.7, val_ratio: float = 0.1):
+  train_end = int(len(X) * train_ratio)
+  val_end = int(len(X) * (train_ratio + val_ratio))
 
   X_train, y_train = X[:train_end], y[:train_end]
   X_val, y_val = X[train_end:val_end], y[train_end:val_end]
@@ -38,46 +30,60 @@ def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int):
 
 # Main function to prepare the data for training the models
 def prepare_data(filepath, seq_len, forecast_horizon):
-  df = pd.read_csv(filepath, parse_dates=["datetime"], index_col="datetime")
-  
+  df = pd.read_csv(filepath, parse_dates=["datetime"])
+  df = df.sort_values(["scats_number", "location", "datetime"])
+
   df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
   df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
   df["dow_sin"]  = np.sin(2 * np.pi * df["day_of_week"] / 7)
   df["dow_cos"]  = np.cos(2 * np.pi * df["day_of_week"] / 7)
-  
-  # log1p handles zeros safely, compresses spikes, lifts low values
   df["traffic_volume"] = np.log1p(df["traffic_volume"])
-  
-  features = df[["traffic_volume", "hour", "day_of_week", "is_weekend", "hour_sin", "hour_cos", "dow_sin", "dow_cos"]].values
 
-  # Split into sequences and then normalize using the scaler fitted on the training data
-  sequences = create_sequences(features, seq_len, forecast_horizon)
-  (X_train, y_train), (X_val, y_val), (X_test, y_test) = sequences
+  feature_cols = ["traffic_volume", "hour", "day_of_week", "hour_sin", "hour_cos", "dow_sin", "dow_cos"]
 
-  # Fit scaler on train rows only
-  n_train = X_train.shape[0]
+  X_train_all, y_train_all = [], []
+  X_val_all, y_val_all = [], []
+  X_test_all, y_test_all = [], []
+
+  for (scats, location), group in df.groupby(["scats_number", "location"]):
+    if len(group) < seq_len + forecast_horizon:
+      continue
+
+    features = group[feature_cols].values
+    X_seq, y_seq = create_sequences(features, seq_len, forecast_horizon)
+
+    if len(X_seq) == 0:
+      continue
+
+    # Split sequences into train/val/test sets for this group, then aggregate across groups
+    (X_tr, y_tr), (X_v, y_v), (X_te, y_te) = split_sequences(X_seq, y_seq)
+
+    X_train_all.append(X_tr); y_train_all.append(y_tr)
+    X_val_all.append(X_v); y_val_all.append(y_v)
+    X_test_all.append(X_te); y_test_all.append(y_te)
+
+  X_train = np.concatenate(X_train_all)
+  y_train = np.concatenate(y_train_all)
+  X_val = np.concatenate(X_val_all)
+  y_val = np.concatenate(y_val_all)
+  X_test = np.concatenate(X_test_all)
+  y_test = np.concatenate(y_test_all)
+
+  # Scaler fit only on training data to prevent data leakage, then applied to all splits
   scaler = MinMaxScaler()
-  train_2d = features[:n_train + seq_len]   
-  scaler.fit(train_2d)
-  
-  # Transform all splits using the train-fitted scaler
-  def scale_X(X):
-    shape = X.shape
-    return scaler.transform(X.reshape(-1, shape[-1])).reshape(shape)
-  
-  X_train = scale_X(X_train)
-  X_val   = scale_X(X_val)
-  X_test  = scale_X(X_test)
-  
-  # Scale y values using only feature 0 (traffic_volume)
-  dummy = np.zeros((len(y_train), scaler.n_features_in_))
-  dummy[:, 0] = y_train
-  y_train = scaler.transform(dummy)[:, 0] 
-  dummy = np.zeros((len(y_val), scaler.n_features_in_))
-  dummy[:, 0] = y_val
-  y_val = scaler.transform(dummy)[:, 0]
-  dummy = np.zeros((len(y_test), scaler.n_features_in_))
-  dummy[:, 0] = y_test
-  y_test = scaler.transform(dummy)[:, 0]
+  scaler.fit(X_train.reshape(-1, X_train.shape[-1]))
 
-  return (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler
+  def scale_X(arr):
+    s = arr.shape
+    return scaler.transform(arr.reshape(-1, s[-1])).reshape(s)
+
+  def scale_y(arr):
+    dummy = np.zeros((len(arr), scaler.n_features_in_))
+    dummy[:, 0] = arr
+    return scaler.transform(dummy)[:, 0]
+
+  X_train = scale_X(X_train); y_train = scale_y(y_train)
+  X_val = scale_X(X_val); y_val = scale_y(y_val)
+  X_test = scale_X(X_test); y_test = scale_y(y_test)
+
+  return (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler 
