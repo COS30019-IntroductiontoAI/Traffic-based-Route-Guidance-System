@@ -5,5 +5,5 @@ scikit-learn
 matplotlib
 tensorflow
 keras
-xgboost
+lightgbm
 joblib
