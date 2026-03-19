@@ -124,7 +124,7 @@
   "forecast_horizon": 1,
   "train_end": "2006-10-22T23:30:00",
   "val_end": "2006-10-25T23:45:00",
-  "row_count_after_features": 379104,
+  "row_count_after_features": 383232,
   "categorical_features": [
     "scats_number",
     "location"

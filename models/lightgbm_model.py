@@ -34,13 +34,16 @@ def get_xy(df, feature_columns: list[str]):
 def create_model() -> LGBMRegressor:
     return LGBMRegressor(
         objective="poisson",
-        n_estimators=1500,
+        device="gpu",
+        n_estimators=2200,
         learning_rate=0.03,
-        num_leaves=127,
-        max_depth=-1,
-        min_child_samples=40,
-        subsample=0.9,
-        colsample_bytree=0.9,
+        num_leaves=255,
+        max_depth=12,
+        min_child_samples=80,
+        subsample=1.0,
+        colsample_bytree=0.6,
+        reg_alpha=0.05,
+        reg_lambda=1.0,
         random_state=42,
         verbose=-1,
     )

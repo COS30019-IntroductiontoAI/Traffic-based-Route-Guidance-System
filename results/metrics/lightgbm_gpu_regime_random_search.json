@@ -1,0 +1,78 @@
+{
+  "baseline": {
+    "validation": {
+      "MAE": 10.198353678405898,
+      "RMSE": 15.805681053886511,
+      "MAPE": 19.48017091987285
+    },
+    "test": {
+      "MAE": 10.419409067993355,
+      "RMSE": 15.963044418931801,
+      "MAPE": 18.802644122549005
+    }
+  },
+  "regime": {
+    "validation": {
+      "MAE": 10.131338919545394,
+      "RMSE": 15.76690037779018,
+      "MAPE": 19.16873782617995
+    },
+    "test": {
+      "MAE": 10.376870587264673,
+      "RMSE": 15.93047311997871,
+      "MAPE": 18.596188497097405
+    },
+    "cutoffs": {
+      "feature": "lag_1",
+      "low_cut": 47.0,
+      "high_cut": 132.0
+    },
+    "rows": {
+      "low": {
+        "train": 91230,
+        "val": 12305,
+        "test": 25041
+      },
+      "mid": {
+        "train": 90477,
+        "val": 11357,
+        "test": 24476
+      },
+      "high": {
+        "train": 92044,
+        "val": 12475,
+        "test": 23827
+      }
+    }
+  },
+  "random_search_best": {
+    "trial": 6,
+    "params": {
+      "objective": "poisson",
+      "device": "gpu",
+      "n_estimators": 2200,
+      "learning_rate": 0.03,
+      "num_leaves": 255,
+      "max_depth": 12,
+      "min_child_samples": 80,
+      "subsample": 1.0,
+      "colsample_bytree": 0.6,
+      "reg_alpha": 0.05,
+      "reg_lambda": 1.0,
+      "random_state": 1005,
+      "verbose": -1
+    },
+    "validation": {
+      "MAE": 10.017672610875294,
+      "RMSE": 15.583425145774903,
+      "MAPE": 19.09078676820948
+    },
+    "test": {
+      "MAE": 10.27201576279819,
+      "RMSE": 15.7434622546995,
+      "MAPE": 18.50736408850005
+    }
+  },
+  "random_search_trials": 50,
+  "elapsed_seconds": 2041.5156199932098
+}
