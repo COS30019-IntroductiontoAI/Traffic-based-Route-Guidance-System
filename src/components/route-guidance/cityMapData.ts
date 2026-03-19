@@ -12,6 +12,20 @@ export interface MapEdge {
   weight: number; // travel time in minutes
 }
 
+export interface RouteSegment {
+  from: string;
+  to: string;
+  time: number;
+  traffic: "clear" | "moderate" | "heavy";
+}
+
+export interface RouteResult {
+  nodes: string[];
+  time: number;
+  distance: number;
+  segments: RouteSegment[];
+}
+
 // Generate a grid-like city with some diagonal roads
 const createNodes = (): MapNode[] => {
   const nodes: MapNode[] = [];
@@ -37,7 +51,7 @@ const createNodes = (): MapNode[] => {
   return nodes;
 };
 
-const createEdges = (nodes: MapNode[]): MapEdge[] => {
+const createEdges = (): MapEdge[] => {
   const edges: MapEdge[] = [];
   const cols = 10;
   const rows = 7;
@@ -70,7 +84,7 @@ const createEdges = (nodes: MapNode[]): MapEdge[] => {
 };
 
 export const cityNodes = createNodes();
-export const cityEdges = createEdges(cityNodes);
+export const cityEdges = createEdges();
 
 // Dijkstra's algorithm
 export function findShortestPaths(
@@ -78,8 +92,9 @@ export function findShortestPaths(
   edges: MapEdge[],
   originId: string,
   destId: string,
-  topK: number
-): { nodes: string[]; time: number; distance: number }[] {
+  topK: number,
+  _algorithm: string = "xgboost"
+): RouteResult[] {
   const adj: Record<string, { to: string; weight: number }[]> = {};
   for (const n of nodes) adj[n.id] = [];
   for (const e of edges) {
@@ -161,9 +176,31 @@ export function findShortestPaths(
     }
   }
 
-  return results.map((r, i) => ({
-    nodes: r.nodes,
-    time: Math.round(r.time * 10) / 10,
-    distance: Math.round(r.nodes.length * 1.2 * 10) / 10,
-  }));
+  return results.map((r) => {
+    const segments: RouteSegment[] = [];
+    for (let j = 0; j < r.nodes.length - 1; j++) {
+      const from = r.nodes[j];
+      const to = r.nodes[j + 1];
+      const edge = adj[from]?.find((x) => x.to === to);
+      const time = edge ? edge.weight : 2.5;
+      
+      let traffic: "clear" | "moderate" | "heavy" = "clear";
+      if (time >= 3.0) traffic = "heavy";
+      else if (time >= 2.0) traffic = "moderate";
+
+      segments.push({
+        from,
+        to,
+        time: Math.round(time * 10) / 10,
+        traffic
+      });
+    }
+
+    return {
+      nodes: r.nodes,
+      time: Math.round(r.time * 10) / 10,
+      distance: Math.round(r.nodes.length * 1.2 * 10) / 10,
+      segments
+    };
+  });
 }

@@ -70,10 +70,10 @@ export function CityMap({
 
   const getNodeColor = useCallback(
     (node: MapNode) => {
-      if (node.id === origin) return "#2563eb"; // blue-600
-      if (node.id === destination) return "#a855f7"; // purple-500
-      if (activeRouteNodes.has(node.id)) return "#93c5fd"; // blue-300
-      return "#e2e8f0"; // slate-200
+      if (node.id === origin) return "#2563eb"; 
+      if (node.id === destination) return "#ff0000ff";
+      if (activeRouteNodes.has(node.id)) return "#93c5fd";
+      return "#e2e8f0";
     },
     [origin, destination, activeRouteNodes]
   );
@@ -92,8 +92,8 @@ export function CityMap({
     <svg viewBox="0 0 960 640" className="w-full h-full" style={{ cursor: selectingFor ? "crosshair" : "default" }}>
       <defs>
         <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#2563eb" /> {/* blue-600 */}
-          <stop offset="100%" stopColor="#a855f7" /> {/* purple-500 */}
+          <stop offset="0%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#0004fcff" />
         </linearGradient>
         <filter id="glow">
           <feGaussianBlur stdDeviation="3" result="blur" />
@@ -155,7 +155,7 @@ export function CityMap({
             .map((n) => `${n.x},${n.y}`)
             .join(" ")}
           fill="none"
-          stroke={ROUTE_COLORS[0]}
+          stroke="url(#routeGrad)"
           strokeWidth={4.5}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -169,7 +169,7 @@ export function CityMap({
         const isHovered = hoveredNode === node.id;
         const isOrigin = node.id === origin;
         const isDest = node.id === destination;
-        
+
         return (
           <g
             key={node.id}
@@ -192,7 +192,7 @@ export function CityMap({
               stroke={isOrigin || isDest ? "#ffffff" : "none"}
               strokeWidth={isOrigin || isDest ? 2 : 0}
             />
-            
+
             {/* Render all labels faintly, but make active/hovered ones darker */}
             <text
               x={node.x}
@@ -214,7 +214,7 @@ export function CityMap({
                 cy={node.y}
                 r={12}
                 fill="none"
-                stroke={isOrigin ? "#2563eb" : "#a855f7"}
+                stroke={isOrigin ? "#2563eb" : "#ff0000ff"}
                 strokeWidth={1.5}
                 opacity={0.3}
               >
