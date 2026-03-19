@@ -62,8 +62,8 @@ def plot_predictions(actual, predicted, title, output_dir: Path = GRAPH_DIR, fil
   save_path = output_dir / save_name
 
   plt.figure(figsize=(14, 5))
-  plt.plot(actual, label="Actual", color="blue")
-  plt.plot(predicted, label="Predicted", color="orange")
+  plt.plot(actual[:400], label="Actual", color="blue")
+  plt.plot(predicted[:400], label="Predicted", color="orange")
   plt.title(title)
   plt.xlabel("Time Steps")
   plt.ylabel("Traffic Volume")
