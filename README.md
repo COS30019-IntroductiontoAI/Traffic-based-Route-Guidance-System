@@ -1,75 +1,56 @@
-# React + TypeScript + Vite
+# Traffic-based Route Guidance System (TBRGS) - GUI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An advanced, interactive web-based graphical user interface for visualizing and calculating optimal travel routes using machine learning-predicted traffic data.
 
-Currently, two official plugins are available:
+## 🌟 Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The **TBRGS GUI** provides a comprehensive routing interface to explore the Swinburne Introduction to AI Assignment 2B project. It allows users to:
+* Select different Machine Learning models (XGBoost, GRU, LSTM, Random Forest) for route evaluation.
+* Interactively select origins and destinations on a mapped city grid using SCATS IDs.
+* Visualize the optimal route as well as Alternative Top-K Routes with smooth animations.
+* View detailed statistics including estimated time, distance, and traffic congestion levels.
 
-## React Compiler
+## 🚀 Features
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+* **Interactive City Map**: View nodes, edges, and real-time route rendering.
+* **Algorithm Selection**: Compare how different ML models affect the routed path.
+* **Top-K Routing**: Select the number of alternative routes to generate and visualize.
+* **Modern UI**: Clean and responsive design using Tailwind CSS and Framer Motion for a premium feel.
 
-Note: This will impact Vite dev & build performances.
+## 🛠️ Technology Stack
 
-## Expanding the ESLint configuration
+* **Framework**: [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+* **Build Tool**: [Vite](https://vitejs.dev/)
+* **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+* **Animations**: [Framer Motion](https://www.framer.com/motion/)
+* **Icons**: [Lucide React](https://lucide.dev/)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📦 Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**1. Navigate to the GUI folder (if you aren't already there):**
+```bash
+cd tbrgs-gui
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**2. Install all necessary dependencies:**
+```bash
+npm install
 ```
+
+## 🚦 How to Run the Application
+
+**1. Start the development server:**
+```bash
+npm run dev
+```
+
+**2. Open your browser:**
+Once the server starts, it will provide a local URL (usually `http://localhost:5173`). Click or copy this link into your web browser to interact with the GUI.
+
+## 🏗️ Project Structure
+* `src/components/route-guidance/` - Contains the core map, controls, and route detail viewing components.
+* `src/pages/` - Main page views (Dashboard, Data Processing, Route Guidance).
+* `src/App.tsx` - Root application routing.
+
