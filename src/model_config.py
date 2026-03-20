@@ -3,7 +3,7 @@
 # Sequence configuration
 SEQ_LEN = 96              # 24 hours of 15-minute intervals
 FORECAST_HORIZON = 1      # Predict 1 step (15 minutes) ahead
-INPUT_FEATURES = 7        # traffic_volume, hour, day_of_week, hour_sin, hour_cos, dow_sin, dow_cos
+INPUT_FEATURES = 10       # traffic_volume, hour, day_of_week, hour_sin, hour_cos, dow_sin, dow_cos, is_peak, is_weekend, road_name
 
 # Training configuration
 EPOCHS = 120

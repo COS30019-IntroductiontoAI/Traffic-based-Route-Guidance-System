@@ -138,6 +138,13 @@ traffic_sorted["day_of_week"] = datetime_column.dt.dayofweek
 traffic_sorted["is_weekend"] = traffic_sorted["day_of_week"] >= 5
 traffic_sorted["is_weekend"] = traffic_sorted["is_weekend"].astype(int)
 
+# Create peak hours indicator (peak hours: 7-9 AM and 5-7 PM)
+traffic_sorted["is_peak"] = ((traffic_sorted["hour"] >= 7) & (traffic_sorted["hour"] < 9)) | ((traffic_sorted["hour"] >= 17) & (traffic_sorted["hour"] < 19))
+traffic_sorted["is_peak"] = traffic_sorted["is_peak"].astype(int)
+
+# Create road_name column (using location as road name)
+traffic_sorted["road_name"] = traffic_sorted["location"]
+
 # Select the final columns for the processed dataset
 final_columns = [
     "scats_number",
@@ -148,6 +155,8 @@ final_columns = [
     "hour",
     "day_of_week",
     "is_weekend",
+    "is_peak",
+    "road_name",
     "traffic_volume"
 ]
 

@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
 
 # Build sliding window sequences for time series forecasting, ensuring that sequences do not cross group boundaries
@@ -38,9 +38,13 @@ def prepare_data(filepath, seq_len, forecast_horizon):
   df["dow_sin"]  = np.sin(2 * np.pi * df["day_of_week"] / 7)
   df["dow_cos"]  = np.cos(2 * np.pi * df["day_of_week"] / 7)
   df["traffic_volume"] = np.log1p(df["traffic_volume"])
+  
+  # Encode road_name using label encoding
+  label_encoder = LabelEncoder()
+  df["road_name"] = label_encoder.fit_transform(df["road_name"])
 
   # Define the feature columns to be used for modeling
-  feature_cols = ["traffic_volume", "hour", "day_of_week", "hour_sin", "hour_cos", "dow_sin", "dow_cos"]
+  feature_cols = ["traffic_volume", "hour", "day_of_week", "hour_sin", "hour_cos", "dow_sin", "dow_cos", "is_peak", "is_weekend", "road_name"]
 
   X_train_all, y_train_all = [], []
   X_val_all, y_val_all = [], []
