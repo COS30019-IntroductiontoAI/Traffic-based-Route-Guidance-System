@@ -1,16 +1,14 @@
-import React, { useState, createContext, useContext, useCallback } from 'react'
+import { useState, createContext, useContext, useCallback } from 'react'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
 import Dashboard from './pages/Dashboard'
 import DataProcessing from './pages/DataProcessing'
-import ModelTraining from './pages/ModelTraining'
-import TrafficPrediction from './pages/TrafficPrediction'
 import RouteGuidance from './pages/RouteGuidance'
 import ToastContainer from './components/ToastContainer'
 import { useToast } from './hooks/useToast'
 import type { ToastType } from './components/ToastContainer'
 
-export type Page = 'dashboard' | 'data-processing' | 'model-training' | 'traffic-prediction' | 'route-guidance'
+export type Page = 'dashboard' | 'data-processing' | 'route-guidance'
 
 interface AppContextValue {
   navigate: (page: Page) => void
@@ -27,8 +25,6 @@ export const useApp = () => useContext(AppContext)
 const PAGE_TITLES: Record<Page, string> = {
   dashboard: 'Dashboard',
   'data-processing': 'Data Processing',
-  'model-training': 'Model Training',
-  'traffic-prediction': 'Traffic Prediction',
   'route-guidance': 'Route Guidance',
 }
 
@@ -48,8 +44,6 @@ export default function App() {
           <main className="flex-1 overflow-y-auto">
             {page === 'dashboard' && <Dashboard />}
             {page === 'data-processing' && <DataProcessing />}
-            {page === 'model-training' && <ModelTraining />}
-            {page === 'traffic-prediction' && <TrafficPrediction />}
             {page === 'route-guidance' && <RouteGuidance />}
           </main>
         </div>

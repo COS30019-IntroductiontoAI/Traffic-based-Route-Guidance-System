@@ -35,6 +35,49 @@ import edgesData from "./edges.json";
 export const cityNodes: MapNode[] = nodesData as MapNode[];
 export const cityEdges: MapEdge[] = edgesData as MapEdge[];
 
+let precomputedAdj: Record<string, { to: string; weight: number }[]> | null = null;
+
+function getAdjacencyList(nodes: MapNode[], edges: MapEdge[]) {
+  if (precomputedAdj) return precomputedAdj;
+  
+  const adj: Record<string, { to: string; weight: number }[]> = {};
+  for (const n of nodes) adj[n.id] = [];
+  
+  // 1. Add given edges (bidirectional to fix one-way islands)
+  for (const e of edges) {
+    if (adj[e.from]) adj[e.from].push({ to: e.to, weight: e.weight });
+    if (adj[e.to] && !adj[e.to].some(x => x.to === e.from)) {
+      adj[e.to].push({ to: e.from, weight: e.weight });
+    }
+  }
+
+  // 2. Add 3-Nearest Neighbors to completely connect the graph
+  const distance = (n1: MapNode, n2: MapNode) => {
+    const dx = n1.lat - n2.lat;
+    const dy = n1.lng - n2.lng;
+    return Math.sqrt(dx * dx + dy * dy) * 111; // Approx dist
+  };
+
+  for (const n of nodes) {
+    const neighbors = nodes
+      .filter((other) => other.id !== n.id)
+      .map((other) => ({ to: other.id, dist: distance(n, other) }))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 3);
+      
+    for (const neighbor of neighbors) {
+      if (!adj[n.id].some((x) => x.to === neighbor.to)) {
+        const weight = Math.max(0.1, neighbor.dist * 2); // approx time
+        adj[n.id].push({ to: neighbor.to, weight });
+        adj[neighbor.to].push({ to: n.id, weight });
+      }
+    }
+  }
+
+  precomputedAdj = adj;
+  return adj;
+}
+
 // Dijkstra's algorithm
 export function findShortestPaths(
   nodes: MapNode[],
@@ -44,11 +87,7 @@ export function findShortestPaths(
   topK: number,
   _algorithm: string = "xgboost"
 ): RouteResult[] {
-  const adj: Record<string, { to: string; weight: number }[]> = {};
-  for (const n of nodes) adj[n.id] = [];
-  for (const e of edges) {
-    if (adj[e.from]) adj[e.from].push({ to: e.to, weight: e.weight });
-  }
+  const adj = getAdjacencyList(nodes, edges);
 
   const results: { nodes: string[]; time: number }[] = [];
 

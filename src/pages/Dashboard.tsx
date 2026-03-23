@@ -1,4 +1,4 @@
-import { Database, Cpu, TrendingUp, Database as DbIcon, BrainCircuit, BarChart2, Navigation, Activity, CheckCircle, Clock } from 'lucide-react'
+import { Database, Cpu, TrendingUp, Database as DbIcon, Navigation, Activity, CheckCircle, Clock } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts'
@@ -59,16 +59,6 @@ export default function Dashboard() {
           style={{ backgroundColor: themeHex.primary }}>
           <DbIcon size={15} /> Load Dataset
         </button>
-        <button onClick={() => { navigate('model-training');     toast('Navigating to Model Training', 'info') }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
-          style={{ backgroundColor: themeHex.primary }}>
-          <BrainCircuit size={15} /> Train Models
-        </button>
-        <button onClick={() => { navigate('traffic-prediction'); toast('Navigating to Traffic Prediction', 'info') }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
-          style={{ backgroundColor: themeHex.primary }}>
-          <BarChart2 size={15} /> Run Prediction
-        </button>
         <button onClick={() => { navigate('route-guidance');     toast('Navigating to Route Guidance', 'info') }}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
           style={{ background: `linear-gradient(to right, ${themeHex.primary}, ${themeHex.grad})` }}>
@@ -114,10 +104,7 @@ export default function Dashboard() {
               <h2 className="font-semibold text-gray-900">Model Comparison</h2>
               <p className="text-xs text-gray-400 mt-0.5">Accuracy across architectures</p>
             </div>
-            <button onClick={() => navigate('model-training')}
-              className="text-xs text-indigo-500 font-semibold hover:text-indigo-700 transition-colors">
-              Details →
-            </button>
+            {/* Removed Details button as model training page is deleted */}
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={modelData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>

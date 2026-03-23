@@ -1,8 +1,8 @@
 import React from 'react'
-import { LayoutDashboard, Database, BrainCircuit, BarChart2, Navigation, Zap } from 'lucide-react'
+import { LayoutDashboard, Database, Navigation, Zap } from 'lucide-react'
 import { themeHex } from '../theme'
 
-type Page = 'dashboard' | 'data-processing' | 'model-training' | 'traffic-prediction' | 'route-guidance'
+type Page = 'dashboard' | 'data-processing' | 'route-guidance'
 
 interface SidebarProps {
   activePage: Page
@@ -12,8 +12,6 @@ interface SidebarProps {
 const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
   { id: 'dashboard',          label: 'Dashboard',          icon: <LayoutDashboard size={17} /> },
   { id: 'data-processing',    label: 'Data Processing',    icon: <Database        size={17} /> },
-  { id: 'model-training',     label: 'Model Training',     icon: <BrainCircuit    size={17} /> },
-  { id: 'traffic-prediction', label: 'Traffic Prediction', icon: <BarChart2       size={17} /> },
   { id: 'route-guidance',     label: 'Route Guidance',     icon: <Navigation      size={17} /> },
 ]
 
