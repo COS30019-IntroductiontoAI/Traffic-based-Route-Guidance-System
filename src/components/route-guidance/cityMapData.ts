@@ -31,7 +31,7 @@ export interface RouteResult {
 import nodesData from "./nodes.json";
 import edgesData from "./edges.json";
 
-// We import the real HCMC graph we fetched from Overpass API
+// We import the real Boroondara graph we fetched from Overpass API
 export const cityNodes: MapNode[] = nodesData as MapNode[];
 export const cityEdges: MapEdge[] = edgesData as MapEdge[];
 
@@ -53,9 +53,9 @@ function getAdjacencyList(nodes: MapNode[], edges: MapEdge[]) {
 
   // 2. Add 3-Nearest Neighbors to completely connect the graph
   const distance = (n1: MapNode, n2: MapNode) => {
-    const dx = n1.lat - n2.lat;
-    const dy = n1.lng - n2.lng;
-    return Math.sqrt(dx * dx + dy * dy) * 111; // Approx dist
+    const dx = (n1.lng - n2.lng) * Math.cos(n1.lat * Math.PI / 180) * 111.32;
+    const dy = (n1.lat - n2.lat) * 111.32;
+    return Math.sqrt(dx * dx + dy * dy); // Approx dist in km
   };
 
   for (const n of nodes) {
@@ -65,11 +65,12 @@ function getAdjacencyList(nodes: MapNode[], edges: MapEdge[]) {
       .sort((a, b) => a.dist - b.dist)
       .slice(0, 3);
       
-    for (const neighbor of neighbors) {
+      for (const neighbor of neighbors) {
       if (!adj[n.id].some((x) => x.to === neighbor.to)) {
-        const weight = Math.max(0.1, neighbor.dist * 2); // approx time
-        adj[n.id].push({ to: neighbor.to, weight });
-        adj[neighbor.to].push({ to: n.id, weight });
+        // According to requirements: 60km/h = 1 min per km + 30s (0.5 min) delay at intersection
+        const weight = Math.max(0.1, neighbor.dist + 0.5); 
+        adj[n.id].push({ to: neighbor.to, weight: Math.round(weight * 100) / 100 });
+        adj[neighbor.to].push({ to: n.id, weight: Math.round(weight * 100) / 100 });
       }
     }
   }
@@ -239,10 +240,12 @@ export function findShortestPaths(
       });
     }
 
+    const exactDistance = segments.reduce((sum, seg) => sum + Math.max(0.01, seg.time - 0.5), 0);
+
     return {
       nodes: r.nodes,
       time: Math.round(r.time * 10) / 10,
-      distance: Math.round(r.nodes.length * 1.2 * 10) / 10,
+      distance: Math.round(exactDistance * 10) / 10,
       segments
     };
   });

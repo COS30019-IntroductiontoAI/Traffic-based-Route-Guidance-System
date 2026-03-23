@@ -37,6 +37,26 @@ body {
   animation: fadeUp 0.25s ease-out both;
 }
 
+/* Map Route Animations */
+@keyframes flow-animation {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0;   }
+}
+
+.route-flow {
+  stroke-dasharray: 12 16;
+  animation: flow-animation 1s linear infinite;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-flow-alt {
+  stroke-dasharray: 8 12;
+  animation: flow-animation 1.5s linear infinite;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

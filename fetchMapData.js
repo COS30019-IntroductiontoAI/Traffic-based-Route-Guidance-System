@@ -1,7 +1,8 @@
 import fs from 'fs';
 
 async function buildMap() {
-  const bbox = "10.755,106.695,10.778,106.715";
+  // Boroondara Area (Hawthorn, Kew, Camberwell)
+  const bbox = "-37.840,145.020,-37.800,145.070";
   const query = `
     [out:json];
     way["highway"~"primary|secondary|tertiary|trunk|residential|unclassified"](${bbox});
@@ -12,7 +13,8 @@ async function buildMap() {
   console.log("Fetching from Overpass API...");
   const res = await fetch("https://overpass-api.de/api/interpreter", {
     method: "POST",
-    body: query
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: "data=" + encodeURIComponent(query)
   });
   const data = await res.json();
   
@@ -60,13 +62,17 @@ async function buildMap() {
           const dx = (n1.lon - n2.lon) * Math.cos(n1.lat * Math.PI / 180) * 111.32;
           const dy = (n1.lat - n2.lat) * 111.32;
           const dist = Math.sqrt(dx*dx + dy*dy);
-          const weight = Math.max(0.1, dist / 0.5); 
           
-          edgesList.push({from: n1.id.toString(), to: n2.id.toString(), weight: Math.round(weight * 10) / 10});
+          // Assumption (i): 60km/h speed limit. Time = distance (km) / 60km/h * 60 minutes = distance in minutes
+          // Assumption (iii): 30 seconds (0.5 mins) delay to pass each intersection
+          const travelTime = dist + 0.5;
+          const weight = Math.max(0.1, travelTime); 
+          
+          edgesList.push({from: n1.id.toString(), to: n2.id.toString(), weight: Math.round(weight * 100) / 100});
           
           const oneway = way.tags && way.tags.oneway === 'yes';
           if (!oneway) {
-            edgesList.push({from: n2.id.toString(), to: n1.id.toString(), weight: Math.round(weight * 10) / 10});
+            edgesList.push({from: n2.id.toString(), to: n1.id.toString(), weight: Math.round(weight * 100) / 100});
           }
         }
         

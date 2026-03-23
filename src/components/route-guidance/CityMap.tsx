@@ -22,9 +22,23 @@ const ROUTE_COLORS = [
   "#f59e0b", // amber-500
 ];
 
-const MapBounds = ({ nodes }: { nodes: MapNode[] }) => {
+const MapBounds = ({ nodes, routes, selectedRoute, nodeMap }: { nodes: MapNode[], routes: any[], selectedRoute: number, nodeMap: Record<string, MapNode> }) => {
   const map = useMap();
   useEffect(() => {
+    if (routes && routes[selectedRoute]) {
+      const routeNodes = routes[selectedRoute].nodes;
+      const lats = routeNodes.map((n: string) => nodeMap[n]?.lat).filter(Boolean);
+      const lngs = routeNodes.map((n: string) => nodeMap[n]?.lng).filter(Boolean);
+      if (lats.length > 0 && lngs.length > 0) {
+        map.flyToBounds([
+          [Math.min(...lats), Math.min(...lngs)],
+          [Math.max(...lats), Math.max(...lngs)]
+        ], { padding: [50, 50], duration: 1.2 });
+        return;
+      }
+    }
+    
+    // Fallback to bounding all nodes if no route is active
     if (nodes.length > 0) {
       const lats = nodes.map(n => n.lat);
       const lngs = nodes.map(n => n.lng);
@@ -33,7 +47,7 @@ const MapBounds = ({ nodes }: { nodes: MapNode[] }) => {
         [Math.max(...lats), Math.max(...lngs)]
       ], { padding: [30, 30] });
     }
-  }, [map, nodes]);
+  }, [map, nodes, routes, selectedRoute, nodeMap]);
   return null;
 };
 
@@ -114,7 +128,7 @@ export function CityMap({
         zoomControl={false}
         preferCanvas={true}
       >
-        <MapBounds nodes={nodes} />
+        <MapBounds nodes={nodes} routes={routes} selectedRoute={selectedRoute} nodeMap={nodeMap} />
         
         {/* Realistic Base Map - OpenStreetMap Light Mode tiles */}
         <TileLayer
@@ -157,6 +171,7 @@ export function CityMap({
                 color: ROUTE_COLORS[Math.min(ri, ROUTE_COLORS.length - 1)],
                 weight: 4,
                 opacity: 0.5,
+                className: "route-flow-alt",
               }}
             />
           );
@@ -173,6 +188,7 @@ export function CityMap({
               color: "#2563eb",
               weight: 6,
               opacity: 0.9,
+              className: "route-flow",
             }}
           />
         )}
