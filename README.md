@@ -36,17 +36,17 @@ pip install -r requirements.txt
 
 ## Task 1: Data Preprocessing
 
-This section covers the `preprocessing_data.py` script, which extracts, cleans, and reshapes the raw VicRoads dataset to prepare it for machine learning training.
+This section covers the `process_2006.py` script, which extracts, cleans, and reshapes the raw VicRoads dataset to prepare it for machine learning training.
 
 ### How to Run
 
 Execute the script from the root folder:
 
 ```bash
-python preprocessing_data.py
+python process_2006.py
 ```
 
-The output will be saved as `processed_traffic.csv` in the `data/processed/` directory.
+The output will be saved as `2006_processed.csv` in the `data/processed/` directory.
 
 The processed dataset will be used in later stages for training the machine learning models.
 

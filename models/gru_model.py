@@ -27,7 +27,7 @@ from src.model_config import (
 # --- 1. LOAD AND PREPARE THE DATA ---
 # ------------------------------------
 (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler = prepare_data(
-  "data/processed/processed_traffic.csv",
+  "data/processed/2006_processed.csv",
   seq_len=SEQ_LEN,
   forecast_horizon=FORECAST_HORIZON
 )

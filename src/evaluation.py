@@ -90,7 +90,7 @@ def save_metrics_json(model_name: str, metrics: dict, output_dir: Path = METRICS
 def evaluate_saved_models(graph_dir: Path = GRAPH_DIR, metrics_dir: Path = METRICS_DIR):
   print("Loading validation and test data...")
   (_, _), (X_val, y_val), (X_test, y_test), scaler = prepare_data(
-    filepath="data/processed/processed_traffic.csv",
+    filepath="data/processed/2006_processed.csv",
     seq_len=SEQ_LEN,
     forecast_horizon=FORECAST_HORIZON
   )
