@@ -3,6 +3,8 @@ export interface MapNode {
   id: string;
   x: number;
   y: number;
+  lat: number;
+  lng: number;
   label: string;
 }
 
@@ -26,65 +28,12 @@ export interface RouteResult {
   segments: RouteSegment[];
 }
 
-// Generate a grid-like city with some diagonal roads
-const createNodes = (): MapNode[] => {
-  const nodes: MapNode[] = [];
-  const cols = 10;
-  const rows = 7;
-  const xSpacing = 90;
-  const ySpacing = 85;
-  const offsetX = 60;
-  const offsetY = 50;
+import nodesData from "./nodes.json";
+import edgesData from "./edges.json";
 
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const jitterX = (Math.sin(r * 3 + c * 7) * 12);
-      const jitterY = (Math.cos(r * 5 + c * 2) * 10);
-      nodes.push({
-        id: `${4000 + r * 100 + c}`,
-        x: offsetX + c * xSpacing + jitterX,
-        y: offsetY + r * ySpacing + jitterY,
-        label: `${4000 + r * 100 + c}`,
-      });
-    }
-  }
-  return nodes;
-};
-
-const createEdges = (): MapEdge[] => {
-  const edges: MapEdge[] = [];
-  const cols = 10;
-  const rows = 7;
-
-  const getId = (r: number, c: number) => `${4000 + r * 100 + c}`;
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      // Horizontal
-      if (c < cols - 1) {
-        const w = 1 + Math.random() * 3;
-        edges.push({ from: getId(r, c), to: getId(r, c + 1), weight: Math.round(w * 10) / 10 });
-        edges.push({ from: getId(r, c + 1), to: getId(r, c), weight: Math.round(w * 10) / 10 });
-      }
-      // Vertical
-      if (r < rows - 1) {
-        const w = 1 + Math.random() * 3;
-        edges.push({ from: getId(r, c), to: getId(r + 1, c), weight: Math.round(w * 10) / 10 });
-        edges.push({ from: getId(r + 1, c), to: getId(r, c), weight: Math.round(w * 10) / 10 });
-      }
-      // Some diagonals for realism
-      if (r < rows - 1 && c < cols - 1 && (r + c) % 3 === 0) {
-        const w = 1.5 + Math.random() * 3;
-        edges.push({ from: getId(r, c), to: getId(r + 1, c + 1), weight: Math.round(w * 10) / 10 });
-        edges.push({ from: getId(r + 1, c + 1), to: getId(r, c), weight: Math.round(w * 10) / 10 });
-      }
-    }
-  }
-  return edges;
-};
-
-export const cityNodes = createNodes();
-export const cityEdges = createEdges();
+// We import the real HCMC graph we fetched from Overpass API
+export const cityNodes: MapNode[] = nodesData as MapNode[];
+export const cityEdges: MapEdge[] = edgesData as MapEdge[];
 
 // Dijkstra's algorithm
 export function findShortestPaths(
@@ -103,6 +52,51 @@ export function findShortestPaths(
 
   const results: { nodes: string[]; time: number }[] = [];
 
+  // Optimized MinHeap for Dijkstra
+  class MinHeap {
+    heap: { id: string; dist: number }[] = [];
+    push(id: string, dist: number) {
+      this.heap.push({ id, dist });
+      let idx = this.heap.length - 1;
+      while (idx > 0) {
+        const pIdx = Math.floor((idx - 1) / 2);
+        if (this.heap[pIdx].dist <= this.heap[idx].dist) break;
+        const tmp = this.heap[pIdx];
+        this.heap[pIdx] = this.heap[idx];
+        this.heap[idx] = tmp;
+        idx = pIdx;
+      }
+    }
+    pop() {
+      if (this.heap.length === 0) return null;
+      const min = this.heap[0];
+      const last = this.heap.pop()!;
+      if (this.heap.length > 0) {
+        this.heap[0] = last;
+        let idx = 0;
+        const len = this.heap.length;
+        while (true) {
+          let left = idx * 2 + 1;
+          let right = idx * 2 + 2;
+          let swap: number | null = null;
+          if (left < len && this.heap[left].dist < this.heap[idx].dist) swap = left;
+          if (
+            right < len &&
+            this.heap[right].dist < (swap === null ? this.heap[idx].dist : this.heap[left].dist)
+          ) {
+            swap = right;
+          }
+          if (swap === null) break;
+          const tmp = this.heap[swap];
+          this.heap[swap] = this.heap[idx];
+          this.heap[idx] = tmp;
+          idx = swap;
+        }
+      }
+      return min;
+    }
+  }
+
   // Yen's K-shortest paths (simplified)
   const dijkstra = (
     blocked: Set<string>
@@ -112,17 +106,24 @@ export function findShortestPaths(
     const visited = new Set<string>();
 
     for (const n of nodes) dist[n.id] = Infinity;
+    if (!(originId in dist) || !(destId in dist)) return null;
+    
     dist[originId] = 0;
     prev[originId] = null;
 
-    const queue = [...nodes.map((n) => n.id)].filter((id) => !blocked.has(id) || id === originId || id === destId);
+    const pq = new MinHeap();
+    pq.push(originId, 0);
 
-    while (queue.length > 0) {
-      queue.sort((a, b) => dist[a] - dist[b]);
-      const u = queue.shift()!;
+    while (pq.heap.length > 0) {
+      const minEl = pq.pop();
+      if (!minEl) break;
+      const u = minEl.id;
+
+      if (blocked.has(u) && u !== originId && u !== destId) continue;
       if (visited.has(u)) continue;
       visited.add(u);
-      if (dist[u] === Infinity) break;
+      
+      if (u === destId) break; // Reached goal optimally
 
       for (const neighbor of adj[u] || []) {
         if (blocked.has(`${u}-${neighbor.to}`)) continue;
@@ -130,6 +131,7 @@ export function findShortestPaths(
         if (alt < dist[neighbor.to]) {
           dist[neighbor.to] = alt;
           prev[neighbor.to] = u;
+          pq.push(neighbor.to, alt);
         }
       }
     }
@@ -173,6 +175,8 @@ export function findShortestPaths(
 
     if (bestAlt) {
       results.push({ nodes: bestAlt.path, time: bestAlt.cost });
+    } else {
+      break; // No more alternative paths exist
     }
   }
 

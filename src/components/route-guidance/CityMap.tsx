@@ -1,4 +1,6 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import type { MapNode, MapEdge } from "./cityMapData";
 
 interface CityMapProps {
@@ -19,6 +21,21 @@ const ROUTE_COLORS = [
   "#3b82f6", // blue-500
   "#f59e0b", // amber-500
 ];
+
+const MapBounds = ({ nodes }: { nodes: MapNode[] }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (nodes.length > 0) {
+      const lats = nodes.map(n => n.lat);
+      const lngs = nodes.map(n => n.lng);
+      map.fitBounds([
+        [Math.min(...lats), Math.min(...lngs)],
+        [Math.max(...lats), Math.max(...lngs)]
+      ], { padding: [30, 30] });
+    }
+  }, [map, nodes]);
+  return null;
+};
 
 export function CityMap({
   nodes,
@@ -70,168 +87,134 @@ export function CityMap({
 
   const getNodeColor = useCallback(
     (node: MapNode) => {
-      if (node.id === origin) return "#2563eb"; 
-      if (node.id === destination) return "#ff0000ff";
-      if (activeRouteNodes.has(node.id)) return "#93c5fd";
-      return "#e2e8f0";
+      if (node.id === origin) return "#2563eb"; // blue-600
+      if (node.id === destination) return "#ef4444"; // red-500
+      if (activeRouteNodes.has(node.id)) return "#93c5fd"; // blue-300
+      return "#cbd5e1"; // slate-300
     },
     [origin, destination, activeRouteNodes]
   );
 
   const getNodeRadius = useCallback(
     (node: MapNode) => {
-      if (node.id === origin || node.id === destination) return 6;
-      if (hoveredNode === node.id) return 5;
-      if (activeRouteNodes.has(node.id)) return 4;
-      return 2.5;
+      if (node.id === origin || node.id === destination) return 8;
+      if (hoveredNode === node.id) return 7;
+      if (activeRouteNodes.has(node.id)) return 6;
+      return 5;
     },
     [origin, destination, hoveredNode, activeRouteNodes]
   );
 
   return (
-    <svg viewBox="0 0 960 640" className="w-full h-full" style={{ cursor: selectingFor ? "crosshair" : "default" }}>
-      <defs>
-        <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#2563eb" />
-          <stop offset="100%" stopColor="#0004fcff" />
-        </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
+    <div className="w-full h-full relative" style={{ cursor: selectingFor ? "crosshair" : "default" }}>
+      <MapContainer
+        center={[-37.8136, 144.9631]} // Default will be updated by MapBounds
+        zoom={14}
+        className="w-full h-full z-0"
+        zoomControl={false}
+        preferCanvas={true}
+      >
+        <MapBounds nodes={nodes} />
+        
+        {/* Realistic Base Map - OpenStreetMap Light Mode tiles */}
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        />
 
-      {/* Road network */}
-      {uniqueEdges.map((edge) => {
-        const from = nodeMap[edge.from];
-        const to = nodeMap[edge.to];
-        if (!from || !to) return null;
-        const isOnRoute = routeEdgeSet.has(`${edge.from}-${edge.to}`);
-        return (
-          <line
-            key={`${edge.from}-${edge.to}`}
-            x1={from.x}
-            y1={from.y}
-            x2={to.x}
-            y2={to.y}
-            stroke={isOnRoute ? "#cbd5e1" : "#f1f5f9"}
-            strokeWidth={isOnRoute ? 1.5 : 1}
-            opacity={isOnRoute ? 0.8 : 0.6}
-          />
-        );
-      })}
+        {/* Base Road Network layer */}
+        {uniqueEdges.map((edge) => {
+          const from = nodeMap[edge.from];
+          const to = nodeMap[edge.to];
+          if (!from || !to) return null;
+          const isOnRoute = routeEdgeSet.has(`${edge.from}-${edge.to}`);
+          return (
+            <Polyline
+              key={`base-${edge.from}-${edge.to}`}
+              positions={[[from.lat, from.lng], [to.lat, to.lng]]}
+              pathOptions={{
+                color: isOnRoute ? "#94a3b8" : "#cbd5e1",
+                weight: isOnRoute ? 2 : 1.5,
+                opacity: isOnRoute ? 0.7 : 0.5,
+              }}
+            />
+          );
+        })}
 
-      {/* Alternative routes (render first so optimal route is on top) */}
-      {routes.map((route, ri) => {
-        if (ri === selectedRoute) return null; // Render selected later
-        const points = route.nodes
-          .map((id) => nodeMap[id])
-          .filter(Boolean)
-          .map((n) => `${n.x},${n.y}`)
-          .join(" ");
-        return (
-          <polyline
-            key={ri}
-            points={points}
-            fill="none"
-            stroke={ROUTE_COLORS[Math.min(ri, ROUTE_COLORS.length - 1)]}
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity={0.4}
-          />
-        );
-      })}
-
-      {/* Active route */}
-      {routes[selectedRoute] && (
-        <polyline
-          points={routes[selectedRoute].nodes
+        {/* Alternative Routes */}
+        {routes.map((route, ri) => {
+          if (ri === selectedRoute) return null; // Default rendered later
+          const positions = route.nodes
             .map((id) => nodeMap[id])
             .filter(Boolean)
-            .map((n) => `${n.x},${n.y}`)
-            .join(" ")}
-          fill="none"
-          stroke="url(#routeGrad)"
-          strokeWidth={4.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={0.9}
-          filter="url(#glow)"
-        />
-      )}
-
-      {/* Nodes */}
-      {nodes.map((node) => {
-        const isHovered = hoveredNode === node.id;
-        const isOrigin = node.id === origin;
-        const isDest = node.id === destination;
-
-        return (
-          <g
-            key={node.id}
-            onClick={() => onNodeClick?.(node.id)}
-            onMouseEnter={() => setHoveredNode(node.id)}
-            onMouseLeave={() => setHoveredNode(null)}
-            style={{ cursor: selectingFor ? "crosshair" : "pointer" }}
-          >
-            <circle
-              cx={node.x}
-              cy={node.y}
-              r={getNodeRadius(node) + 6}
-              fill="transparent"
+            .map((n) => [n.lat, n.lng] as [number, number]);
+          
+          return (
+            <Polyline
+              key={`alt-route-${ri}`}
+              positions={positions}
+              pathOptions={{
+                color: ROUTE_COLORS[Math.min(ri, ROUTE_COLORS.length - 1)],
+                weight: 4,
+                opacity: 0.5,
+              }}
             />
-            <circle
-              cx={node.x}
-              cy={node.y}
-              r={getNodeRadius(node)}
-              fill={getNodeColor(node)}
-              stroke={isOrigin || isDest ? "#ffffff" : "none"}
-              strokeWidth={isOrigin || isDest ? 2 : 0}
-            />
+          );
+        })}
 
-            {/* Render all labels faintly, but make active/hovered ones darker */}
-            <text
-              x={node.x}
-              y={node.y - 8}
-              textAnchor="middle"
-              fontSize={isOrigin || isDest || isHovered ? "10" : "8"}
-              fill={isOrigin || isDest || isHovered ? "#475569" : "#94a3b8"}
-              fontFamily="sans-serif"
-              fontWeight={isOrigin || isDest || isHovered ? 600 : 500}
-              letterSpacing="-0.02em"
+        {/* Active Route */}
+        {routes[selectedRoute] && (
+          <Polyline
+            positions={routes[selectedRoute].nodes
+              .map((id) => nodeMap[id])
+              .filter(Boolean)
+              .map((n) => [n.lat, n.lng] as [number, number])}
+            pathOptions={{
+              color: "#2563eb",
+              weight: 6,
+              opacity: 0.9,
+            }}
+          />
+        )}
+
+        {/* Rendering Intersections / Nodes */}
+        {nodes.map((node) => {
+          const isOrigin = node.id === origin;
+          const isDest = node.id === destination;
+          const radius = getNodeRadius(node);
+
+          return (
+            <CircleMarker
+              key={node.id}
+              center={[node.lat, node.lng]}
+              radius={radius}
+              pathOptions={{
+                fillColor: getNodeColor(node),
+                fillOpacity: 1,
+                color: isOrigin || isDest ? "#ffffff" : "#475569",
+                weight: isOrigin || isDest ? 2 : 1,
+              }}
+              eventHandlers={{
+                click: () => onNodeClick?.(node.id),
+                mouseover: () => setHoveredNode(node.id),
+                mouseout: () => setHoveredNode(null),
+              }}
             >
-              {node.label}
-            </text>
+              <Tooltip direction="top" offset={[0, -radius - 2]} opacity={1}>
+                {node.label}
+              </Tooltip>
+            </CircleMarker>
+          );
+        })}
+      </MapContainer>
 
-            {/* Origin/Dest pulse */}
-            {(isOrigin || isDest) && (
-              <circle
-                cx={node.x}
-                cy={node.y}
-                r={12}
-                fill="none"
-                stroke={isOrigin ? "#2563eb" : "#ff0000ff"}
-                strokeWidth={1.5}
-                opacity={0.3}
-              >
-                <animate attributeName="r" values="8;20;8" dur="2s" repeatCount="indefinite" />
-                <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
-              </circle>
-            )}
-          </g>
-        );
-      })}
-
-      {/* Selecting hint */}
+      {/* Selecting hint overlay */}
       {selectingFor && (
-        <text x="480" y="625" textAnchor="middle" fontSize="13" fontWeight="500" fill="#2563eb" fontFamily="sans-serif">
-          Click a node to set {selectingFor}
-        </text>
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur shadow-md px-4 py-2 rounded-full font-sans text-[13px] font-medium text-blue-600 border border-blue-100 flex items-center gap-2 pointer-events-none">
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+          Click a node on the map to set {selectingFor}
+        </div>
       )}
-    </svg>
+    </div>
   );
 }

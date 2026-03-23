@@ -16,8 +16,8 @@ const item = {
 };
 
 export default function RouteGuidance() {
-  const [origin, setOrigin] = useState("4004");
-  const [destination, setDestination] = useState("4609");
+  const [origin, setOrigin] = useState(cityNodes[0]?.id || "");
+  const [destination, setDestination] = useState(cityNodes[Math.floor(cityNodes.length / 2)]?.id || "");
   const [topK, setTopK] = useState(5);
   const [algorithm, setAlgorithm] = useState("xgboost");
   const [selectedRoute, setSelectedRoute] = useState(0);
