@@ -6,3 +6,5 @@ matplotlib
 tensorflow
 keras
 xlrd
+scipy
+seaborn
