@@ -6,7 +6,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from tensorflow.keras.models import load_model
 
 from src.data_loader import prepare_data
-from src.model_config import SEQ_LEN, FORECAST_HORIZON
+from config.model_config import SEQ_LEN, FORECAST_HORIZON
 
 
 GRAPH_DIR = Path("results/graphs")

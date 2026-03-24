@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 from tensorflow.keras.models import load_model
 from src.data_loader import prepare_data, create_sequences
-from src.model_config import SEQ_LEN, FORECAST_HORIZON
+from config.model_config import SEQ_LEN, FORECAST_HORIZON
 
 PROCESSED_DIR = Path("data/processed")
 PREDICTIONS_DIR = Path("results/predictions")
