@@ -1,120 +1,95 @@
 # Traffic-Based Route Guidance System (TBRGS)
 
 ## Team Members
-
-The initial role for each member in the project
-
-| Name | Student ID | Task | Responsibility |
-|:---|:---|:---|:---|
-| Bui Quang Doan | 104993227 | Task 1 | Data Processing & Dataset Preparation |
-| Do Gia Huy (Leader) | 104988294 | Task 2 | ML Implementation (LSTM/GRU) & Model Evaluation |
-| Huynh Doan Hoang Minh | 104777308 | Task 2 | ML Implementation & Model Evaluation |
-| Le Thanh Nam | 104999380 | Task 3 & 4 | System Integration, Travel Time Estimation & GUI |
+| Name | Student ID | Task & Responsibility |
+|:---|:---|:---|
+| Bui Quang Doan | 104993227 | Data Processing & Dataset Preparation for 2006 |
+| Do Gia Huy (Leader) | 104988294 | ML Implementation (LSTM/GRU), Model Evaluation, Data Processing & Dataset Preparation for 2014 |
+| Huynh Doan Hoang Minh | 104777308 | ML Implementation (LightGBM), Model Evaluation, Backend, Frontend Supporter |
+| Le Thanh Nam | 104999380 | System Integration, Travel Time Estimation & GUI |
 
 ## Project Overview
-* **Goal:** Build a Traffic-Based Route Guidance System (TBRGS) for the city of Boroondara.
-* **Data:** Use historical SCATS traffic flow data (October 2006) to train machine learning models.
-* **Prediction:** Train models such as LSTM and GRU to predict future traffic flow.
-* **Integration:** Convert predicted traffic flow into travel time and use the A* algorithm to find optimal routes.
-* **Note:** This repository currently focuses on Task 1 (Data Preprocessing). Other modules will be added later by team members.
+- Goal: Build a traffic-based route guidance system for the City of Boroondara.
+- Data: Historical SCATS traffic flow data from October 2006 (training) plus October 2014 (held-out temporal test).
+- Models: LSTM and GRU sequence models to forecast 15-minute traffic volume.
+- Routing: Forecasts will later be converted to travel times for A* routing (not covered here).
 
 ---
 
-## Prerequisites & Installation
-
-### Python Version
-
-This project requires **Python 3.12** or later.
-
-### Install Dependencies
-
-Install all required packages using:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Task 1: Data Preprocessing
-
-This section covers the `process_2006.py` script, which extracts, cleans, and reshapes the raw VicRoads dataset to prepare it for machine learning training.
-
-### How to Run
-
-Execute the script from the root folder:
-
-```bash
-python process_2006.py
-```
-
-The output will be saved as `2006_processed.csv` in the `data/processed/` directory.
-
-The processed dataset will be used in later stages for training the machine learning models.
-
-### Processing Steps
-
-The script performs the following operations on the raw dataset:
-
-* Standardizes column names (lowercase, stripped spaces, underscores).
-* Reshapes data from wide format (v00–v95 intervals) to a long format time series.
-* Converts interval time codes into HH:MM:SS format and creates a unified datetime column.
-* Cleans the dataset by removing the pedestrian counting site (4335) and branches with insufficient data (less than 25 days).
-* Handles missing traffic volume values using linear interpolation, forward fill, and backward fill.
-* Generates time-based features including hour, day of week, and an `is_weekend` indicator.
+## Prerequisites
+- Python 3.12 or later
+- Install dependencies: `pip install -r requirements.txt`
 
 ---
 
-## Task 2: Model Training
+## Datasets & Split Strategy
+- 2006 dataset is split **70/10/20** into train/validation/test using sliding 96-step windows per site.
+- Early stopping and learning-rate scheduling monitor the **2006 validation** split only.
+- The **2014 dataset is never used for training**. It is a temporal generalisation check over an 8-year gap.
+- Feature scaling: `MinMaxScaler` is **fit on 2006 training only** and reused everywhere.
+- Road name encoding: `LabelEncoder` is fit on 2006; unseen 2014 road names map to **-1** to avoid leakage.
 
-This section covers training two deep learning models (LSTM and GRU) to predict traffic flow patterns using the preprocessed traffic data.
+---
 
-### How to Run
+## Data Preparation
+- 2006 processing  
+  `python -m src.process_2006`  
+  Output: `data/processed/2006_processed.csv`
 
-#### LSTM Model
+- 2014 processing (uses detector-direction lookup and 2006 metadata)  
+  `python -m src.process_2014`  
+  Output: `data/processed/2014_processed.csv`
 
-To train the LSTM (Long Short-Term Memory) model, execute:
+---
 
-```bash
-python -m models.lstm_model
-```
+## Model Training (2006 only)
+Both models train on `data/processed/2006_processed.csv` with 96-step input sequences and 1-step (15-minute) forecasts.
 
-**What it does:**
-* Loads and prepares the preprocessed traffic data
-* Builds a sequential LSTM model with 2 stacked LSTM layers (64 and 32 units)
-* Uses dropout regularization (0.2) to prevent overfitting
-* Trains the model with Adam optimizer and mean squared error loss
-* Saves the best model based on validation loss to `saved/saved_lstm_model.keras`
-* Evaluates performance on test data and generates prediction visualizations
-* Results are saved to `results/test_result/` and `results/prediction/`
+- LSTM: `python -m models.lstm_model`
+- GRU : `python -m models.gru_model`
 
-#### GRU Model
+Artifacts: saved models and training curves in `results/trained_models/`.
 
-To train the GRU (Gated Recurrent Unit) model, execute:
+---
 
-```bash
-python -m models.gru_model
-```
+## Prediction Pipeline
+Predictions are generated on **full continuous datasets** to preserve 96-step sequence integrity before any filtering.
 
-**What it does:**
-* Loads and prepares the preprocessed traffic data
-* Builds a sequential GRU model with 2 stacked GRU layers (64 and 32 units)
-* Uses dropout regularization (0.2) to prevent overfitting
-* Trains the model with Adam optimizer and mean squared error loss
-* Saves the best model based on validation loss to `saved/saved_gru_model.keras`
-* Evaluates performance on test data and generates prediction visualizations
-* Results are saved to `results/test_result/` and `results/prediction/`
+- Run on 2014 (temporal generalisation):  
+  `python -m src.predict --data 2014`
 
-### Model Architecture
+- Run on 2006 (in-domain check):  
+  `python -m src.predict --data 2006`
 
-Both models use a similar architecture:
-* **Input:** Sequence of 96 time intervals (24 hours of 15-minute intervals)
-* **Prediction:** Next 15-minute traffic flow value
-* **Layers:** Two recurrent layers with dropout for regularization
-* **Output:** Single value (predicted traffic volume)
+Outputs: `results/predictions/{year}_predictions.csv` with columns  
+`datetime, scats_number, location, hour, day_of_week, is_weekend, actual, predicted_lstm, predicted_gru`.
 
-### Model Outputs
+---
 
-After training, the following files are generated:
-* `results/trained_models/gru_model.keras` - Trained GRU model
-* `results/trained_models/lstm_model.keras` - Trained LSTM model
-* `results/trained_models/gru_training_curve.png` - Model training graph of gru
-* `results/trained_models/lstm_training_curve.png` - Model training graph of lstm
+## Scenario Tests (post-prediction)
+`src/test_runner.py` filters the **precomputed predictions CSVs** (no model re-run) so every evaluated point comes from a valid 96-step window.
+
+Test Case Descriptions:
+
+| ID   | Name                     | Scenario                       |
+|:----:|:-------------------------|:-------------------------------|
+| T01  | Morning Peak Hour        | Weekday 7:00-9:45 AM           |
+| T02  | Evening Peak Hour        | Weekday 4:00-6:45 PM           |
+| T03  | Late Night Low Volume    | 11:00 PM-2:45 AM               |
+| T04  | Weekday vs Weekend       | All weekend intervals          |
+| T05  | Mon Morning vs Fri Afternoon | Start vs end of week       |
+| T06  | High Volume Intersection | Busiest SCATS site             |
+| T07  | Low Volume Intersection  | Quietest SCATS site            |
+| T08  | Full Monday              | All 96 intervals on Mondays    |
+| T09  | Full Week                | All intervals for busiest site |
+| T10  | Transition Period        | 6:00-8:45 AM ramp-up           |
+
+Example commands:
+- Default (2014 data, both models):  
+  `python -m src.test_runner --test T01-morning_peak_hour`
+- Specify model:  
+  `python -m src.test_runner --test T06-high_vol_intersection --model lstm`
+- Use 2006 predictions:  
+  `python -m src.test_runner --test T01-morning_peak_hour --data 2006`
+
+Metrics (MAE, RMSE, MAPE) are written to `results/test_result/{test}_metrics.json`; plots go to `results/test_graphs/`.
