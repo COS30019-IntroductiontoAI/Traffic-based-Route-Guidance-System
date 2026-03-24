@@ -94,4 +94,4 @@ def prepare_data(filepath, seq_len, forecast_horizon):
   X_val = scale_X(X_val); y_val = scale_y(y_val)
   X_test = scale_X(X_test); y_test = scale_y(y_test)
 
-  return (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler 
+  return (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler, label_encoder
