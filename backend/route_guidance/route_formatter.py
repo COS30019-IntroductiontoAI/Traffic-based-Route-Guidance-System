@@ -13,7 +13,7 @@ def classify_traffic_level(time_minutes: float) -> str:
 
 
 def to_frontend_route(route: RouteResult, rank: int) -> dict[str, object]:
-    # Convert a backend route result into the structure Nam's UI already expects.
+    # Convert a backend route result into the structure the frontend expects.
     return {
         "rank": rank,
         "nodes": route.nodes,

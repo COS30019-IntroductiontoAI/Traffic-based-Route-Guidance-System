@@ -6,10 +6,10 @@ from backend.services.route_service import RouteService
 
 
 def main() -> None:
-    # Small local demo entrypoint for the backend route engine.
+    # Small local smoke-test entrypoint for the backend route engine.
     service = RouteService.from_scats_graph()
 
-    # Demo pair from the generated SCATS graph.
+    # Sample pair from the generated SCATS graph.
     origin = "970"
     destination = "4043"
     routes = service.get_routes(origin=origin, destination=destination, k=3, algorithm="lightgbm")
