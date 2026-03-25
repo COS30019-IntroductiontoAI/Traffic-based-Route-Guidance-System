@@ -87,7 +87,7 @@ class RouteService:
                 distance_km=edge.distance_km if edge.distance_km > 0 else max(edge.base_time_minutes / 60.0, 0.01),
                 predicted_flow=predicted_flow,
                 reference_flow=reference_flow,
-                include_intersection_delay=False,
+                include_intersection_delay=True,
             )
 
         routes = find_top_k_routes(

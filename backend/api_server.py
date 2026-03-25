@@ -60,6 +60,7 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
             destination = params.get("destination", [""])[0]
             algorithm = params.get("algorithm", ["lightgbm"])[0]
             data_key = params.get("data", ["2014"])[0]
+            print(f"[API] Route search: origin={origin}, destination={destination}, algorithm={algorithm}, data={data_key}, k={params.get('k', ['5'])[0]}")
             try:
                 k = int(params.get("k", ["5"])[0])
             except ValueError:
