@@ -1,4 +1,4 @@
-pandas
+﻿pandas
 openpyxl
 numpy
 scikit-learn
@@ -8,3 +8,4 @@ keras
 xlrd
 scipy
 seaborn
+lightgbm
