@@ -3,8 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from backend.core.config import (
-    FRONTEND_EDGES_PATH,
-    FRONTEND_NODES_PATH,
     SCATS_EDGES_PATH,
     SCATS_NODES_PATH,
 )
@@ -27,11 +25,6 @@ class RouteService:
     @classmethod
     def from_json(cls, nodes_path: str | Path, edges_path: str | Path) -> "RouteService":
         return cls(load_graph_from_json(nodes_path, edges_path))
-
-    @classmethod
-    # Load the graph data that Nam's frontend currently uses.
-    def from_frontend_graph(cls) -> "RouteService":
-        return cls.from_json(FRONTEND_NODES_PATH, FRONTEND_EDGES_PATH)
 
     @classmethod
     # Load the generated SCATS/Boroondara graph for real model-aligned routing.
