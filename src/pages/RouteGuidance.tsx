@@ -23,10 +23,11 @@ export default function RouteGuidance() {
   const [selectedRoute, setSelectedRoute] = useState(0);
   const [selectingFor, setSelectingFor] = useState<"origin" | "destination" | null>(null);
   const [showDetails, setShowDetails] = useState(true);
+  const [year, setYear] = useState<"2006" | "2014">("2014");
 
   const routes = useMemo(
-    () => findShortestPaths(cityNodes, cityEdges, origin, destination, topK, algorithm),
-    [origin, destination, topK, algorithm]
+    () => findShortestPaths(cityNodes, cityEdges, origin, destination, topK, algorithm, year),
+    [origin, destination, topK, algorithm, year]
   );
 
   const handleNodeClick = useCallback(
@@ -62,10 +63,12 @@ export default function RouteGuidance() {
               destination={destination}
               topK={topK}
               algorithm={algorithm}
+              year={year}
               onOriginChange={setOrigin}
               onDestinationChange={setDestination}
               onTopKChange={setTopK}
               onAlgorithmChange={setAlgorithm}
+              onYearChange={setYear}
               onFindRoutes={() => { setSelectedRoute(0); setShowDetails(true); }}
               onSelectOrigin={() => setSelectingFor(selectingFor === "origin" ? null : "origin")}
               onSelectDestination={() => setSelectingFor(selectingFor === "destination" ? null : "destination")}

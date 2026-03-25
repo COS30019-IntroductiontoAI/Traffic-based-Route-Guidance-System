@@ -12,6 +12,8 @@ interface RouteControlsProps {
   onDestinationChange: (v: string) => void;
   onTopKChange: (v: number) => void;
   onAlgorithmChange: (v: string) => void;
+  year: "2006" | "2014";
+  onYearChange: (v: "2006" | "2014") => void;
   onFindRoutes: () => void;
   onSelectOrigin: () => void;
   onSelectDestination: () => void;
@@ -34,8 +36,8 @@ const algorithms = [
 ];
 
 export function RouteControls({
-  origin, destination, topK, algorithm,
-  onOriginChange, onDestinationChange, onTopKChange, onAlgorithmChange,
+  origin, destination, topK, algorithm, year,
+  onOriginChange, onDestinationChange, onTopKChange, onAlgorithmChange, onYearChange,
   onFindRoutes, onSelectOrigin, onSelectDestination, selectingFor,
   routes, selectedRoute, onSelectRoute,
 }: RouteControlsProps) {
@@ -113,6 +115,26 @@ export function RouteControls({
                 <div className="text-[10px] text-slate-400 leading-tight">
                   {algo.desc}
                 </div>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-3">
+          <label className="text-[13px] text-slate-500 flex items-center gap-1.5">
+            📅 Year
+          </label>
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            {(["2006", "2014"] as const).map((y) => (
+              <button
+                key={y}
+                onClick={() => onYearChange(y)}
+                className={`flex-1 py-2 text-[13px] font-medium rounded-lg transition-all ${
+                  year === y
+                    ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200/50"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {y}
               </button>
             ))}
           </div>

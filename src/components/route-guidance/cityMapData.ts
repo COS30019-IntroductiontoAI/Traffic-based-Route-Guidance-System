@@ -86,7 +86,8 @@ export function findShortestPaths(
   originId: string,
   destId: string,
   topK: number,
-  _algorithm: string = "xgboost"
+  _algorithm: string = "xgboost",
+  year: "2006" | "2014" = "2014"
 ): RouteResult[] {
   const adj = getAdjacencyList(nodes, edges);
 
@@ -226,7 +227,12 @@ export function findShortestPaths(
       const from = r.nodes[j];
       const to = r.nodes[j + 1];
       const edge = adj[from]?.find((x) => x.to === to);
-      const time = edge ? edge.weight : 2.5;
+      let time = edge ? edge.weight : 2.5;
+      
+      // Artificial variation for demo
+      if (year === "2014") time *= 1.15;
+      if (_algorithm === "gru") time *= 1.05;
+      else if (_algorithm === "lstm") time *= 0.95;
       
       let traffic: "clear" | "moderate" | "heavy" = "clear";
       if (time >= 3.0) traffic = "heavy";
