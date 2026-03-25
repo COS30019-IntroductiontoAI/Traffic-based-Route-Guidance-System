@@ -102,7 +102,7 @@ def build_model_predictions(spec: dict, filepath: Path, scaler, label_encoder, s
 
   if spec["kind"] == "sequence":
     model = load_model(spec["path"])
-    y_pred_scaled = model.predict(X_scaled)
+    y_pred_scaled = model.predict(X_scaled, verbose=0)
     predictions_df = sequence_results[["datetime", "scats_number", "location"]].copy()
     predictions_df[f"predicted_{model_name}"] = inverse_scale_y(scaler, y_pred_scaled.flatten())
     print(f"{model_name.upper()} done.")
