@@ -1,52 +1,39 @@
-import { useState, createContext, useContext, useCallback } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import Header from './components/Header'
-import Dashboard from './pages/Dashboard'
-import DataProcessing from './pages/DataProcessing'
 import RouteGuidance from './pages/RouteGuidance'
+import ModelEvaluation from './pages/ModelEvaluation'
 import ToastContainer from './components/ToastContainer'
 import { useToast } from './hooks/useToast'
+import { createContext, useContext, useCallback } from 'react'
 import type { ToastType } from './components/ToastContainer'
 
-export type Page = 'dashboard' | 'data-processing' | 'route-guidance'
-
 interface AppContextValue {
-  navigate: (page: Page) => void
   toast: (message: string, type?: ToastType) => void
 }
+
 // eslint-disable-next-line react-refresh/only-export-components
-export const AppContext = createContext<AppContextValue>({
-  navigate: () => { },
-  toast: () => { },
-})
+export const AppContext = createContext<AppContextValue>({ toast: () => {} })
 // eslint-disable-next-line react-refresh/only-export-components
 export const useApp = () => useContext(AppContext)
 
-const PAGE_TITLES: Record<Page, string> = {
-  dashboard: 'Dashboard',
-  'data-processing': 'Data Processing',
-  'route-guidance': 'Route Guidance',
-}
-
 export default function App() {
-  const [page, setPage] = useState<Page>('dashboard')
   const { toasts, push, dismiss } = useToast()
+  const location = useLocation()
 
-  const navigate = useCallback((p: Page) => setPage(p), [])
   const toast = useCallback((msg: string, type: ToastType = 'info') => push(msg, type), [push])
 
   return (
-    <AppContext.Provider value={{ navigate, toast }}>
+    <AppContext.Provider value={{ toast }}>
       <div className="flex h-screen bg-gray-50 overflow-hidden">
-        <Sidebar activePage={page} onNavigate={setPage} />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header title={PAGE_TITLES[page]} />
-          <main className="flex-1 overflow-y-auto">
-            {page === 'dashboard' && <Dashboard />}
-            {page === 'data-processing' && <DataProcessing />}
-            {page === 'route-guidance' && <RouteGuidance />}
-          </main>
-        </div>
+        <Sidebar activePath={location.pathname} />
+        <main className="flex-1 overflow-y-auto">
+          <Routes>
+            <Route path="/" element={<Navigate to="/model-evaluation" replace />} />
+            <Route path="/model-evaluation" element={<ModelEvaluation />} />
+            <Route path="/route-guidance" element={<RouteGuidance />} />
+            <Route path="*" element={<Navigate to="/model-evaluation" replace />} />
+          </Routes>
+        </main>
         <ToastContainer toasts={toasts} onDismiss={dismiss} />
       </div>
     </AppContext.Provider>

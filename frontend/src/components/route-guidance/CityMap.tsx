@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, useMap } from "react-leaflet";
+import type { LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { MapNode, MapEdge, RouteResult } from "./cityMapData";
 
@@ -14,7 +15,8 @@ interface CityMapProps {
   selectingFor?: "origin" | "destination" | null;
 }
 
-const ROUTE_COLORS = ["#2563eb", "#10b981", "#8b5cf6", "#3b82f6", "#f59e0b"];
+
+const DEFAULT_CENTER: [number, number] = [-37.82, 145.045];
 
 function MapBounds({
   nodes,
@@ -110,17 +112,6 @@ export function CityMap({
     return result;
   }, [routes, selectedRoute]);
 
-  const routeEdgeSet = useMemo(() => {
-    const result = new Set<string>();
-    for (const route of routes) {
-      for (let index = 0; index < route.nodes.length - 1; index += 1) {
-        result.add(`${route.nodes[index]}-${route.nodes[index + 1]}`);
-        result.add(`${route.nodes[index + 1]}-${route.nodes[index]}`);
-      }
-    }
-    return result;
-  }, [routes]);
-
   const getNodeColor = useCallback(
     (node: MapNode) => {
       if (node.id === origin) {
@@ -153,11 +144,36 @@ export function CityMap({
     [origin, destination, hoveredNode, activeRouteNodes],
   );
 
+  const dragBounds: LatLngBoundsExpression = useMemo(() => {
+    if (nodes.length === 0) {
+      const [lat, lng] = DEFAULT_CENTER;
+      const buffer = 0.1;
+      return [
+        [lat - buffer, lng - buffer],
+        [lat + buffer, lng + buffer],
+      ];
+    }
+
+    const lats = nodes.map((node) => node.lat);
+    const lngs = nodes.map((node) => node.lng);
+    const latBuffer = 0.04;
+    const lngBuffer = 0.06;
+
+    return [
+      [Math.min(...lats) - latBuffer, Math.min(...lngs) - lngBuffer],
+      [Math.max(...lats) + latBuffer, Math.max(...lngs) + lngBuffer],
+    ];
+  }, [nodes]);
+
   return (
     <div className="w-full h-full relative" style={{ cursor: selectingFor ? "crosshair" : "default" }}>
       <MapContainer
-        center={[-37.8136, 144.9631]}
-        zoom={14}
+        center={DEFAULT_CENTER}
+        zoom={1}
+        minZoom={12.5}
+        maxZoom={13.5}
+        maxBounds={dragBounds}
+        maxBoundsViscosity={1}
         className="w-full h-full z-0"
         zoomControl={false}
         preferCanvas
@@ -176,16 +192,14 @@ export function CityMap({
             return null;
           }
 
-          const isOnRoute = routeEdgeSet.has(`${edge.from}-${edge.to}`);
-
           return (
             <Polyline
               key={`base-${edge.from}-${edge.to}`}
               positions={[[from.lat, from.lng], [to.lat, to.lng]]}
               pathOptions={{
-                color: isOnRoute ? "#94a3b8" : "#cbd5e1",
-                weight: isOnRoute ? 2 : 1.5,
-                opacity: isOnRoute ? 0.7 : 0.5,
+                color: "#d1d5db",
+                weight: 1.5,
+                opacity: 0.5,
               }}
             />
           );
@@ -206,10 +220,9 @@ export function CityMap({
               key={`alt-route-${route.rank ?? routeIndex}`}
               positions={positions}
               pathOptions={{
-                color: ROUTE_COLORS[Math.min(routeIndex, ROUTE_COLORS.length - 1)],
+                color: "#9ca3af",
                 weight: 4,
-                opacity: 0.5,
-                className: "route-flow-alt",
+                opacity: 0.45,
               }}
             />
           );
@@ -253,7 +266,7 @@ export function CityMap({
               }}
             >
               <Tooltip direction="top" offset={[0, -radius - 2]} opacity={1}>
-                {node.label}
+                {node.id}
               </Tooltip>
             </CircleMarker>
           );

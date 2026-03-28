@@ -198,6 +198,32 @@ export default function RouteGuidance() {
     [selectingFor],
   );
 
+  /* ── Full-page loading state ── show this instead of the whole UI ──────── */
+  if (isGraphLoading) {
+    return (
+      <div className="flex h-full min-h-screen items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4 text-slate-500">
+          <LoaderCircle className="w-8 h-8 animate-spin text-blue-500" />
+          <p className="text-sm font-medium">Loading SCATS graph from backend…</p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Graph error state ─────────────────────────────────────────────────── */
+  if (graphError) {
+    return (
+      <div className="flex h-full min-h-screen items-center justify-center font-sans p-8">
+        <div className="flex flex-col items-center gap-3 text-center max-w-sm">
+          <ServerCrash className="w-8 h-8 text-red-400" />
+          <p className="text-sm font-semibold text-slate-700">Could not load graph data</p>
+          <p className="text-xs text-slate-400">{graphError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Main UI — only rendered after graph is loaded ─────────────────────── */
   return (
     <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
@@ -263,23 +289,7 @@ export default function RouteGuidance() {
                   selectingFor={selectingFor}
                 />
 
-                {isGraphLoading && (
-                  <div className="absolute inset-0 z-[1000] bg-white/80 backdrop-blur-sm flex items-center justify-center">
-                    <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
-                      <LoaderCircle className="w-4 h-4 animate-spin text-blue-500" />
-                      Loading SCATS graph from backend...
-                    </div>
-                  </div>
-                )}
-
-                {graphError && !isGraphLoading && (
-                  <div className="absolute top-6 left-6 right-6 z-[1000] rounded-2xl border border-red-200 bg-red-50/95 px-4 py-3 text-sm text-red-700 flex items-start gap-3">
-                    <ServerCrash className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>{graphError}</span>
-                  </div>
-                )}
-
-                {isRoutesLoading && !isGraphLoading && (
+                {isRoutesLoading && (
                   <div className="absolute top-6 left-6 z-[1000] rounded-full border border-blue-100 bg-white/95 px-4 py-2 text-sm text-blue-600 flex items-center gap-2 shadow-sm">
                     <LoaderCircle className="w-4 h-4 animate-spin" />
                     Finding routes...
