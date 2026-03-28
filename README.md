@@ -1,4 +1,4 @@
-﻿# Traffic-Based Route Guidance System (TBRGS)
+# Traffic-Based Route Guidance System (TBRGS)
 
 ## Team Members
 
@@ -21,7 +21,55 @@
 ## Prerequisites
 
 - Python 3.12 or later
-- Install dependencies: `pip install -r requirements.txt`
+- Node.js 18 or later
+
+---
+
+## How to Run the Project
+
+### 1. Install Python ML dependencies (from project root)
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Install Python backend dependencies
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+### 3. Install frontend dependencies (from project root)
+
+```bash
+npm install
+```
+
+### 4. (Optional) Verify the backend engine with a smoke test
+
+```bash
+py -m backend.main
+```
+
+This runs a quick route query (node `970` → `4043`) and prints the JSON result to the console. Use it to confirm the route engine and ML models are loading correctly **before** starting the full server.
+
+### 5. Start the backend API server (from project root)
+
+```bash
+py -m backend.api_server
+```
+
+The API will be available at `http://127.0.0.1:8000`.
+
+### 6. Start the frontend dev server (from project root)
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173` (or the next available port).
+
+> Both servers must be running at the same time for the full GUI experience.
 
 ---
 

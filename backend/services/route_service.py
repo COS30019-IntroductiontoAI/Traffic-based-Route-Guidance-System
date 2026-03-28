@@ -6,7 +6,7 @@ from backend.core.config import (
     SCATS_EDGES_PATH,
     SCATS_NODES_PATH,
 )
-from backend.models.prediction_inference import PredictionInference
+from src.models.prediction_inference import PredictionInference
 from backend.route_guidance.graph_builder import RouteGraph, load_graph_from_json
 from backend.route_guidance.route_formatter import to_frontend_route
 from backend.route_guidance.top_k import find_top_k_routes

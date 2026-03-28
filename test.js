@@ -1,1 +1,0 @@
-const query = '[out:json];way[\"highway\"~\"primary|secondary|tertiary|trunk|residential|unclassified\"](-37.840,145.020,-37.800,145.070);(._;>;);out body;'; fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query }).then(res => res.text()).then(text => console.log(text.substring(0, 500))).catch(console.error);

@@ -4,7 +4,7 @@ from functools import cached_property
 
 import pandas as pd
 
-from backend.models.model_loader import PredictionArtifacts, load_prediction_artifacts
+from src.models.model_loader import PredictionArtifacts, load_prediction_artifacts
 
 
 # Look up prepared model predictions from the shared predictions CSV.
