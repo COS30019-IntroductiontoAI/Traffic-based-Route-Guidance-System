@@ -10,8 +10,27 @@ from backend.route_guidance.heuristic import haversine_distance_km
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-TRAFFIC_PATH = PROJECT_ROOT / "data" / "processed" / "processed_traffic.csv"
-SITE_LISTING_PATH = PROJECT_ROOT / "data" / "processed" / "SCATSSiteListingSpreadsheet_VicRoads_clean.csv"
+# The processed traffic CSV lives under src/data/processed; prefer that path if the
+# top-level /data directory does not exist.
+_TRAFFIC_CANDIDATES = [
+    PROJECT_ROOT / "data" / "processed" / "processed_traffic.csv",
+    PROJECT_ROOT / "src" / "data" / "processed" / "processed_traffic.csv",
+]
+TRAFFIC_PATH = next((p for p in _TRAFFIC_CANDIDATES if p.exists()), _TRAFFIC_CANDIDATES[0])
+
+_LISTING_CANDIDATES = [
+    PROJECT_ROOT / "data" / "processed" / "SCATSSiteListingSpreadsheet_VicRoads_clean.csv",
+    PROJECT_ROOT / "src" / "data" / "processed" / "SCATSSiteListingSpreadsheet_VicRoads_clean.csv",
+]
+SITE_LISTING_PATH = next((p for p in _LISTING_CANDIDATES if p.exists()), _LISTING_CANDIDATES[0])
+
+# Manual coordinate corrections for SCATS sites whose recorded GPS coordinates are
+# clearly wrong (e.g., lat/lng that map outside Melbourne / Victoria entirely).
+# These are verified against the VicRoads site descriptions and street-map cross-checks.
+COORDINATE_CORRECTIONS: dict[int, tuple[float, float]] = {
+    # 4266 BURWOOD/AUBURN — raw data has lat=-28.37, lng=108.78 (wrong)
+    4266: (-37.8246, 145.0396),
+}
 OUTPUT_DIR = PROJECT_ROOT / "backend" / "generated"
 NODES_OUTPUT = OUTPUT_DIR / "scats_nodes.json"
 EDGES_OUTPUT = OUTPUT_DIR / "scats_edges.json"
@@ -50,11 +69,24 @@ def load_site_records() -> list[SiteRecord]:
     records: list[SiteRecord] = []
     for row in site_df.itertuples(index=False):
         label = row.location_description if pd.notna(row.location_description) else row.road_name
+        scats_number = int(row.scats_number)
+        lat = float(row.nb_latitude)
+        lng = float(row.nb_longitude)
+
+        # Apply manual corrections for sites with wrong GPS coordinates in the raw data.
+        if scats_number in COORDINATE_CORRECTIONS:
+            lat, lng = COORDINATE_CORRECTIONS[scats_number]
+
+        # Skip sites that are still clearly outside the Melbourne/Victoria region.
+        # Victoria lat range: -39.2 to -33.9, lng range: 140.9 to 150.0
+        if not (-39.5 < lat < -33.5 and 140.0 < lng < 150.5):
+            continue
+
         records.append(
             SiteRecord(
-                scats_number=int(row.scats_number),
-                lat=float(row.nb_latitude),
-                lng=float(row.nb_longitude),
+                scats_number=scats_number,
+                lat=lat,
+                lng=lng,
                 road_name=str(row.road_name),
                 label=str(label),
             )

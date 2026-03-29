@@ -73,10 +73,19 @@ class PredictionInference:
         if prediction_column not in feature_df.columns:
             raise ValueError(f"Prediction column '{prediction_column}' is missing from the prepared CSV")
 
-        if target_datetime is None:
-            target_timestamp = feature_df["datetime"].max()
-        else:
+        if target_datetime is not None:
             target_timestamp = pd.Timestamp(target_datetime)
+        else:
+            # Prefer a representative morning-peak snapshot (08:00 weekday).
+            # This produces more realistic congestion data than the dataset max (which
+            # is often a low-traffic late-night timestamp).
+            peak_rows = feature_df[feature_df["datetime"].dt.hour == 8]
+            if not peak_rows.empty:
+                # Pick the median available peak date to represent a typical day
+                peak_dates = sorted(peak_rows["datetime"].unique())
+                target_timestamp = peak_dates[len(peak_dates) // 2]
+            else:
+                target_timestamp = feature_df["datetime"].max()
 
         target_rows = feature_df[feature_df["datetime"] == target_timestamp].copy()
         if target_rows.empty:
@@ -90,3 +99,4 @@ class PredictionInference:
         )
         site_predictions = {str(site): float(value) for site, value in site_predictions.items()}
         return pd.Timestamp(target_timestamp).isoformat(), site_predictions
+

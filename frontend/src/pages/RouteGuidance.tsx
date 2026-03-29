@@ -234,7 +234,19 @@ export default function RouteGuidance() {
           </p>
           {forecastTimestamp && (
             <p className="text-[12px] text-slate-400 font-medium mt-2">
-              Forecast snapshot: {new Date(forecastTimestamp).toLocaleString()}
+              Forecast snapshot:{" "}
+              <span className="text-slate-600 font-semibold">
+                {(() => {
+                  try {
+                    return new Date(forecastTimestamp).toLocaleString("en-AU", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    });
+                  } catch {
+                    return forecastTimestamp;
+                  }
+                })()}
+              </span>
             </p>
           )}
         </motion.div>
@@ -296,9 +308,10 @@ export default function RouteGuidance() {
                   </div>
                 )}
 
+                {/* Map legend */}
                 <div className="absolute bottom-6 left-6 p-4 text-[13px] text-slate-500 font-medium space-y-2.5 pointer-events-none">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-3.5 h-3.5 rounded-full bg-blue-500 shadow-sm" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-blue-600 shadow-sm" />
                     <span>Origin</span>
                   </div>
                   <div className="flex items-center gap-2.5">
@@ -306,10 +319,12 @@ export default function RouteGuidance() {
                     <span>Destination</span>
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <div className="flex gap-0.5">
-                      <div className="w-2.5 h-[3px] rounded-full bg-amber-500 shadow-sm" />
-                    </div>
+                    <div className="w-10 h-[4px] rounded-full bg-blue-600 shadow-sm" />
                     <span>Selected Route</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-[3px] rounded-full bg-slate-400 opacity-60" style={{ backgroundImage: "repeating-linear-gradient(to right, #9ca3af 0 6px, transparent 6px 10px)" }} />
+                    <span>Other Routes</span>
                   </div>
                 </div>
 

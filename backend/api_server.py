@@ -4,7 +4,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-from backend.core.config import SCATS_EDGES_PATH, SCATS_NODES_PATH
+from backend.core.config import SCATS_EDGES_PATH, SCATS_NODES_PATH, get_predictions_path
 from backend.services.route_service import RouteService, SUPPORTED_ALGORITHMS, SUPPORTED_DATA_KEYS
 
 
@@ -25,6 +25,84 @@ def _json_response(handler: BaseHTTPRequestHandler, status_code: int, payload: d
     handler.send_header("Access-Control-Allow-Headers", "Content-Type")
     handler.end_headers()
     handler.wfile.write(body)
+
+
+def _compute_metrics(data_key: str) -> dict:
+    """Compute real MAE / RMSE / Accuracy from the predictions CSV."""
+    import pandas as pd
+    import numpy as np
+
+    path = get_predictions_path(data_key)
+    df = pd.read_csv(path, parse_dates=["datetime"])
+
+    models_info = [
+        ("LightGBM", "predicted_lightgbm"),
+        ("LSTM",     "predicted_lstm"),
+        ("GRU",      "predicted_gru"),
+    ]
+
+    results = []
+    for name, col in models_info:
+        if col not in df.columns:
+            continue
+        actual = df["actual"].values
+        pred   = df[col].values
+        mae    = float(np.mean(np.abs(actual - pred)))
+        rmse   = float(np.sqrt(np.mean((actual - pred) ** 2)))
+        nonzero = actual != 0
+        if nonzero.any():
+            mape = float(np.mean(np.abs((actual[nonzero] - pred[nonzero]) / actual[nonzero])) * 100)
+        else:
+            mape = 100.0
+        accuracy = max(0.0, 100.0 - mape)
+        results.append({
+            "model":    name,
+            "mae":      round(mae, 3),
+            "rmse":     round(rmse, 3),
+            "accuracy": round(accuracy, 1),
+        })
+
+    # Sort by accuracy descending so the best model is first
+    results.sort(key=lambda x: x["accuracy"], reverse=True)
+
+    # Dataset-level stats
+    n_sites = int(df["scats_number"].nunique())
+    n_records = len(df)
+    dt_min = str(df["datetime"].min().date())
+    dt_max = str(df["datetime"].max().date())
+
+    return {
+        "models": results,
+        "stats": {
+            "intersections": n_sites,
+            "records": f"{n_records:,}",
+            "date_range": f"{dt_min} – {dt_max}",
+        },
+    }
+
+
+def _compute_traffic_profile(data_key: str) -> list[dict]:
+    """Return average hourly traffic volume aggregated across all sites and days."""
+    import pandas as pd
+
+    path = get_predictions_path(data_key)
+    df = pd.read_csv(path, parse_dates=["datetime"])
+
+    if "hour" not in df.columns:
+        df["hour"] = df["datetime"].dt.hour
+
+    profile = (
+        df.groupby("hour")["actual"]
+        .mean()
+        .reset_index()
+        .rename(columns={"hour": "hour", "actual": "volume"})
+    )
+
+    return [
+        {"time": f"{int(row.hour):02d}:00", "volume": round(float(row.volume), 1)}
+        for row in profile.itertuples(index=False)
+        if int(row.hour) % 3 == 0  # return every 3 hours for chart readability
+    ]
 
 
 class RouteGuidanceHandler(BaseHTTPRequestHandler):
@@ -52,6 +130,34 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
                     "edges": json.loads(SCATS_EDGES_PATH.read_text(encoding="utf-8")),
                 },
             )
+            return
+
+        if parsed.path == "/api/metrics":
+            params   = parse_qs(parsed.query)
+            data_key = params.get("data", ["2014"])[0].strip().lower()
+            if data_key not in SUPPORTED_DATA_KEYS:
+                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
+                return
+            try:
+                result = _compute_metrics(data_key)
+            except Exception as exc:  # noqa: BLE001
+                _json_response(self, 500, {"error": str(exc)})
+                return
+            _json_response(self, 200, result)
+            return
+
+        if parsed.path == "/api/traffic-profile":
+            params   = parse_qs(parsed.query)
+            data_key = params.get("data", ["2014"])[0].strip().lower()
+            if data_key not in SUPPORTED_DATA_KEYS:
+                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
+                return
+            try:
+                profile = _compute_traffic_profile(data_key)
+            except Exception as exc:  # noqa: BLE001
+                _json_response(self, 500, {"error": str(exc)})
+                return
+            _json_response(self, 200, {"profile": profile})
             return
 
         if parsed.path == "/api/routes":

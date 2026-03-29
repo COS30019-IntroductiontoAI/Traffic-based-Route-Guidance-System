@@ -45,9 +45,9 @@ export interface RoutesResponse {
 }
 
 export const ROUTE_ALGORITHMS: Array<{ id: AlgorithmId; name: string; desc: string }> = [
-  { id: "lightgbm", name: "LightGBM", desc: "Gradient boosting ensemble" },
-  { id: "gru", name: "GRU", desc: "Gated Recurrent Unit" },
+  { id: "lightgbm", name: "LightGBM", desc: "Gradient boosting (LGBM)" },
   { id: "lstm", name: "LSTM", desc: "Long Short-Term Memory" },
+  { id: "gru", name: "GRU", desc: "Gated Recurrent Unit" },
 ];
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");

@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -17,55 +17,34 @@ interface CityMapProps {
 
 
 const DEFAULT_CENTER: [number, number] = [-37.82, 145.045];
+const DEFAULT_ZOOM = 13;
 
-function MapBounds({
-  nodes,
-  routes,
-  selectedRoute,
-  nodeMap,
-}: {
-  nodes: MapNode[];
-  routes: RouteResult[];
-  selectedRoute: number;
-  nodeMap: Record<string, MapNode>;
-}) {
+// Only fits the map to all nodes once on initial load — never auto-zooms after that.
+function InitialMapFit({ nodes }: { nodes: MapNode[] }) {
   const map = useMap();
+  const hasFit = useRef(false);
 
   useEffect(() => {
-    if (routes[selectedRoute]) {
-      const routeNodes = routes[selectedRoute].nodes;
-      const lats = routeNodes
-        .map((nodeId) => nodeMap[nodeId]?.lat)
-        .filter((value): value is number => value !== undefined);
-      const lngs = routeNodes
-        .map((nodeId) => nodeMap[nodeId]?.lng)
-        .filter((value): value is number => value !== undefined);
+    if (hasFit.current || nodes.length === 0) return;
 
-      if (lats.length > 0 && lngs.length > 0) {
-        map.flyToBounds(
-          [
-            [Math.min(...lats), Math.min(...lngs)],
-            [Math.max(...lats), Math.max(...lngs)],
-          ],
-          { padding: [50, 50], duration: 1.2 },
-        );
-        return;
-      }
-    }
+    // Filter out outlier nodes (coordinates far from Boroondara, Melbourne)
+    const boroondara = nodes.filter(
+      (n) => n.lat > -38.1 && n.lat < -37.6 && n.lng > 144.8 && n.lng < 145.3,
+    );
+    const validNodes = boroondara.length > 0 ? boroondara : nodes;
 
-    if (nodes.length > 0) {
-      const lats = nodes.map((node) => node.lat);
-      const lngs = nodes.map((node) => node.lng);
+    const lats = validNodes.map((n) => n.lat);
+    const lngs = validNodes.map((n) => n.lng);
 
-      map.fitBounds(
-        [
-          [Math.min(...lats), Math.min(...lngs)],
-          [Math.max(...lats), Math.max(...lngs)],
-        ],
-        { padding: [30, 30] },
-      );
-    }
-  }, [map, nodes, routes, selectedRoute, nodeMap]);
+    map.fitBounds(
+      [
+        [Math.min(...lats), Math.min(...lngs)],
+        [Math.max(...lats), Math.max(...lngs)],
+      ],
+      { padding: [40, 40], animate: false },
+    );
+    hasFit.current = true;
+  }, [map, nodes]);
 
   return null;
 }
@@ -115,15 +94,15 @@ export function CityMap({
   const getNodeColor = useCallback(
     (node: MapNode) => {
       if (node.id === origin) {
-        return "#2563eb";
+        return "#2563eb"; // Blue for origin
       }
       if (node.id === destination) {
-        return "#ef4444";
+        return "#ef4444"; // Red for destination
       }
       if (activeRouteNodes.has(node.id)) {
-        return "#93c5fd";
+        return "#3b82f6"; // Light blue for nodes on selected route
       }
-      return "#cbd5e1";
+      return "#cbd5e1"; // Slate for inactive nodes
     },
     [origin, destination, activeRouteNodes],
   );
@@ -131,7 +110,7 @@ export function CityMap({
   const getNodeRadius = useCallback(
     (node: MapNode) => {
       if (node.id === origin || node.id === destination) {
-        return 8;
+        return 9;
       }
       if (hoveredNode === node.id) {
         return 7;
@@ -139,13 +118,18 @@ export function CityMap({
       if (activeRouteNodes.has(node.id)) {
         return 6;
       }
-      return 5;
+      return 4;
     },
     [origin, destination, hoveredNode, activeRouteNodes],
   );
 
   const dragBounds: LatLngBoundsExpression = useMemo(() => {
-    if (nodes.length === 0) {
+    // Use only nodes that are plausibly within Victoria, Australia
+    const validNodes = nodes.filter(
+      (n) => n.lat > -39.5 && n.lat < -33.5 && n.lng > 140.0 && n.lng < 150.5,
+    );
+
+    if (validNodes.length === 0) {
       const [lat, lng] = DEFAULT_CENTER;
       const buffer = 0.1;
       return [
@@ -154,10 +138,10 @@ export function CityMap({
       ];
     }
 
-    const lats = nodes.map((node) => node.lat);
-    const lngs = nodes.map((node) => node.lng);
-    const latBuffer = 0.04;
-    const lngBuffer = 0.06;
+    const lats = validNodes.map((node) => node.lat);
+    const lngs = validNodes.map((node) => node.lng);
+    const latBuffer = 0.06;
+    const lngBuffer = 0.08;
 
     return [
       [Math.min(...lats) - latBuffer, Math.min(...lngs) - lngBuffer],
@@ -169,16 +153,16 @@ export function CityMap({
     <div className="w-full h-full relative" style={{ cursor: selectingFor ? "crosshair" : "default" }}>
       <MapContainer
         center={DEFAULT_CENTER}
-        zoom={1}
-        minZoom={12.5}
-        maxZoom={13.5}
+        zoom={DEFAULT_ZOOM}
+        minZoom={12}
+        maxZoom={16}
         maxBounds={dragBounds}
-        maxBoundsViscosity={1}
+        maxBoundsViscosity={0.8}
         className="w-full h-full z-0"
-        zoomControl={false}
+        zoomControl={true}
         preferCanvas
       >
-        <MapBounds nodes={nodes} routes={routes} selectedRoute={selectedRoute} nodeMap={nodeMap} />
+        <InitialMapFit nodes={nodes} />
 
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -205,9 +189,10 @@ export function CityMap({
           );
         })}
 
+        {/* Unselected (alternative) routes — all rendered in neutral grey */}
         {routes.map((route, routeIndex) => {
           if (routeIndex === selectedRoute) {
-            return null;
+            return null; // draw selected route last so it renders on top
           }
 
           const positions = route.nodes
@@ -220,14 +205,16 @@ export function CityMap({
               key={`alt-route-${route.rank ?? routeIndex}`}
               positions={positions}
               pathOptions={{
-                color: "#9ca3af",
-                weight: 4,
-                opacity: 0.45,
+                color: "#9ca3af",   // fixed grey for every non-selected route
+                weight: 3,
+                opacity: 0.4,
+                dashArray: "6 4",
               }}
             />
           );
         })}
 
+        {/* Selected route — one solid blue line, always on top */}
         {routes[selectedRoute] && (
           <Polyline
             positions={routes[selectedRoute].nodes
@@ -235,10 +222,11 @@ export function CityMap({
               .filter((node): node is MapNode => Boolean(node))
               .map((node) => [node.lat, node.lng] as [number, number])}
             pathOptions={{
-              color: "#f59e0b",
+              color: "#2563eb",  // solid blue — single colour for the chosen route
               weight: 6,
-              opacity: 0.9,
-              className: "route-flow",
+              opacity: 0.92,
+              lineCap: "round",
+              lineJoin: "round",
             }}
           />
         )}
