@@ -25,9 +25,11 @@ def congestion_multiplier(
         return 1.0
 
     if reference_flow is None or reference_flow <= 0:
-        normalized_flow = min(predicted_flow / 200.0, 1.0)
+        normalized_flow = predicted_flow / 200.0
     else:
-        normalized_flow = min(predicted_flow / reference_flow, 1.0)
+        # Exaggerate the impact of high predictions and remove the hard 1.0 bottleneck 
+        # so that slight differences between ML models produce different route choices
+        normalized_flow = (predicted_flow / reference_flow) ** 1.5
 
     return min(1.0 + normalized_flow * scale, MAX_CONGESTION_MULTIPLIER)
 

@@ -28,10 +28,10 @@ export default function App() {
         <Sidebar activePath={location.pathname} />
         <main className="flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<Navigate to="/model-evaluation" replace />} />
-            <Route path="/model-evaluation" element={<ModelEvaluation />} />
+            <Route path="/" element={<Navigate to="/route-guidance" replace />} />
             <Route path="/route-guidance" element={<RouteGuidance />} />
-            <Route path="*" element={<Navigate to="/model-evaluation" replace />} />
+            <Route path="/model-evaluation" element={<ModelEvaluation />} />
+            <Route path="*" element={<Navigate to="/route-guidance" replace />} />
           </Routes>
         </main>
         <ToastContainer toasts={toasts} onDismiss={dismiss} />

@@ -2,8 +2,8 @@ import { NavLink } from 'react-router-dom'
 import { themeHex } from '../theme'
 
 const navItems = [
-  { to: '/model-evaluation', label: 'Model Evaluation' },
   { to: '/route-guidance',   label: 'Route Guidance'   },
+  { to: '/model-evaluation', label: 'Model Evaluation' },
 ]
 
 interface SidebarProps {

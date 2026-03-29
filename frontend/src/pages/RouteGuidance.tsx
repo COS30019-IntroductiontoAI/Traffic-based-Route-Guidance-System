@@ -298,6 +298,10 @@ export default function RouteGuidance() {
                   origin={origin}
                   destination={destination}
                   onNodeClick={handleNodeClick}
+                  onSelectRoute={(index) => {
+                    setSelectedRoute(index);
+                    setShowDetails(true);
+                  }}
                   selectingFor={selectingFor}
                 />
 

@@ -12,6 +12,7 @@ interface CityMapProps {
   origin: string;
   destination: string;
   onNodeClick?: (nodeId: string) => void;
+  onSelectRoute?: (index: number) => void;
   selectingFor?: "origin" | "destination" | null;
 }
 
@@ -57,6 +58,7 @@ export function CityMap({
   origin,
   destination,
   onNodeClick,
+  onSelectRoute,
   selectingFor,
 }: CityMapProps) {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -189,7 +191,7 @@ export function CityMap({
           );
         })}
 
-        {/* Unselected (alternative) routes — all rendered in neutral grey */}
+         {/* Unselected (alternative) routes — all rendered in neutral grey */}
         {routes.map((route, routeIndex) => {
           if (routeIndex === selectedRoute) {
             return null; // draw selected route last so it renders on top
@@ -206,11 +208,27 @@ export function CityMap({
               positions={positions}
               pathOptions={{
                 color: "#9ca3af",   // fixed grey for every non-selected route
-                weight: 3,
-                opacity: 0.4,
+                weight: 5,          // increased weight slightly for easier clicking
+                opacity: 0.5,
                 dashArray: "6 4",
+                className: "cursor-pointer hover:stroke-slate-500", // adding cursor pointer and hover color
               }}
-            />
+              eventHandlers={{
+                click: () => onSelectRoute?.(routeIndex),
+                mouseover: (e) => {
+                  const layer = e.target;
+                  layer.setStyle({ color: "#64748b", opacity: 0.8 }); // slate-500 equivalent
+                },
+                mouseout: (e) => {
+                  const layer = e.target;
+                  layer.setStyle({ color: "#9ca3af", opacity: 0.5 }); // original color
+                }
+              }}
+            >
+              <Tooltip sticky>
+                Alternative Route {routeIndex}
+              </Tooltip>
+            </Polyline>
           );
         })}
 
