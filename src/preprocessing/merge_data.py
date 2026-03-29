@@ -15,9 +15,8 @@ def merge_datasets(
 
     print("\n=== STAGE 2: MERGING DATASETS ===")
 
-    # =========================
+
     # Step 1: Check input files
-    # =========================
     for path in [traffic_path, sites_path, aadt_path]:
         if not os.path.exists(path):
             raise FileNotFoundError(
@@ -34,9 +33,8 @@ def merge_datasets(
     print(f"Sites data shape: {sites_data.shape}")
     print(f"AADT data shape: {aadt_data.shape}")
 
-    # =========================
+
     # Step 2: Merge Traffic and Sites
-    # =========================
     print("Step 2: Merging traffic data with SCATS site metadata...")
 
     master_data = pd.merge(
@@ -50,9 +48,8 @@ def merge_datasets(
     missing_sites = master_data["location_description"].isnull().sum()
     print(f"Rows without matching site metadata: {missing_sites}")
 
-    # =========================
+
     # Step 3: Spatial matching with AADT
-    # =========================
     print("Step 3: Performing spatial matching with AADT data...")
 
     # Extract one coordinate per SCATS station
@@ -78,9 +75,8 @@ def merge_datasets(
 
     distances, nearest_indices = aadt_tree.query(query_points)
 
-    # =========================
+
     # Step 4: Retrieve matched AADT records
-    # =========================
     print("Step 4: Matching AADT records...")
 
     matched_aadt = aadt_data.iloc[nearest_indices].reset_index(drop=True)
@@ -91,9 +87,8 @@ def merge_datasets(
     # Store distance as a feature
     matched_aadt["distance_to_aadt"] = distances
 
-    # =========================
+
     # Step 5: Merge AADT into master dataset
-    # =========================
     print("Step 5: Merging AADT features into master dataset...")
 
     master_data = pd.merge(
@@ -104,9 +99,8 @@ def merge_datasets(
         validate="many_to_one"
     )
 
-    # =========================
+
     # Step 6: Final checks
-    # =========================
     print("Step 6: Performing final checks...")
 
     missing_aadt = master_data["aadt_longitude"].isnull().sum()
@@ -114,9 +108,8 @@ def merge_datasets(
 
     print(f"Final dataset shape: {master_data.shape}")
 
-    # =========================
+
     # Step 7: Save output
-    # =========================
     print("Step 7: Saving master dataset...")
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
