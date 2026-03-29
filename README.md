@@ -1,4 +1,4 @@
-# Traffic-Based Route Guidance System (TBRGS)
+﻿# Traffic-Based Route Guidance System (TBRGS)
 
 ## Team Members
 
@@ -124,6 +124,8 @@ Outputs: `results/predictions/{year}_predictions.csv` with columns
 
 ## Scenario Tests (post-prediction)
 
+### Full Dataset Test Runner
+
 `src/test_runner.py` filters the **precomputed predictions CSVs** (no model re-run) so every evaluated point comes from a valid 96-step window.
 
 Test Case Descriptions:
@@ -141,13 +143,39 @@ Test Case Descriptions:
 | T09 | Full Week                    | All intervals for busiest site |
 | T10 | Transition Period            | 6:00-8:45 AM ramp-up           |
 
-Example commands:
+Usage:
 
-- Default (2014 data, all models):  
-  `python -m src.test_runner --test T01-morning_peak_hour`
-- Specify model:  
-  `python -m src.test_runner --test T06-high_vol_intersection --model lstm`
-- Use 2006 predictions:  
-  `python -m src.test_runner --test T01-morning_peak_hour --data 2006`
+- Run all tests and aggregate to CSV (2014 data):  
+  `python -m src.test_runner --data 2014`
 
-Metrics (MAE, RMSE, MAPE) are written to `results/test_result/{test}_metrics.json`; plots go to `results/test_graphs/`.
+- Run single test:  
+  `python -m src.test_runner --test T01 --data 2014`
+
+- Run specific model:  
+  `python -m src.test_runner --test T06 --model lstm --data 2014`
+
+Outputs:
+- Aggregated metrics: `results/test_results/test_metrics_full.csv`
+- Individual plots: `results/test_graphs/T01/lstm_predictions.png`, etc.
+
+### Stratified Dataset Test Runner (20% Test Split Only)
+
+`src/test_stratified.py` runs the same 10 test cases but **only on the 20% test split** of the 2006 dataset (the portion held out during model training/validation).
+
+This provides a stratified evaluation that is independent of the full dataset performance.
+
+Usage:
+
+```bash
+python -m src.test_stratified
+```
+
+This will:
+1. Extract the 20% test split from 2006 dataset using time-based boundaries
+2. Load full 2006 predictions and filter to test split
+3. Run all 10 test cases on the test split
+4. Compute metrics for LSTM, GRU, and LightGBM
+
+Outputs:
+- Aggregated metrics: `results/test_results/test_split_metrics.csv`
+- Individual plots: `results/test_graphs/T01/lstm_predictions.png`, etc. (split versions)

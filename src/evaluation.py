@@ -7,7 +7,7 @@ from lightgbm import Booster
 from tensorflow.keras.models import load_model
 
 from src.data_loader import prepare_data, prepare_tabular_data
-from config.model_config import SEQ_LEN, FORECAST_HORIZON
+from src.config.model_config import SEQ_LEN, FORECAST_HORIZON
 from src.predict import MODEL_SPECS, predict_tabular_model
 
 
