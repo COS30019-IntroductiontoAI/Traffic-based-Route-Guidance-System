@@ -63,7 +63,7 @@ def parse_processed_datetime(values) -> pd.Series:
 
   parsed = pd.Series(pd.NaT, index=values.index, dtype="datetime64[ns]")
   if iso_mask.any():
-    parsed.loc[iso_mask] = pd.to_datetime(datetime_strings.loc[iso_mask], errors="coerce")
+    parsed.loc[iso_mask] = pd.to_datetime(datetime_strings.loc[iso_mask], format='ISO8601', errors="coerce")
   if slash_mask.any():
     parsed.loc[slash_mask] = pd.to_datetime(datetime_strings.loc[slash_mask], dayfirst=True, errors="coerce")
 

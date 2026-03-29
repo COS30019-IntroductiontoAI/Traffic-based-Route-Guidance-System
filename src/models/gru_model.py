@@ -7,7 +7,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from tensorflow.keras import regularizers
 from src.data_loader import prepare_data
-from config.model_config import (
+from src.config.model_config import (
   SEQ_LEN,
   FORECAST_HORIZON,
   INPUT_FEATURES,

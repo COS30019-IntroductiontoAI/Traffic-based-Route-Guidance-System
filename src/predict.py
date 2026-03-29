@@ -7,7 +7,7 @@ import pandas as pd
 from lightgbm import Booster
 from tensorflow.keras.models import load_model
 
-from config.model_config import FORECAST_HORIZON, SEQ_LEN
+from src.config.model_config import FORECAST_HORIZON, SEQ_LEN
 from src.data_loader import (
   SEQUENCE_FEATURE_COLUMNS,
   add_common_time_features,
