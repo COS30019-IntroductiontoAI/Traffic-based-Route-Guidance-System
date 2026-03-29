@@ -10,16 +10,20 @@ from backend.route_guidance.travel_time import free_flow_time_minutes
 from backend.route_guidance.types import RouteEdge, RouteNode
 
 
+# Hold the directed graph used by the route search algorithms.
 class RouteGraph:
     # Simple adjacency-list graph used by the route engine.
+    # Store nodes and outgoing edges in adjacency-list form.
     def __init__(self, nodes: dict[str, RouteNode], adjacency: dict[str, list[RouteEdge]]):
         self.nodes = nodes
         self.adjacency = adjacency
 
+    # Return all outgoing edges for a node.
     def neighbors(self, node_id: str) -> list[RouteEdge]:
         return self.adjacency.get(node_id, [])
 
 
+# Convert one raw node dictionary into a typed route node.
 def _parse_node(raw_node: dict[str, object]) -> RouteNode:
     return RouteNode(
         id=str(raw_node["id"]),
@@ -29,6 +33,7 @@ def _parse_node(raw_node: dict[str, object]) -> RouteNode:
     )
 
 
+# Convert one raw edge dictionary into a typed route edge.
 def _parse_edge(raw_edge: dict[str, object], nodes: dict[str, RouteNode]) -> RouteEdge:
     from_node = str(raw_edge["from"])
     to_node = str(raw_edge["to"])
@@ -63,6 +68,7 @@ def _parse_edge(raw_edge: dict[str, object], nodes: dict[str, RouteNode]) -> Rou
     )
 
 
+# Build a route graph from raw node and edge lists.
 def build_graph(nodes_data: list[dict[str, object]], edges_data: list[dict[str, object]]) -> RouteGraph:
     # Build a route graph from raw node/edge dictionaries.
     nodes = {node.id: node for node in (_parse_node(item) for item in nodes_data)}
@@ -75,6 +81,7 @@ def build_graph(nodes_data: list[dict[str, object]], edges_data: list[dict[str, 
     return RouteGraph(nodes=nodes, adjacency=dict(adjacency))
 
 
+# Load graph JSON files and convert them into an in-memory route graph.
 def load_graph_from_json(nodes_path: str | Path, edges_path: str | Path) -> RouteGraph:
     # Load nodes and edges from JSON files and convert them into a graph.
     nodes_data = json.loads(Path(nodes_path).read_text(encoding="utf-8"))

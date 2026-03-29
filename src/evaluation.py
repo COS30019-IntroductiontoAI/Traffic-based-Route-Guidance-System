@@ -11,8 +11,10 @@ from config.model_config import SEQ_LEN, FORECAST_HORIZON
 from src.predict import MODEL_SPECS, predict_tabular_model
 
 
-GRAPH_DIR = Path("results/graphs")
-METRICS_DIR = Path("results/metrics")
+SRC_ROOT = Path(__file__).resolve().parent
+GRAPH_DIR = SRC_ROOT / "results" / "graphs"
+METRICS_DIR = SRC_ROOT / "results" / "metrics"
+PROCESSED_2006_PATH = SRC_ROOT / "data" / "processed" / "2006_processed.csv"
 
 
 # Inverse transform the data using the scaler
@@ -99,12 +101,12 @@ def evaluate_tabular_model(model, split_df, feature_columns: list[str], target_c
 # Build the shared validation/test contexts used by different model kinds.
 def build_evaluation_context():
   (_, _), (X_val, y_val), (X_test, y_test), scaler, label_encoder = prepare_data(
-    filepath="data/processed/2006_processed.csv",
+    filepath=str(PROCESSED_2006_PATH),
     seq_len=SEQ_LEN,
     forecast_horizon=FORECAST_HORIZON
   )
   _, feature_columns, _, val_df, test_df, train_end, val_end = prepare_tabular_data(
-    filepath="data/processed/2006_processed.csv",
+    filepath=str(PROCESSED_2006_PATH),
     seq_len=SEQ_LEN,
     forecast_horizon=FORECAST_HORIZON,
   )

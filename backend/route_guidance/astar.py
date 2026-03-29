@@ -8,15 +8,18 @@ from backend.route_guidance.heuristic import straight_line_time_minutes
 from backend.route_guidance.types import RouteResult, RouteSegment
 
 
+# Store one A* frontier entry with its current priority.
 @dataclass(slots=True)
 class _FrontierState:
     priority: float
     node_id: str
 
+    # Keep the heap ordered by priority.
     def __lt__(self, other: "_FrontierState") -> bool:
         return self.priority < other.priority
 
 
+# Rebuild the final node path from the A* parent pointers.
 def _reconstruct_path(came_from: dict[str, str | None], destination: str) -> list[str]:
     path = [destination]
     current = destination
@@ -29,6 +32,7 @@ def _reconstruct_path(came_from: dict[str, str | None], destination: str) -> lis
     return path
 
 
+# Find the single best route between two nodes using A* search.
 def find_route(
     graph: RouteGraph,
     origin: str,

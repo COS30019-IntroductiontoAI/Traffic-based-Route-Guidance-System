@@ -6,11 +6,14 @@ import { RouteControls } from "@/components/route-guidance/RouteControls";
 import { RouteDetails } from "@/components/route-guidance/RouteDetails";
 import {
   fetchGraph,
+  fetchRouteGuidanceConfig,
   fetchRoutes,
   type AlgorithmId,
   type DataKey,
   type MapEdge,
   type MapNode,
+  type RouteGuidanceConfigResponse,
+  type RouteGuidanceSelectionOptions,
   type RouteResult,
 } from "@/components/route-guidance/cityMapData";
 import { LoaderCircle, MapPin, ServerCrash } from "lucide-react";
@@ -28,6 +31,15 @@ const item = {
 const DEFAULT_TOP_K = 5;
 const DEFAULT_ALGORITHM: AlgorithmId = "lightgbm";
 const DEFAULT_YEAR: DataKey = "2014";
+const EMPTY_SELECTION_OPTIONS: RouteGuidanceSelectionOptions = {
+  data: DEFAULT_YEAR,
+  available_dates: [],
+  min_date: null,
+  max_date: null,
+  times: [],
+  default_date: null,
+  default_time: null,
+};
 
 export default function RouteGuidance() {
   const { toast } = useApp();
@@ -43,10 +55,20 @@ export default function RouteGuidance() {
   const [year, setYear] = useState<DataKey>(DEFAULT_YEAR);
   const [routes, setRoutes] = useState<RouteResult[]>([]);
   const [forecastTimestamp, setForecastTimestamp] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [routeConfig, setRouteConfig] = useState<RouteGuidanceConfigResponse | null>(null);
   const [isGraphLoading, setIsGraphLoading] = useState(true);
   const [isRoutesLoading, setIsRoutesLoading] = useState(false);
   const [graphError, setGraphError] = useState<string | null>(null);
   const latestRouteRequestRef = useRef(0);
+
+  const monthLabel = routeConfig?.month_label ?? "October";
+  const currentSelectionOptions = routeConfig?.selection_options[year] ?? EMPTY_SELECTION_OPTIONS;
+  const minDate = currentSelectionOptions.min_date;
+  const maxDate = currentSelectionOptions.max_date;
+  const availableTimes = currentSelectionOptions.times;
+  const availableDates = currentSelectionOptions.available_dates;
 
   const requestRoutes = useCallback(
     async ({
@@ -55,6 +77,8 @@ export default function RouteGuidance() {
       algorithmId,
       yearKey,
       routeCount,
+      date,
+      time,
       silentError = false,
     }: {
       originId: string;
@@ -62,6 +86,8 @@ export default function RouteGuidance() {
       algorithmId: AlgorithmId;
       yearKey: DataKey;
       routeCount: number;
+      date: string | null;
+      time: string | null;
       silentError?: boolean;
     }) => {
       if (!originId || !destinationId) {
@@ -78,6 +104,20 @@ export default function RouteGuidance() {
         return;
       }
 
+      if (!date || !time) {
+        if (!silentError) {
+          toast("Pick a date and time before searching.", "error");
+        }
+        return;
+      }
+
+      if (availableDates.length > 0 && !availableDates.includes(date)) {
+        if (!silentError) {
+          toast("That date is outside the supported prediction range for the selected year.", "error");
+        }
+        return;
+      }
+
       const requestId = ++latestRouteRequestRef.current;
       setIsRoutesLoading(true);
 
@@ -88,6 +128,8 @@ export default function RouteGuidance() {
           k: routeCount,
           algorithm: algorithmId,
           data: yearKey,
+          date,
+          time,
         });
 
         if (requestId !== latestRouteRequestRef.current) {
@@ -121,30 +163,71 @@ export default function RouteGuidance() {
         }
       }
     },
-    [toast],
+    [availableDates, toast],
   );
 
   useEffect(() => {
     const abortController = new AbortController();
 
-    async function loadGraph() {
+    async function loadRouteGuidanceContext() {
       setIsGraphLoading(true);
       setGraphError(null);
 
       try {
-        const graph = await fetchGraph(abortController.signal);
+        const config = await fetchRouteGuidanceConfig(abortController.signal);
+        setRouteConfig(config);
+        setYear(config.defaults.data);
+      } catch (error) {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        const message = error instanceof Error ? error.message : "Unknown backend error";
+        setIsGraphLoading(false);
+        setGraphError(message);
+        setNodes([]);
+        setEdges([]);
+        setRoutes([]);
+        setForecastTimestamp(null);
+        toast(`Could not load graph data: ${message}`, "error");
+      }
+    }
+
+    void loadRouteGuidanceContext();
+
+    return () => {
+      abortController.abort();
+    };
+  }, [toast]);
+
+  useEffect(() => {
+    if (!routeConfig) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    async function loadGraphForYear() {
+      setIsGraphLoading(true);
+      setGraphError(null);
+
+      try {
+        const graph = await fetchGraph(year, abortController.signal);
         setNodes(graph.nodes);
         setEdges(graph.edges);
 
-        const defaultOrigin = graph.nodes[0]?.id ?? "";
-        const defaultDestinationCandidate = graph.nodes[Math.floor(graph.nodes.length / 2)]?.id ?? graph.nodes[1]?.id ?? "";
-        const defaultDestination =
-          defaultDestinationCandidate && defaultDestinationCandidate !== defaultOrigin
-            ? defaultDestinationCandidate
-            : graph.nodes.find((node) => node.id !== defaultOrigin)?.id ?? "";
+        const graphNodeIds = new Set(graph.nodes.map((node) => node.id));
+        const nextOrigin = graphNodeIds.has(origin) ? origin : graph.nodes[0]?.id ?? "";
+        const destinationCandidate = graphNodeIds.has(destination)
+          ? destination
+          : graph.nodes[Math.floor(graph.nodes.length / 2)]?.id ?? graph.nodes[1]?.id ?? "";
+        const nextDestination =
+          destinationCandidate && destinationCandidate !== nextOrigin
+            ? destinationCandidate
+            : graph.nodes.find((node) => node.id !== nextOrigin)?.id ?? "";
 
-        setOrigin(defaultOrigin);
-        setDestination(defaultDestination);
+        setOrigin(nextOrigin);
+        setDestination(nextDestination);
       } catch (error) {
         if (abortController.signal.aborted) {
           return;
@@ -154,8 +237,6 @@ export default function RouteGuidance() {
         setGraphError(message);
         setNodes([]);
         setEdges([]);
-        setRoutes([]);
-        setForecastTimestamp(null);
         toast(`Could not load graph data: ${message}`, "error");
       } finally {
         if (!abortController.signal.aborted) {
@@ -164,26 +245,67 @@ export default function RouteGuidance() {
       }
     }
 
-    void loadGraph();
+    const nextSelectionOptions = routeConfig.selection_options[year];
+    const nextDate = nextSelectionOptions.default_date ?? nextSelectionOptions.available_dates[0] ?? "";
+    const nextTime = nextSelectionOptions.default_time ?? nextSelectionOptions.times[0] ?? "";
+    setSelectedDate(nextDate);
+    setSelectedTime(nextTime);
+    setRoutes([]);
+    setForecastTimestamp(null);
+
+    void loadGraphForYear();
 
     return () => {
       abortController.abort();
     };
-  }, [toast]);
+  }, [routeConfig, year]);
 
-  // Automatically fetch routes when selections change
   useEffect(() => {
-    if (origin && destination && origin !== destination && !isGraphLoading) {
+    if (!selectedDate && availableDates.length > 0) {
+      setSelectedDate(availableDates[0]);
+      return;
+    }
+
+    if (selectedDate && availableDates.length > 0 && !availableDates.includes(selectedDate)) {
+      setSelectedDate(availableDates[0] ?? "");
+    }
+  }, [availableDates, selectedDate]);
+
+  useEffect(() => {
+    if (!selectedTime && availableTimes.length > 0) {
+      setSelectedTime(availableTimes[0]);
+      return;
+    }
+
+    if (selectedTime && !availableTimes.includes(selectedTime)) {
+      setSelectedTime(availableTimes[0] ?? "");
+    }
+  }, [availableTimes, selectedTime]);
+
+  useEffect(() => {
+    if (origin && destination && origin !== destination && !isGraphLoading && selectedDate && selectedTime) {
       void requestRoutes({
         originId: origin,
         destinationId: destination,
         algorithmId: algorithm,
         yearKey: year,
         routeCount: topK,
+        date: selectedDate,
+        time: selectedTime,
         silentError: true,
       });
     }
-  }, [origin, destination, algorithm, year, topK, isGraphLoading, requestRoutes]);
+  }, [origin, destination, algorithm, year, topK, isGraphLoading, requestRoutes, selectedDate, selectedTime]);
+
+  const handleDateChange = useCallback(
+    (nextDate: string) => {
+      setSelectedDate(nextDate);
+      if (availableDates.length > 0 && !availableDates.includes(nextDate)) {
+        toast("That date is outside the supported prediction range for the selected year.", "error");
+      }
+    },
+    [availableDates, toast],
+  );
 
   const handleNodeClick = useCallback(
     (nodeId: string) => {
@@ -198,19 +320,17 @@ export default function RouteGuidance() {
     [selectingFor],
   );
 
-  /* ── Full-page loading state ── show this instead of the whole UI ──────── */
-  if (isGraphLoading) {
+  if (isGraphLoading && !nodes.length) {
     return (
       <div className="flex h-full min-h-screen items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4 text-slate-500">
           <LoaderCircle className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-sm font-medium">Loading SCATS graph from backend…</p>
+          <p className="text-sm font-medium">Loading SCATS graph from backend...</p>
         </div>
       </div>
     );
   }
 
-  /* ── Graph error state ─────────────────────────────────────────────────── */
   if (graphError) {
     return (
       <div className="flex h-full min-h-screen items-center justify-center font-sans p-8">
@@ -223,30 +343,17 @@ export default function RouteGuidance() {
     );
   }
 
-  /* ── Main UI — only rendered after graph is loaded ─────────────────────── */
   return (
     <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
         <motion.div variants={item}>
           <h1 className="text-[26px] font-bold tracking-tight text-slate-800">Route Guidance</h1>
           <p className="text-[14px] text-slate-500 font-medium mt-1">
-            Find optimal travel routes using backend ML predictions. Choose a model, then click nodes on the map or type SCATS IDs.
+            Find optimal travel routes using backend ML predictions. Pick a year, date, and time in October, then click nodes on the map or type SCATS IDs.
           </p>
           {forecastTimestamp && (
             <p className="text-[12px] text-slate-400 font-medium mt-2">
-              Forecast snapshot:{" "}
-              <span className="text-slate-600 font-semibold">
-                {(() => {
-                  try {
-                    return new Date(forecastTimestamp).toLocaleString("en-AU", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    });
-                  } catch {
-                    return forecastTimestamp;
-                  }
-                })()}
-              </span>
+              Forecast snapshot: <span className="text-slate-600 font-semibold">{forecastTimestamp}</span>
             </p>
           )}
         </motion.div>
@@ -264,6 +371,14 @@ export default function RouteGuidance() {
               onTopKChange={setTopK}
               onAlgorithmChange={setAlgorithm}
               onYearChange={setYear}
+              monthLabel={monthLabel}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              minDate={minDate}
+              maxDate={maxDate}
+              availableTimes={availableTimes}
+              onDateChange={handleDateChange}
+              onTimeChange={setSelectedTime}
               onFindRoutes={() => {
                 void requestRoutes({
                   originId: origin,
@@ -271,6 +386,8 @@ export default function RouteGuidance() {
                   algorithmId: algorithm,
                   yearKey: year,
                   routeCount: topK,
+                  date: selectedDate,
+                  time: selectedTime,
                 });
               }}
               onSelectOrigin={() => setSelectingFor(selectingFor === "origin" ? null : "origin")}
@@ -312,7 +429,6 @@ export default function RouteGuidance() {
                   </div>
                 )}
 
-                {/* Map legend */}
                 <div className="absolute bottom-6 left-6 p-4 text-[13px] text-slate-500 font-medium space-y-2.5 pointer-events-none">
                   <div className="flex items-center gap-2.5">
                     <div className="w-3.5 h-3.5 rounded-full bg-blue-600 shadow-sm" />
@@ -337,6 +453,8 @@ export default function RouteGuidance() {
                     <MapPin className="w-3.5 h-3.5" />
                     <span>{nodes.length} nodes</span>
                   </span>
+                  <span className="w-[1.5px] h-3.5 bg-slate-300" />
+                  <span>{monthLabel}</span>
                   <span className="w-[1.5px] h-3.5 bg-slate-300" />
                   <span className="uppercase">{algorithm}</span>
                 </div>

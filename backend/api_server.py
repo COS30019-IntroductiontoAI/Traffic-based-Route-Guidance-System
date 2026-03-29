@@ -4,7 +4,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-from backend.core.config import SCATS_EDGES_PATH, SCATS_NODES_PATH, get_predictions_path
+from backend.core.config import get_predictions_path
 from backend.services.route_service import RouteService, SUPPORTED_ALGORITHMS, SUPPORTED_DATA_KEYS
 
 
@@ -15,6 +15,7 @@ if ROUTE_SERVICE.model_inference is not None:
     ROUTE_SERVICE.model_inference.predict_site_flow_map()
 
 
+# Send a JSON response with CORS headers for the frontend.
 def _json_response(handler: BaseHTTPRequestHandler, status_code: int, payload: dict[str, object]) -> None:
     body = json.dumps(payload).encode("utf-8")
     handler.send_response(status_code)
@@ -27,6 +28,7 @@ def _json_response(handler: BaseHTTPRequestHandler, status_code: int, payload: d
     handler.wfile.write(body)
 
 
+# Compute summary metrics from the prepared predictions file.
 def _compute_metrics(data_key: str) -> dict:
     """Compute real MAE / RMSE / Accuracy from the predictions CSV."""
     import pandas as pd
@@ -81,6 +83,7 @@ def _compute_metrics(data_key: str) -> dict:
     }
 
 
+# Build an hourly traffic profile for dashboard-style charts.
 def _compute_traffic_profile(data_key: str) -> list[dict]:
     """Return average hourly traffic volume aggregated across all sites and days."""
     import pandas as pd
@@ -105,8 +108,10 @@ def _compute_traffic_profile(data_key: str) -> list[dict]:
     ]
 
 
+# Expose the small local HTTP API used by the frontend.
 class RouteGuidanceHandler(BaseHTTPRequestHandler):
     # Minimal local backend API for frontend route-guidance integration.
+    # Handle CORS preflight requests from the frontend.
     def do_OPTIONS(self) -> None:  # noqa: N802
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -114,6 +119,7 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
+    # Route every GET request to the matching backend endpoint.
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
 
@@ -122,14 +128,39 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
             return
 
         if parsed.path == "/api/graph":
+            params = parse_qs(parsed.query)
+            data_key = params.get("data", ["2014"])[0].strip().lower()
+            if data_key not in SUPPORTED_DATA_KEYS:
+                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
+                return
             _json_response(
                 self,
                 200,
-                {
-                    "nodes": json.loads(SCATS_NODES_PATH.read_text(encoding="utf-8")),
-                    "edges": json.loads(SCATS_EDGES_PATH.read_text(encoding="utf-8")),
-                },
+                ROUTE_SERVICE.get_graph_payload(data_key),
             )
+            return
+
+        if parsed.path == "/api/route-guidance-config":
+            try:
+                payload = ROUTE_SERVICE.get_route_guidance_config()
+            except Exception as exc:  # noqa: BLE001
+                _json_response(self, 500, {"error": str(exc)})
+                return
+            _json_response(self, 200, payload)
+            return
+
+        if parsed.path == "/api/timestamps":
+            params = parse_qs(parsed.query)
+            data_key = params.get("data", ["2014"])[0].strip().lower()
+            if data_key not in SUPPORTED_DATA_KEYS:
+                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
+                return
+            try:
+                payload = ROUTE_SERVICE.get_time_options(data_key)
+            except Exception as exc:  # noqa: BLE001
+                _json_response(self, 500, {"error": str(exc)})
+                return
+            _json_response(self, 200, payload)
             return
 
         if parsed.path == "/api/metrics":
@@ -166,7 +197,12 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
             destination = params.get("destination", [""])[0]
             algorithm = params.get("algorithm", ["lightgbm"])[0]
             data_key = params.get("data", ["2014"])[0]
-            print(f"[API] Route search: origin={origin}, destination={destination}, algorithm={algorithm}, data={data_key}, k={params.get('k', ['5'])[0]}")
+            timestamp = params.get("timestamp", [""])[0].strip() or None
+            date_value = params.get("date", [""])[0].strip() or None
+            time_of_day = params.get("time", [""])[0].strip() or None
+            if timestamp is None and date_value and time_of_day:
+                timestamp = f"{date_value}T{time_of_day}:00"
+            print(f"[API] Route search: origin={origin}, destination={destination}, algorithm={algorithm}, data={data_key}, date={date_value}, time={time_of_day}, k={params.get('k', ['5'])[0]}")
             try:
                 k = int(params.get("k", ["5"])[0])
             except ValueError:
@@ -190,7 +226,11 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
                     k=k,
                     algorithm=algorithm,
                     data_key=data_key,
+                    target_datetime=timestamp,
                 )
+            except ValueError as exc:
+                _json_response(self, 400, {"error": str(exc)})
+                return
             except Exception as exc:  # noqa: BLE001
                 _json_response(self, 500, {"error": str(exc)})
                 return
@@ -201,6 +241,7 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
         _json_response(self, 404, {"error": "Not found"})
 
 
+# Start the local backend HTTP server.
 def main() -> None:
     server = ThreadingHTTPServer((HOST, PORT), RouteGuidanceHandler)
     print(f"Backend API running at http://{HOST}:{PORT}")

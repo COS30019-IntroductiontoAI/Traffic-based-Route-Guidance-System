@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import GRU, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -22,12 +23,16 @@ from config.model_config import (
   MONITOR_METRIC,
 )
 
+SRC_ROOT = Path(__file__).resolve().parents[1]
+PROCESSED_2006_PATH = SRC_ROOT / "data" / "processed" / "2006_processed.csv"
+TRAINED_MODELS_DIR = SRC_ROOT / "results" / "trained_models"
+
 
 # ------------------------------------
 # --- 1. LOAD AND PREPARE THE DATA ---
 # ------------------------------------
 (X_train, y_train), (X_val, y_val), (X_test, y_test), scaler, label_encoder = prepare_data(
-  "data/processed/2006_processed.csv",
+  str(PROCESSED_2006_PATH),
   seq_len=SEQ_LEN,
   forecast_horizon=FORECAST_HORIZON
 )
@@ -88,7 +93,7 @@ reduce_lr = ReduceLROnPlateau(
 
 # Save the best model based on validation loss
 checkpoint = ModelCheckpoint(
-  "results/trained_models/gru_model.keras", 
+  str(TRAINED_MODELS_DIR / "gru_model.keras"),
   monitor=MONITOR_METRIC,
   save_best_only=True,
   mode="min"
@@ -118,5 +123,6 @@ plt.title("GRU Model Training and Validation Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.legend()
-plt.savefig("results/trained_models/gru_training_curve.png")
+TRAINED_MODELS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(TRAINED_MODELS_DIR / "gru_training_curve.png")
 plt.show()

@@ -15,6 +15,14 @@ interface RouteControlsProps {
   onAlgorithmChange: (v: AlgorithmId) => void;
   year: DataKey;
   onYearChange: (v: DataKey) => void;
+  monthLabel: string;
+  selectedDate: string;
+  selectedTime: string;
+  minDate?: string | null;
+  maxDate?: string | null;
+  availableTimes: string[];
+  onDateChange: (v: string) => void;
+  onTimeChange: (v: string) => void;
   onFindRoutes: () => void;
   onSelectOrigin: () => void;
   onSelectDestination: () => void;
@@ -54,6 +62,14 @@ export function RouteControls({
   onTopKChange,
   onAlgorithmChange,
   onYearChange,
+  monthLabel,
+  selectedDate,
+  selectedTime,
+  minDate,
+  maxDate,
+  availableTimes,
+  onDateChange,
+  onTimeChange,
   onFindRoutes,
   onSelectOrigin,
   onSelectDestination,
@@ -64,7 +80,14 @@ export function RouteControls({
   isGraphLoading,
   isRoutesLoading,
 }: RouteControlsProps) {
-  const isSubmitDisabled = isGraphLoading || isRoutesLoading || !origin || !destination || origin === destination;
+  const isSubmitDisabled =
+    isGraphLoading ||
+    isRoutesLoading ||
+    !origin ||
+    !destination ||
+    !selectedDate ||
+    !selectedTime ||
+    origin === destination;
 
   // Track which route card is expanded to show traffic details
   const [expandedRoute, setExpandedRoute] = useState<number | null>(null);
@@ -166,6 +189,37 @@ export function RouteControls({
                 {itemYear}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <label className="text-[13px] text-slate-500 flex items-center gap-1.5">{monthLabel} Date</label>
+            <input
+              type="date"
+              value={selectedDate}
+              min={minDate ?? undefined}
+              max={maxDate ?? undefined}
+              onChange={(e) => onDateChange(e.target.value)}
+              disabled={isGraphLoading}
+              className="w-full h-11 px-4 rounded-xl bg-slate-50 text-sm text-slate-800 border-none outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[13px] text-slate-500 flex items-center gap-1.5">Forecast Time</label>
+            <select
+              value={selectedTime}
+              onChange={(e) => onTimeChange(e.target.value)}
+              disabled={isGraphLoading || availableTimes.length === 0}
+              className="w-full h-11 px-4 rounded-xl bg-slate-50 text-sm text-slate-800 border-none outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {availableTimes.map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
