@@ -1,0 +1,298 @@
+[
+  {
+    "id": "970",
+    "lat": -37.86735,
+    "lng": 145.09159,
+    "x": 0,
+    "y": 0,
+    "label": "WARRIGAL/HIGH ST RD"
+  },
+  {
+    "id": "2000",
+    "lat": -37.8519,
+    "lng": 145.09429784999998,
+    "x": 0,
+    "y": 0,
+    "label": "BURWOOD HWY/WARRIGAL"
+  },
+  {
+    "id": "2200",
+    "lat": -37.81651495,
+    "lng": 145.09807,
+    "x": 0,
+    "y": 0,
+    "label": "MAROONDAH/UNION"
+  },
+  {
+    "id": "2825",
+    "lat": -37.78661,
+    "lng": 145.06202,
+    "x": 0,
+    "y": 0,
+    "label": "EASTERN/BURKE ON RAMP"
+  },
+  {
+    "id": "2827",
+    "lat": -37.78167865,
+    "lng": 145.07731,
+    "x": 0,
+    "y": 0,
+    "label": "EASTERN FWY/BULLEEN/THOMPSONS"
+  },
+  {
+    "id": "2846",
+    "lat": -37.86152,
+    "lng": 145.058038,
+    "x": 0,
+    "y": 0,
+    "label": "MONASH/HIGH/WILLS"
+  },
+  {
+    "id": "3001",
+    "lat": -37.81463,
+    "lng": 145.02211,
+    "x": 0,
+    "y": 0,
+    "label": "BARKERS/CHURCH/HIGH"
+  },
+  {
+    "id": "3002",
+    "lat": -37.815155000000004,
+    "lng": 145.026575,
+    "x": 0,
+    "y": 0,
+    "label": "BARKERS/DENMARK/POWER"
+  },
+  {
+    "id": "3120",
+    "lat": -37.822895,
+    "lng": 145.05729000000002,
+    "x": 0,
+    "y": 0,
+    "label": "BURKE/CANTERBURY"
+  },
+  {
+    "id": "3122",
+    "lat": -37.823765,
+    "lng": 145.064415,
+    "x": 0,
+    "y": 0,
+    "label": "CANTERBURY/STANHOPE"
+  },
+  {
+    "id": "3126",
+    "lat": -37.82772,
+    "lng": 145.0983,
+    "x": 0,
+    "y": 0,
+    "label": "CANTERBURY/WARRIGAL"
+  },
+  {
+    "id": "3127",
+    "lat": -37.82531,
+    "lng": 145.07792,
+    "x": 0,
+    "y": 0,
+    "label": "CANTERBURY/BALWYN"
+  },
+  {
+    "id": "3180",
+    "lat": -37.79618,
+    "lng": 145.08352,
+    "x": 0,
+    "y": 0,
+    "label": "DONCASTER/BALWYN"
+  },
+  {
+    "id": "3662",
+    "lat": -37.80887,
+    "lng": 145.02757,
+    "x": 0,
+    "y": 0,
+    "label": "HIGH/DENMARK/PRINCESS/S'PARK"
+  },
+  {
+    "id": "3682",
+    "lat": -37.83748,
+    "lng": 145.0969,
+    "x": 0,
+    "y": 0,
+    "label": "WARRIGAL/RIVERSDALE"
+  },
+  {
+    "id": "3685",
+    "lat": -37.8549,
+    "lng": 145.0938,
+    "x": 0,
+    "y": 0,
+    "label": "WARRIGAL/HIGHBURY"
+  },
+  {
+    "id": "3804",
+    "lat": -37.8337,
+    "lng": 145.06233,
+    "x": 0,
+    "y": 0,
+    "label": "RIVERSDALE/TRAFALGAR"
+  },
+  {
+    "id": "3812",
+    "lat": -37.83738,
+    "lng": 145.06115,
+    "x": 0,
+    "y": 0,
+    "label": "CAMBERWELL/SEYMOUR/TRAFALGAR"
+  },
+  {
+    "id": "4030",
+    "lat": -37.795640000000006,
+    "lng": 145.06181,
+    "x": 0,
+    "y": 0,
+    "label": "BURKE/DONCASTER/KILBY/HIGH"
+  },
+  {
+    "id": "4032",
+    "lat": -37.802305000000004,
+    "lng": 145.06122,
+    "x": 0,
+    "y": 0,
+    "label": "BURKE/BELMORE/HARP"
+  },
+  {
+    "id": "4034",
+    "lat": -37.81193,
+    "lng": 145.05946,
+    "x": 0,
+    "y": 0,
+    "label": "BURKE/COTHAM/WHITEHORSE"
+  },
+  {
+    "id": "4035",
+    "lat": -37.81812,
+    "lng": 145.05818514999999,
+    "x": 0,
+    "y": 0,
+    "label": "BURKE/BARKERS/MONT ALBERT"
+  },
+  {
+    "id": "4040",
+    "lat": -37.83284,
+    "lng": 145.05532,
+    "x": 0,
+    "y": 0,
+    "label": "BURKE/CAMBERWELL/RIVERSDALE"
+  },
+  {
+    "id": "4043",
+    "lat": -37.8472,
+    "lng": 145.05268999999998,
+    "x": 0,
+    "y": 0,
+    "label": "BURKE/TOORAK"
+  },
+  {
+    "id": "4051",
+    "lat": -37.794185,
+    "lng": 145.069575,
+    "x": 0,
+    "y": 0,
+    "label": "DONCASTER/BULLEEN/SEVERN"
+  },
+  {
+    "id": "4057",
+    "lat": -37.804975,
+    "lng": 145.08184,
+    "x": 0,
+    "y": 0,
+    "label": "BALWYN/BELMORE"
+  },
+  {
+    "id": "4063",
+    "lat": -37.814345,
+    "lng": 145.08003,
+    "x": 0,
+    "y": 0,
+    "label": "WHITEHORSE/BALWYN"
+  },
+  {
+    "id": "4263",
+    "lat": -37.82295,
+    "lng": 145.0251292,
+    "x": 0,
+    "y": 0,
+    "label": "BURWOOD/POWER"
+  },
+  {
+    "id": "4264",
+    "lat": -37.824105,
+    "lng": 145.03404,
+    "x": 0,
+    "y": 0,
+    "label": "BURWOOD/GLENFERRIE"
+  },
+  {
+    "id": "4266",
+    "lat": -37.8246,
+    "lng": 145.0396,
+    "x": 0,
+    "y": 0,
+    "label": "BURWOOD/AUBURN"
+  },
+  {
+    "id": "4270",
+    "lat": -37.83015,
+    "lng": 145.03291000000002,
+    "x": 0,
+    "y": 0,
+    "label": "GLENFERRIE/RIVERSDALE"
+  },
+  {
+    "id": "4272",
+    "lat": -37.83186,
+    "lng": 145.04668,
+    "x": 0,
+    "y": 0,
+    "label": "RIVERSDALE/TOORONGA"
+  },
+  {
+    "id": "4273",
+    "lat": -37.84659,
+    "lng": 145.04443,
+    "x": 0,
+    "y": 0,
+    "label": "TOORAK/TOORONGA"
+  },
+  {
+    "id": "4321",
+    "lat": -37.800818,
+    "lng": 145.04910805,
+    "x": 0,
+    "y": 0,
+    "label": "HIGH/HARP/VALERIE"
+  },
+  {
+    "id": "4324",
+    "lat": -37.809225,
+    "lng": 145.036879,
+    "x": 0,
+    "y": 0,
+    "label": "COTHAM/GLENFERRIE"
+  },
+  {
+    "id": "4812",
+    "lat": -37.82903,
+    "lng": 145.01456,
+    "x": 0,
+    "y": 0,
+    "label": "SWAN/MADDEN"
+  },
+  {
+    "id": "4821",
+    "lat": -37.812945,
+    "lng": 145.008465,
+    "x": 0,
+    "y": 0,
+    "label": "VICTORIA/BURNLEY/WALMER"
+  }
+]
