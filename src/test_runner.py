@@ -7,9 +7,10 @@ import pandas as pd
 
 from src.evaluation import plot_predictions
 
-PREDICTIONS_DIR = Path("results/predictions")
-RESULTS_DIR = Path("results/test_results")
-GRAPH_DIR = Path("results/test_graphs")
+SRC_ROOT = Path(__file__).resolve().parent
+PREDICTIONS_DIR = SRC_ROOT / "results" / "predictions"
+RESULTS_DIR = SRC_ROOT / "results" / "test_results"
+GRAPH_DIR = SRC_ROOT / "results" / "test_graphs"
 AVAILABLE_MODELS = ["lstm", "gru", "lightgbm"]
 
 # --------------------------------------

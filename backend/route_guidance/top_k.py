@@ -7,15 +7,18 @@ from backend.route_guidance.graph_builder import RouteGraph
 from backend.route_guidance.types import RouteResult, RouteSegment
 
 
+# Store one candidate path inside the top-k search frontier.
 @dataclass(slots=True)
 class _PathState:
     total_cost: float
     nodes: tuple[str, ...]
 
+    # Keep the heap ordered by the current total path cost.
     def __lt__(self, other: "_PathState") -> bool:
         return self.total_cost < other.total_cost
 
 
+# Convert a node path into a detailed route with distances and segment times.
 def _build_route_result(
     graph: RouteGraph,
     path_nodes: tuple[str, ...],
@@ -40,6 +43,7 @@ def _build_route_result(
     )
 
 
+# Return up to k distinct simple routes ordered by total path cost.
 def find_top_k_routes(
     graph: RouteGraph,
     origin: str,
@@ -47,7 +51,6 @@ def find_top_k_routes(
     edge_cost_lookup,
     k: int = 5,
 ) -> list[RouteResult]:
-    # Return up to k distinct simple routes ordered by total path cost.
     if k <= 0:
         return []
     if origin not in graph.nodes or destination not in graph.nodes:

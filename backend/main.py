@@ -5,6 +5,7 @@ import json
 from backend.services.route_service import RouteService
 
 
+# Run a small local smoke test against the route service.
 def main() -> None:
     # Small local smoke-test entrypoint for the backend route engine.
     service = RouteService.from_scats_graph()

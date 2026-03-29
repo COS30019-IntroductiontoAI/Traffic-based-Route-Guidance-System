@@ -1,30 +1,36 @@
 import os
+from pathlib import Path
 
 from preprocessing.clean_scats_sites import clean_scats_sites
 from preprocessing.clean_scats_traffic import clean_scats_traffic
 from preprocessing.clean_traffic_locations import clean_aadt_locations
 from preprocessing.merge_data import merge_datasets
 
+
+SRC_ROOT = Path(__file__).resolve().parent
+RAW_2006_DIR = SRC_ROOT / "data" / "2006_raw"
+PROCESSED_DIR = SRC_ROOT / "data" / "processed"
+
 def main():
     print("Start preprocessing pipeline...\n")
 
     # Raw data paths
-    raw_sites_path = "data/2006_raw/SCATSSiteListingSpreadsheet_VicRoads.xlsx"
-    raw_traffic_path = "data/2006_raw/Scats Data October 2006.xls"
-    raw_aadt_path = "data/2006_raw/Traffic_Count_Locations_with_LONG_LAT.csv"
+    raw_sites_path = str(RAW_2006_DIR / "SCATSSiteListingSpreadsheet_VicRoads.xlsx")
+    raw_traffic_path = str(RAW_2006_DIR / "Scats Data October 2006.xls")
+    raw_aadt_path = str(RAW_2006_DIR / "Traffic_Count_Locations_with_LONG_LAT.csv")
 
 
     # Cleaned data output paths
-    cleaned_sites_path = "data/processed/cleaned_sites.csv"
-    cleaned_traffic_path = "data/processed/cleaned_traffic.csv"
-    cleaned_aadt_path = "data/processed/cleaned_aadt.csv"
+    cleaned_sites_path = str(PROCESSED_DIR / "cleaned_sites.csv")
+    cleaned_traffic_path = str(PROCESSED_DIR / "cleaned_traffic.csv")
+    cleaned_aadt_path = str(PROCESSED_DIR / "cleaned_aadt.csv")
 
 
     # Final merged dataset
-    master_output_path = "data/processed/master_dataset.csv"
+    master_output_path = str(PROCESSED_DIR / "master_dataset.csv")
 
     # Ensure output directory exists
-    os.makedirs("data/processed", exist_ok=True)
+    os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 
     # Phase 1: Clean each dataset

@@ -2,14 +2,19 @@ import pandas as pd
 import numpy as np
 import os
 import glob
+from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
+SRC_ROOT = Path(__file__).resolve().parent
+DATA_DIR = SRC_ROOT / 'data'
+PROCESSED_DIR = DATA_DIR / 'processed'
+
 # Configuration paths - Update these four paths as needed
-PATH_2014_FOLDER  = 'data/2014_raw'       
-PATH_2006         = 'data/processed/2006_processed.csv'
-PATH_LOOKUP       = 'data/detector_direction_lookup.csv'
-PATH_OUTPUT       = 'data/processed/2014_processed.csv'
+PATH_2014_FOLDER  = str(DATA_DIR / '2014_raw')
+PATH_2006         = str(PROCESSED_DIR / '2006_processed.csv')
+PATH_LOOKUP       = str(DATA_DIR / 'detector_direction_lookup.csv')
+PATH_OUTPUT       = str(PROCESSED_DIR / '2014_processed.csv')
 
 # List of 39 SCATS detector numbers in the Boroondara region
 BOROONDARA_SCATS = [
