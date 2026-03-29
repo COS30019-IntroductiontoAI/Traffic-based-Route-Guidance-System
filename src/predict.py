@@ -19,9 +19,10 @@ from src.data_loader import (
   read_processed_data,
 )
 
-PROCESSED_DIR = Path("data/processed")
-PREDICTIONS_DIR = Path("results/predictions")
-MODEL_DIR = Path("results/trained_models")
+SRC_ROOT = Path(__file__).resolve().parent
+PROCESSED_DIR = SRC_ROOT / "data" / "processed"
+PREDICTIONS_DIR = SRC_ROOT / "results" / "predictions"
+MODEL_DIR = SRC_ROOT / "results" / "trained_models"
 LIGHTGBM_MODEL_PATH = MODEL_DIR / "lightgbm_model.txt"
 LIGHTGBM_METADATA_PATH = MODEL_DIR / "lightgbm_metadata.json"
 
@@ -109,14 +110,14 @@ def build_model_predictions(spec: dict, filepath: Path, scaler, label_encoder, s
     return predictions_df
 
   if spec["kind"] == "tabular":
-    metadata = json.loads(spec["metadata_path"].read_text(encoding="utf-8"))
+    metadata = json.loads(spec["metadata_path"].read_text(encoding="utf-8-sig"))
     movement_df = load_movement_level_data(str(filepath))
     feature_df = create_tabular_sequences_by_movement(
       movement_df,
       int(metadata["sequence_length"]),
       int(metadata["forecast_horizon"]),
     )
-    model = Booster(model_file=str(spec["path"]))
+    model = Booster(model_str=spec["path"].read_text(encoding="utf-8-sig"))
     predictions_df = feature_df[["datetime", "scats_number", "location"]].copy()
     predictions_df[f"predicted_{model_name}"] = predict_tabular_model(
       model,

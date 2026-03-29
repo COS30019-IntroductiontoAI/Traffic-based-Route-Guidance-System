@@ -57,7 +57,21 @@ def normalize_processed_schema(df: pd.DataFrame) -> pd.DataFrame:
 
 # Parse processed datetime values consistently across loaders.
 def parse_processed_datetime(values) -> pd.Series:
-  return pd.to_datetime(values, dayfirst=True, errors="coerce")
+  datetime_strings = values.astype(str)
+  iso_mask = datetime_strings.str.match(r"^\d{4}-\d{2}-\d{2}\s")
+  slash_mask = datetime_strings.str.match(r"^\d{2}/\d{2}/\d{4}\s")
+
+  parsed = pd.Series(pd.NaT, index=values.index, dtype="datetime64[ns]")
+  if iso_mask.any():
+    parsed.loc[iso_mask] = pd.to_datetime(datetime_strings.loc[iso_mask], errors="coerce")
+  if slash_mask.any():
+    parsed.loc[slash_mask] = pd.to_datetime(datetime_strings.loc[slash_mask], dayfirst=True, errors="coerce")
+
+  remaining_mask = parsed.isna()
+  if remaining_mask.any():
+    parsed.loc[remaining_mask] = pd.to_datetime(datetime_strings.loc[remaining_mask], dayfirst=True, errors="coerce")
+
+  return parsed
 
 
 # Add shared cyclical time features used by both sequence and tabular models.

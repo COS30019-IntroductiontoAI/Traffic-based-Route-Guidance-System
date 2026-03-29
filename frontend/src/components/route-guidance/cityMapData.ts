@@ -33,6 +33,7 @@ export interface RouteResult {
 }
 
 export interface GraphResponse {
+  data?: DataKey;
   nodes: MapNode[];
   edges: MapEdge[];
 }
@@ -42,6 +43,28 @@ export interface RoutesResponse {
   data: DataKey;
   forecast_timestamp: string | null;
   routes: RouteResult[];
+}
+
+export interface RouteGuidanceSelectionOptions {
+  data: DataKey;
+  available_dates: string[];
+  min_date: string | null;
+  max_date: string | null;
+  times: string[];
+  default_date: string | null;
+  default_time: string | null;
+}
+
+export interface RouteGuidanceConfigResponse {
+  supported_data: DataKey[];
+  month: number;
+  month_label: string;
+  defaults: {
+    data: DataKey;
+    time: string;
+    date_by_data: Record<DataKey, string>;
+  };
+  selection_options: Record<DataKey, RouteGuidanceSelectionOptions>;
 }
 
 export const ROUTE_ALGORITHMS: Array<{ id: AlgorithmId; name: string; desc: string }> = [
@@ -78,9 +101,14 @@ function buildApiUrl(path: string, query?: Record<string, string | number>) {
   return url.toString();
 }
 
-export async function fetchGraph(signal?: AbortSignal): Promise<GraphResponse> {
-  const response = await fetch(buildApiUrl("/api/graph"), { signal });
+export async function fetchGraph(data: DataKey, signal?: AbortSignal): Promise<GraphResponse> {
+  const response = await fetch(buildApiUrl("/api/graph", { data }), { signal });
   return readJson<GraphResponse>(response);
+}
+
+export async function fetchRouteGuidanceConfig(signal?: AbortSignal): Promise<RouteGuidanceConfigResponse> {
+  const response = await fetch(buildApiUrl("/api/route-guidance-config"), { signal });
+  return readJson<RouteGuidanceConfigResponse>(response);
 }
 
 interface FetchRoutesParams {
@@ -89,6 +117,8 @@ interface FetchRoutesParams {
   k: number;
   algorithm: AlgorithmId;
   data: DataKey;
+  date?: string | null;
+  time?: string | null;
   signal?: AbortSignal;
 }
 
@@ -98,16 +128,28 @@ export async function fetchRoutes({
   k,
   algorithm,
   data,
+  date,
+  time,
   signal,
 }: FetchRoutesParams): Promise<RoutesResponse> {
+  const query: Record<string, string | number> = {
+    origin,
+    destination,
+    k,
+    algorithm,
+    data,
+  };
+
+  if (date) {
+    query.date = date;
+  }
+
+  if (time) {
+    query.time = time;
+  }
+
   const response = await fetch(
-    buildApiUrl("/api/routes", {
-      origin,
-      destination,
-      k,
-      algorithm,
-      data,
-    }),
+    buildApiUrl("/api/routes", query),
     { signal },
   );
 

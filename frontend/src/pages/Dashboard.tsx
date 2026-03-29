@@ -2,6 +2,7 @@ import { Database, Cpu, TrendingUp, Database as DbIcon, Navigation, Activity, Ch
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts'
+import { useNavigate } from 'react-router-dom'
 import StatCard from '../components/StatCard'
 import { useApp } from '../App'
 import { themeHex } from '../theme'
@@ -27,7 +28,8 @@ const recentActivity = [
 ]
 
 export default function Dashboard() {
-  const { navigate, toast } = useApp()
+  const navigate = useNavigate()
+  const { toast } = useApp()
 
   return (
     <div className="p-8 space-y-6 animate-fade-up">
@@ -54,12 +56,12 @@ export default function Dashboard() {
 
       {/* Action buttons */}
       <div className="flex gap-3">
-        <button onClick={() => { navigate('data-processing');    toast('Navigating to Data Processing', 'info') }}
+        <button onClick={() => { navigate('/model-evaluation'); toast('Navigating to Model Evaluation', 'info') }}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
           style={{ backgroundColor: themeHex.primary }}>
-          <DbIcon size={15} /> Load Dataset
+          <DbIcon size={15} /> View Metrics
         </button>
-        <button onClick={() => { navigate('route-guidance');     toast('Navigating to Route Guidance', 'info') }}
+        <button onClick={() => { navigate('/route-guidance'); toast('Navigating to Route Guidance', 'info') }}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold active:scale-95 transition-all shadow-sm"
           style={{ background: `linear-gradient(to right, ${themeHex.primary}, ${themeHex.grad})` }}>
           <Navigation size={15} /> Find Routes

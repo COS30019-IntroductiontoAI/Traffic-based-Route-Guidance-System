@@ -1,41 +1,29 @@
 from __future__ import annotations
 
+import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
 
+from backend.core.config import GENERATED_DIR, SUPPORTED_DATA_KEYS, normalize_data_key
+from backend.route_guidance.travel_time import free_flow_time_minutes
 from backend.route_guidance.heuristic import haversine_distance_km
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-# The processed traffic CSV lives under src/data/processed; prefer that path if the
-# top-level /data directory does not exist.
-_TRAFFIC_CANDIDATES = [
-    PROJECT_ROOT / "data" / "processed" / "processed_traffic.csv",
-    PROJECT_ROOT / "src" / "data" / "processed" / "processed_traffic.csv",
-]
-TRAFFIC_PATH = next((p for p in _TRAFFIC_CANDIDATES if p.exists()), _TRAFFIC_CANDIDATES[0])
-
-_LISTING_CANDIDATES = [
-    PROJECT_ROOT / "data" / "processed" / "SCATSSiteListingSpreadsheet_VicRoads_clean.csv",
-    PROJECT_ROOT / "src" / "data" / "processed" / "SCATSSiteListingSpreadsheet_VicRoads_clean.csv",
-]
-SITE_LISTING_PATH = next((p for p in _LISTING_CANDIDATES if p.exists()), _LISTING_CANDIDATES[0])
+PROCESSED_DIR = PROJECT_ROOT / "src" / "data" / "processed"
+SITE_LISTING_PATH = PROCESSED_DIR / "SCATSSiteListingSpreadsheet_VicRoads_clean.csv"
 
 # Manual coordinate corrections for SCATS sites whose recorded GPS coordinates are
-# clearly wrong (e.g., lat/lng that map outside Melbourne / Victoria entirely).
-# These are verified against the VicRoads site descriptions and street-map cross-checks.
+# clearly wrong. The raw rows for 4266 include zero/out-of-region coordinates.
 COORDINATE_CORRECTIONS: dict[int, tuple[float, float]] = {
-    # 4266 BURWOOD/AUBURN — raw data has lat=-28.37, lng=108.78 (wrong)
     4266: (-37.8246, 145.0396),
 }
-OUTPUT_DIR = PROJECT_ROOT / "backend" / "generated"
-NODES_OUTPUT = OUTPUT_DIR / "scats_nodes.json"
-EDGES_OUTPUT = OUTPUT_DIR / "scats_edges.json"
 
 
+# Store the site metadata needed to build the route graph.
 @dataclass(slots=True)
 class SiteRecord:
     scats_number: int
@@ -45,21 +33,73 @@ class SiteRecord:
     label: str
 
 
-def load_site_records() -> list[SiteRecord]:
-    # Build one site-level record per SCATS site from the processed dataset.
-    traffic_df = pd.read_csv(TRAFFIC_PATH)
+# Resolve the processed traffic file for the selected dataset year.
+def _get_processed_traffic_path(data_key: str) -> Path:
+    normalized = normalize_data_key(data_key)
+    preferred = PROCESSED_DIR / f"{normalized}_processed.csv"
+    if preferred.exists():
+        return preferred
+
+    fallback = PROCESSED_DIR / "cleaned_traffic.csv"
+    if fallback.exists():
+        return fallback
+
+    raise FileNotFoundError(f"Could not find a processed traffic CSV for dataset '{data_key}'")
+
+
+# Detect the longitude column name used by the processed dataset.
+def _get_longitude_column(dataframe: pd.DataFrame) -> str:
+    for candidate in ("nb_longitude", "nb_longtitude"):
+        if candidate in dataframe.columns:
+            return candidate
+    raise KeyError("Processed traffic CSV is missing both 'nb_longitude' and 'nb_longtitude'")
+
+
+# Return the most representative text value from a grouped series.
+def _series_mode_or_first(series: pd.Series) -> object:
+    mode = series.mode(dropna=True)
+    if not mode.empty:
+        return mode.iloc[0]
+    return series.dropna().iloc[0] if not series.dropna().empty else ""
+
+
+# Build one cleaned site record per SCATS intersection for a dataset year.
+def load_site_records(data_key: str) -> list[SiteRecord]:
+    traffic_path = _get_processed_traffic_path(data_key)
+    traffic_df = pd.read_csv(traffic_path)
     listing_df = pd.read_csv(SITE_LISTING_PATH).rename(columns={"site_number": "scats_number"})
 
-    site_df = (
-        traffic_df.groupby("scats_number")
+    longitude_column = _get_longitude_column(traffic_df)
+
+    coordinate_df = traffic_df[["scats_number", "nb_latitude", longitude_column]].copy()
+    coordinate_df = coordinate_df.rename(columns={longitude_column: "nb_longitude"})
+    coordinate_df["nb_latitude"] = pd.to_numeric(coordinate_df["nb_latitude"], errors="coerce")
+    coordinate_df["nb_longitude"] = pd.to_numeric(coordinate_df["nb_longitude"], errors="coerce")
+
+    # Ignore obviously broken coordinates before aggregating site locations.
+    coordinate_df = coordinate_df[
+        coordinate_df["nb_latitude"].between(-39.5, -33.5)
+        & coordinate_df["nb_longitude"].between(140.0, 150.5)
+    ]
+
+    coordinate_summary = (
+        coordinate_df.groupby("scats_number", observed=False)
         .agg(
-            nb_latitude=("nb_latitude", "mean"),
-            nb_longitude=("nb_longitude", "mean"),
-            road_name=("road_name", lambda s: s.mode().iloc[0] if not s.mode().empty else s.iloc[0]),
+            nb_latitude=("nb_latitude", "median"),
+            nb_longitude=("nb_longitude", "median"),
         )
         .reset_index()
     )
 
+    metadata_summary = (
+        traffic_df.groupby("scats_number", observed=False)
+        .agg(
+            road_name=("road_name", _series_mode_or_first),
+        )
+        .reset_index()
+    )
+
+    site_df = coordinate_summary.merge(metadata_summary, on="scats_number", how="left")
     site_df = site_df.merge(
         listing_df[["scats_number", "location_description"]],
         on="scats_number",
@@ -68,17 +108,14 @@ def load_site_records() -> list[SiteRecord]:
 
     records: list[SiteRecord] = []
     for row in site_df.itertuples(index=False):
-        label = row.location_description if pd.notna(row.location_description) else row.road_name
         scats_number = int(row.scats_number)
+        label = row.location_description if pd.notna(row.location_description) else row.road_name
         lat = float(row.nb_latitude)
         lng = float(row.nb_longitude)
 
-        # Apply manual corrections for sites with wrong GPS coordinates in the raw data.
         if scats_number in COORDINATE_CORRECTIONS:
             lat, lng = COORDINATE_CORRECTIONS[scats_number]
 
-        # Skip sites that are still clearly outside the Melbourne/Victoria region.
-        # Victoria lat range: -39.2 to -33.9, lng range: 140.9 to 150.0
         if not (-39.5 < lat < -33.5 and 140.0 < lng < 150.5):
             continue
 
@@ -91,26 +128,27 @@ def load_site_records() -> list[SiteRecord]:
                 label=str(label),
             )
         )
+
     return records
 
 
+# Precompute pairwise distances between every site in the graph.
 def build_distance_table(records: list[SiteRecord]) -> dict[tuple[int, int], float]:
-    # Precompute pairwise site distances in kilometers.
     distances: dict[tuple[int, int], float] = {}
-    for i, left in enumerate(records):
-        for right in records[i + 1 :]:
+    for index, left in enumerate(records):
+        for right in records[index + 1 :]:
             distance_km = haversine_distance_km(left.lat, left.lng, right.lat, right.lng)
             distances[(left.scats_number, right.scats_number)] = distance_km
             distances[(right.scats_number, left.scats_number)] = distance_km
     return distances
 
 
+# Connect each site to a small number of nearby neighbors.
 def connect_nearest_neighbors(
     records: list[SiteRecord],
     distances: dict[tuple[int, int], float],
     neighbors_per_site: int = 3,
 ) -> set[tuple[int, int]]:
-    # Create an undirected candidate graph by linking each site to nearby sites.
     undirected_edges: set[tuple[int, int]] = set()
 
     for site in records:
@@ -124,17 +162,16 @@ def connect_nearest_neighbors(
         )
 
         for _, neighbor in candidates[:neighbors_per_site]:
-            edge = tuple(sorted((site.scats_number, neighbor)))
-            undirected_edges.add(edge)
+            undirected_edges.add(tuple(sorted((site.scats_number, neighbor))))
 
     return undirected_edges
 
 
+# Add extra links between sites that appear to share the same road corridor.
 def connect_same_road_sites(
     records: list[SiteRecord],
     distances: dict[tuple[int, int], float],
 ) -> set[tuple[int, int]]:
-    # Add extra edges between sites that appear to lie on the same corridor.
     undirected_edges: set[tuple[int, int]] = set()
     by_road: dict[str, list[SiteRecord]] = {}
 
@@ -155,14 +192,13 @@ def connect_same_road_sites(
                 key=lambda item: item[0],
             )
             if same_road_neighbors:
-                edge = tuple(sorted((site.scats_number, same_road_neighbors[0][1])))
-                undirected_edges.add(edge)
+                undirected_edges.add(tuple(sorted((site.scats_number, same_road_neighbors[0][1]))))
 
     return undirected_edges
 
 
+# Return the connected components of the current undirected graph.
 def connected_components(records: list[SiteRecord], edges: set[tuple[int, int]]) -> list[set[int]]:
-    # Return connected components for the current undirected graph.
     adjacency: dict[int, set[int]] = {record.scats_number: set() for record in records}
     for left, right in edges:
         adjacency[left].add(right)
@@ -189,13 +225,12 @@ def connected_components(records: list[SiteRecord], edges: set[tuple[int, int]])
     return components
 
 
+# Join disconnected components until the graph becomes fully connected.
 def connect_components(
     records: list[SiteRecord],
     distances: dict[tuple[int, int], float],
     edges: set[tuple[int, int]],
 ) -> set[tuple[int, int]]:
-    # Ensure the graph is connected by joining the closest disconnected components.
-    site_lookup = {record.scats_number: record for record in records}
     components = connected_components(records, edges)
 
     while len(components) > 1:
@@ -217,14 +252,13 @@ def connect_components(
         edges.add(best_pair)
         components = connected_components(records, edges)
 
-    # Prevent linter warnings about the lookup remaining unused if we later extend the graph metadata.
-    _ = site_lookup
     return edges
 
 
-def export_scats_graph() -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    # Generate a frontend-compatible SCATS graph and save it to JSON files.
-    records = load_site_records()
+# Generate and save the frontend-ready graph JSON for one dataset year.
+def export_scats_graph(data_key: str) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    normalized = normalize_data_key(data_key)
+    records = load_site_records(normalized)
     distances = build_distance_table(records)
 
     undirected_edges = connect_nearest_neighbors(records, distances, neighbors_per_site=3)
@@ -246,7 +280,7 @@ def export_scats_graph() -> tuple[list[dict[str, object]], list[dict[str, object
     directed_edges: list[dict[str, object]] = []
     for left, right in sorted(undirected_edges):
         distance_km = distances[(left, right)]
-        approx_time_minutes = max((distance_km / 60.0) * 60.0, 0.1)
+        approx_time_minutes = max(free_flow_time_minutes(distance_km), 0.1)
         directed_edges.append(
             {
                 "from": str(left),
@@ -264,17 +298,36 @@ def export_scats_graph() -> tuple[list[dict[str, object]], list[dict[str, object
             }
         )
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    NODES_OUTPUT.write_text(json.dumps(nodes, indent=2), encoding="utf-8")
-    EDGES_OUTPUT.write_text(json.dumps(directed_edges, indent=2), encoding="utf-8")
+    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+    nodes_output = GENERATED_DIR / f"scats_nodes_{normalized}.json"
+    edges_output = GENERATED_DIR / f"scats_edges_{normalized}.json"
+    nodes_output.write_text(json.dumps(nodes, indent=2), encoding="utf-8")
+    edges_output.write_text(json.dumps(directed_edges, indent=2), encoding="utf-8")
 
     return nodes, directed_edges
 
 
+# Parse CLI arguments for the graph export script.
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generate SCATS route graphs from processed traffic data")
+    parser.add_argument(
+        "--data",
+        default="all",
+        choices=["all", *sorted(SUPPORTED_DATA_KEYS)],
+        help="Dataset year to export",
+    )
+    return parser.parse_args()
+
+
+# Export one or both year-specific SCATS graphs from the command line.
 def main() -> None:
-    nodes, edges = export_scats_graph()
-    print(f"Saved {len(nodes)} SCATS nodes to {NODES_OUTPUT}")
-    print(f"Saved {len(edges)} directed SCATS edges to {EDGES_OUTPUT}")
+    args = _parse_args()
+    target_datasets = sorted(SUPPORTED_DATA_KEYS) if args.data == "all" else [args.data]
+
+    for data_key in target_datasets:
+        nodes, edges = export_scats_graph(data_key)
+        print(f"[{data_key}] Saved {len(nodes)} SCATS nodes")
+        print(f"[{data_key}] Saved {len(edges)} directed SCATS edges")
 
 
 if __name__ == "__main__":
