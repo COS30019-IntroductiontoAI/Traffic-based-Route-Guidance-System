@@ -239,6 +239,32 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
             _json_response(self, 200, result)
             return
 
+
+        if parsed.path == "/api/storytelling":
+            params = parse_qs(parsed.query)
+            file_name = params.get("file", [""])[0]
+            
+            if not file_name:
+                _json_response(self, 400, {"error": "Missing file parameter"})
+                return
+                
+            # Tính toán đường dẫn trỏ từ backend sang thư mục src/data/storytelling_vis
+            import os
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            file_path = os.path.join(base_dir, "src", "data", "storytelling_vis", file_name)
+            
+            try:
+                import json
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                _json_response(self, 200, data)
+            except FileNotFoundError:
+                _json_response(self, 404, {"error": f"File not found: {file_name}"})
+            except Exception as exc:  # noqa: BLE001
+                _json_response(self, 500, {"error": str(exc)})
+            return
+
+
         _json_response(self, 404, {"error": "Not found"})
 
 

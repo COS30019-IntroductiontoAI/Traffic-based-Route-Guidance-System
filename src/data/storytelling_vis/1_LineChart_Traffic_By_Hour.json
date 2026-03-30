@@ -1,0 +1,122 @@
+[
+    {
+        "hour": 0,
+        "traffic_volume": 28.2,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 1,
+        "traffic_volume": 16.3,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 2,
+        "traffic_volume": 11.1,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 3,
+        "traffic_volume": 9.9,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 4,
+        "traffic_volume": 11.1,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 5,
+        "traffic_volume": 23.5,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 6,
+        "traffic_volume": 72.4,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 7,
+        "traffic_volume": 145.8,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 8,
+        "traffic_volume": 173.6,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 9,
+        "traffic_volume": 150.6,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 10,
+        "traffic_volume": 141.2,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 11,
+        "traffic_volume": 145.9,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 12,
+        "traffic_volume": 151.8,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 13,
+        "traffic_volume": 148.5,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 14,
+        "traffic_volume": 151.3,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 15,
+        "traffic_volume": 169.7,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 16,
+        "traffic_volume": 179.7,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 17,
+        "traffic_volume": 194.4,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 18,
+        "traffic_volume": 173.2,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 19,
+        "traffic_volume": 121.7,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 20,
+        "traffic_volume": 86.7,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 21,
+        "traffic_volume": 78.3,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 22,
+        "traffic_volume": 63.9,
+        "overall_average": 103.9
+    },
+    {
+        "hour": 23,
+        "traffic_volume": 43.5,
+        "overall_average": 103.9
+    }
+]

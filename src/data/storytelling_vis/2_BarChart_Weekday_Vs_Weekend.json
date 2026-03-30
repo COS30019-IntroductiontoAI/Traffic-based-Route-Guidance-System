@@ -1,0 +1,122 @@
+[
+    {
+        "hour": 0,
+        "weekday_volume": 18.7,
+        "weekend_volume": 51.4
+    },
+    {
+        "hour": 1,
+        "weekday_volume": 10.0,
+        "weekend_volume": 31.6
+    },
+    {
+        "hour": 2,
+        "weekday_volume": 7.2,
+        "weekend_volume": 20.6
+    },
+    {
+        "hour": 3,
+        "weekday_volume": 6.7,
+        "weekend_volume": 17.6
+    },
+    {
+        "hour": 4,
+        "weekday_volume": 9.5,
+        "weekend_volume": 15.1
+    },
+    {
+        "hour": 5,
+        "weekday_volume": 25.9,
+        "weekend_volume": 17.9
+    },
+    {
+        "hour": 6,
+        "weekday_volume": 89.0,
+        "weekend_volume": 32.1
+    },
+    {
+        "hour": 7,
+        "weekday_volume": 186.1,
+        "weekend_volume": 47.7
+    },
+    {
+        "hour": 8,
+        "weekday_volume": 212.2,
+        "weekend_volume": 79.7
+    },
+    {
+        "hour": 9,
+        "weekday_volume": 165.0,
+        "weekend_volume": 115.5
+    },
+    {
+        "hour": 10,
+        "weekday_volume": 142.5,
+        "weekend_volume": 138.1
+    },
+    {
+        "hour": 11,
+        "weekday_volume": 143.1,
+        "weekend_volume": 152.6
+    },
+    {
+        "hour": 12,
+        "weekday_volume": 146.3,
+        "weekend_volume": 165.0
+    },
+    {
+        "hour": 13,
+        "weekday_volume": 144.7,
+        "weekend_volume": 157.9
+    },
+    {
+        "hour": 14,
+        "weekday_volume": 151.0,
+        "weekend_volume": 152.0
+    },
+    {
+        "hour": 15,
+        "weekday_volume": 177.0,
+        "weekend_volume": 152.1
+    },
+    {
+        "hour": 16,
+        "weekday_volume": 190.5,
+        "weekend_volume": 153.6
+    },
+    {
+        "hour": 17,
+        "weekday_volume": 210.9,
+        "weekend_volume": 154.4
+    },
+    {
+        "hour": 18,
+        "weekday_volume": 189.0,
+        "weekend_volume": 134.6
+    },
+    {
+        "hour": 19,
+        "weekday_volume": 131.0,
+        "weekend_volume": 98.9
+    },
+    {
+        "hour": 20,
+        "weekday_volume": 91.6,
+        "weekend_volume": 74.8
+    },
+    {
+        "hour": 21,
+        "weekday_volume": 82.4,
+        "weekend_volume": 68.3
+    },
+    {
+        "hour": 22,
+        "weekday_volume": 65.8,
+        "weekend_volume": 59.2
+    },
+    {
+        "hour": 23,
+        "weekday_volume": 41.3,
+        "weekend_volume": 48.9
+    }
+]

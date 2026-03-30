@@ -4,8 +4,8 @@ import { themeHex } from '../theme'
 const navItems = [
   { to: '/route-guidance',   label: 'Route Guidance'   },
   { to: '/model-evaluation', label: 'Model Evaluation' },
-  // { to: '/data-insight',     label: 'Data Insight'     },
-  // { to: '/about-us',         label: 'About Us'         },
+  { to: '/data-insight',     label: 'Data Insight'     },
+  { to: '/about-us',         label: 'About Us'         },
 ]
 
 interface SidebarProps {

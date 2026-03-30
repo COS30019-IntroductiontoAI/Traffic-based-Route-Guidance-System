@@ -1,0 +1,37 @@
+[
+    {
+        "day_of_week": 0,
+        "traffic_volume": 104.6,
+        "day_name": "Mon"
+    },
+    {
+        "day_of_week": 1,
+        "traffic_volume": 109.6,
+        "day_name": "Tue"
+    },
+    {
+        "day_of_week": 2,
+        "traffic_volume": 110.5,
+        "day_name": "Wed"
+    },
+    {
+        "day_of_week": 3,
+        "traffic_volume": 112.4,
+        "day_name": "Thu"
+    },
+    {
+        "day_of_week": 4,
+        "traffic_volume": 114.0,
+        "day_name": "Fri"
+    },
+    {
+        "day_of_week": 5,
+        "traffic_volume": 99.2,
+        "day_name": "Sat"
+    },
+    {
+        "day_of_week": 6,
+        "traffic_volume": 81.4,
+        "day_name": "Sun"
+    }
+]
