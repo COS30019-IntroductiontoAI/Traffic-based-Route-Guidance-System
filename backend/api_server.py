@@ -62,11 +62,11 @@ def _compute_metrics(data_key: str) -> dict:
             "model":    name,
             "mae":      round(mae, 3),
             "rmse":     round(rmse, 3),
-            "accuracy": round(accuracy, 1),
+            "mape":     round(mape, 2),
         })
 
     # Sort by accuracy descending so the best model is first
-    results.sort(key=lambda x: x["accuracy"], reverse=True)
+    results.sort(key=lambda x: x["mape"])
 
     # Dataset-level stats
     n_sites = int(df["scats_number"].nunique())
@@ -74,8 +74,59 @@ def _compute_metrics(data_key: str) -> dict:
     dt_min = str(df["datetime"].min().date())
     dt_max = str(df["datetime"].max().date())
 
+    # Load detailed metrics from CSV
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    metrics_path = os.path.join(base_dir, "src", "results", "test_results", f"test_metrics_full_{data_key}.csv")
+    
+    detailed_metrics = []
+    chart_data = None
+    if os.path.exists(metrics_path):
+        df_metrics = pd.read_csv(metrics_path)
+        # Convert dataframe to a list of dicts, keeping necessary columns
+        if not df_metrics.empty:
+            # fillna(0) to ensure JSON compliant output
+            detailed_metrics = df_metrics.fillna(0).to_dict(orient="records")
+
+            chart_data = {
+                "mae": { "lstmData": [], "gruData": [], "lgbmData": [], "testIds": [], "overallAverage": 0.0 },
+                "rmse": { "lstmData": [], "gruData": [], "lgbmData": [], "testIds": [], "overallAverage": 0.0 },
+                "mape": { "lstmData": [], "gruData": [], "lgbmData": [], "testIds": [], "overallAverage": 0.0 }
+            }
+            
+            unique_test_ids = sorted([str(x) for x in df_metrics["test_id"].unique()])
+            
+            for metric in ["mae", "rmse", "mape"]:
+                lst_data = []
+                gru_data = []
+                lgbm_data = []
+                
+                for tid in unique_test_ids:
+                    sub = df_metrics[df_metrics["test_id"].astype(str) == tid]
+                    
+                    lstm = sub[sub["model"].str.upper() == "LSTM"][metric].values
+                    lst_data.append(float(lstm[0]) if len(lstm) else 0.0)
+                    
+                    gru = sub[sub["model"].str.upper() == "GRU"][metric].values
+                    gru_data.append(float(gru[0]) if len(gru) else 0.0)
+                    
+                    lgbm = sub[sub["model"].str.upper() == "LIGHTGBM"][metric].values
+                    lgbm_data.append(float(lgbm[0]) if len(lgbm) else 0.0)
+                
+                all_vals = lst_data + gru_data + lgbm_data
+                avg = sum(all_vals) / len(all_vals) if all_vals else 0.0
+                
+                chart_data[metric] = {
+                    "testIds": unique_test_ids,
+                    "lstmData": lst_data,
+                    "gruData": gru_data,
+                    "lgbmData": lgbm_data,
+                    "overallAverage": avg
+                }
+
     return {
         "models": results,
+        "detailed_metrics": detailed_metrics,
+        "chart_data": chart_data,
         "stats": {
             "intersections": n_sites,
             "records": f"{n_records:,}",
@@ -248,7 +299,6 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
                 _json_response(self, 400, {"error": "Missing file parameter"})
                 return
                 
-            # Tính toán đường dẫn trỏ từ backend sang thư mục src/data/storytelling_vis
             import os
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             file_path = os.path.join(base_dir, "src", "data", "storytelling_vis", file_name)
