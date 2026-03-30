@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -8,8 +9,8 @@ from backend.core.config import get_predictions_path
 from backend.services.route_service import RouteService, SUPPORTED_ALGORITHMS, SUPPORTED_DATA_KEYS
 
 
-HOST = "127.0.0.1"
-PORT = 8000
+HOST = os.environ.get("HOST", "0.0.0.0")
+PORT = int(os.environ.get("PORT", 8000))
 ROUTE_SERVICE = RouteService.from_scats_graph()
 if ROUTE_SERVICE.model_inference is not None:
     ROUTE_SERVICE.model_inference.predict_site_flow_map()
