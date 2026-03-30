@@ -2,6 +2,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import RouteGuidance from './pages/RouteGuidance'
 import ModelEvaluation from './pages/ModelEvaluation'
+// import DataInsight from './pages/DataInsight'
+// import AboutUs from './pages/AboutUs'
 import ToastContainer from './components/ToastContainer'
 import { useToast } from './hooks/useToast'
 import { createContext, useContext, useCallback } from 'react'
@@ -31,6 +33,8 @@ export default function App() {
             <Route path="/" element={<Navigate to="/route-guidance" replace />} />
             <Route path="/route-guidance" element={<RouteGuidance />} />
             <Route path="/model-evaluation" element={<ModelEvaluation />} />
+            {/* <Route path="/data-insight" element={<DataInsight />} />
+            <Route path="/about-us" element={<AboutUs />} /> */}
             <Route path="*" element={<Navigate to="/route-guidance" replace />} />
           </Routes>
         </main>

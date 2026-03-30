@@ -147,7 +147,7 @@ export default function ModelEvaluation() {
             {/* Traffic volume chart */}
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <div className="mb-4">
-                <h2 className="font-semibold text-gray-900">Traffic Volume — {activeYear}</h2>
+                <h2 className="font-semibold text-gray-900">Traffic Volume - {activeYear}</h2>
                 <p className="text-xs text-gray-400 mt-0.5">Average hourly SCATS volume (across all sites)</p>
               </div>
               {traffic.length > 0 ? (
@@ -171,36 +171,12 @@ export default function ModelEvaluation() {
                 <div className="h-[200px] flex items-center justify-center text-sm text-gray-400">No traffic data</div>
               )}
             </div>
-
-            {/* Model accuracy chart */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <div className="mb-4">
-                <h2 className="font-semibold text-gray-900">Model Accuracy — {activeYear}</h2>
-                <p className="text-xs text-gray-400 mt-0.5">Prediction accuracy per model architecture</p>
-              </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={metrics.models} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="barGrad1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%"   stopColor={themeHex.primary} />
-                      <stop offset="100%" stopColor={themeHex.grad} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                  <XAxis dataKey="model" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 12 }}
-                    formatter={(v) => [`${v}%`, 'Accuracy']} />
-                  <Bar dataKey="accuracy" fill="url(#barGrad1)" radius={[6, 6, 0, 0]} maxBarSize={48} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
           </div>
 
           {/* Model metrics table */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <h2 className="font-semibold text-gray-900 mb-4">
-              Detailed Metrics — {activeYear}
+              Detailed Metrics - {activeYear}
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
