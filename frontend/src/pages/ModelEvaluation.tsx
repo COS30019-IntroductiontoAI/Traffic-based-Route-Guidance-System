@@ -14,7 +14,6 @@ import {
 
 import {
   fetchMetrics,
-  fetchTrafficProfile,
   type MetricsResponse,
 } from '../api_server';
 
@@ -87,7 +86,7 @@ export default function ModelEvaluation() {
   }, [metrics, activeMetric]);
 
   const bestModel = metrics?.models?.length
-    ? [...metrics.models].sort((a, b) => b.mape - a.mape)[0]
+    ? [...metrics.models].sort((a, b) => a.mape - b.mape)[0]
     : null;
 
   return (
@@ -220,7 +219,8 @@ export default function ModelEvaluation() {
                   <span className="font-bold text-gray-900">{bestModel.model}</span> achieves{' '}
                   MAE: <span className="text-gray-900 font-bold">{bestModel.mae.toFixed(3)}</span>, 
                   RMSE: <span className="text-gray-900 font-bold">{bestModel.rmse.toFixed(3)}</span>, 
-                  MAPE: <span className="text-gray-900 font-bold">{bestModel.mape.toFixed(3)}</span>
+                  MAPE: <span className="text-gray-900 font-bold">{bestModel.mape.toFixed(3)}</span> <br/>
+                  (<strong>Note:</strong> Based on the datasets from test_metrics_full_{activeYear}.csv and the avarage of 10 test cases)
                 </p>
               </div>
             )}
