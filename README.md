@@ -4,7 +4,7 @@
 
 | Name                  | Student ID | Task & Responsibility                                                                          |
 | :-------------------- | :--------- | :--------------------------------------------------------------------------------------------- |
-| Bui Quang Doan        | 104993227  | Data Processing & Dataset Preparation for 2006                                                 |
+| Bui Quang Doan        | 104993227  | Data Processing & Dataset Preparation for 2006, Frontend Support                                                 |
 | Do Gia Huy (Leader)   | 104988294  | ML Implementation (LSTM/GRU), Model Evaluation, Data Processing & Dataset Preparation for 2014 |
 | Huynh Doan Hoang Minh | 104777308  | ML Implementation (LightGBM), Model Evaluation, Backend, Frontend Supporter                    |
 | Le Thanh Nam          | 104999380  | System Integration, Travel Time Estimation & GUI                                               |
