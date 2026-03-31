@@ -78,6 +78,12 @@ def _compute_metrics(data_key: str) -> dict:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     metrics_path = os.path.join(base_dir, "src", "results", "test_results", f"test_metrics_full_{data_key}.csv")
     
+    try:
+        if not os.path.exists(metrics_path):
+            raise FileNotFoundError
+    except FileNotFoundError:
+        metrics_path = os.path.join(base_dir, "frontend", "data", "csv", f"test_metrics_full_{data_key}.csv")
+        
     detailed_metrics = []
     chart_data = None
     if os.path.exists(metrics_path):
@@ -309,7 +315,13 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
                     data = json.load(f)
                 _json_response(self, 200, data)
             except FileNotFoundError:
-                _json_response(self, 404, {"error": f"File not found: {file_name}"})
+                try:
+                    fallback_file_path = os.path.join(base_dir, "frontend", "data", "json", file_name)
+                    with open(fallback_file_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    _json_response(self, 200, data)
+                except FileNotFoundError:
+                    _json_response(self, 404, {"error": f"File not found: {file_name}"})
             except Exception as exc:  # noqa: BLE001
                 _json_response(self, 500, {"error": str(exc)})
             return
