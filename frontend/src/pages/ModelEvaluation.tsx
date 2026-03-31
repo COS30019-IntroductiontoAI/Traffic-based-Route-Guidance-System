@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { LoaderCircle, ServerCrash } from 'lucide-react';
 import {
   BarChart,
@@ -14,16 +14,131 @@ import {
 
 import {
   fetchMetrics,
-  fetchTrafficProfile,
   type MetricsResponse,
 } from '../api_server';
 
 type Year = '2006' | '2014';
 type MetricType = 'MAE' | 'RMSE' | 'MAPE';
+type TestCase = {
+  id: string;
+  title: string;
+  scenario: string;
+  validationGoal: string;
+};
+
+type TestCaseCategory = {
+  key: string;
+  title: string;
+  summary: string;
+  tests: TestCase[];
+};
+
+const TEST_CASE_BREAKDOWN: TestCaseCategory[] = [
+  {
+    key: 'peak-off-peak',
+    title: 'Peak & Off-Peak Behavior',
+    summary:
+      'These cases verify whether models track both congestion spikes and near-empty traffic periods where percentage errors are unstable.',
+    tests: [
+      {
+        id: 'TC01',
+        title: 'Morning Peak Hour',
+        scenario: 'Weekday records between 7:00-9:00 AM to capture the dominant inbound commute surge.',
+        validationGoal: 'Checks if the model identifies the highest-volume window and preserves strong peak magnitude.',
+      },
+      {
+        id: 'TC02',
+        title: 'Evening Peak Hour',
+        scenario: 'Weekday records between 4:00-6:00 PM with directional flow patterns different from morning.',
+        validationGoal: 'Tests whether the model adapts to a second daily peak with a different traffic composition.',
+      },
+      {
+        id: 'TC03',
+        title: 'Late Night Low Volume',
+        scenario: 'Records between 11:00 PM-2:00 AM where observed flow can approach zero.',
+        validationGoal: 'Examines robustness in low-demand periods where MAPE can become highly sensitive.',
+      },
+    ],
+  },
+  {
+    key: 'day-type',
+    title: 'Day Type Variation',
+    summary:
+      'These tests isolate calendar effects so we can validate whether encoded day patterns are reflected in forecast behavior.',
+    tests: [
+      {
+        id: 'TC04',
+        title: 'Weekday vs Weekend Comparison',
+        scenario: 'Same intersection and same time slot, comparing a Tuesday sample against a Saturday sample.',
+        validationGoal: 'Verifies that the model captures structural weekday/weekend demand differences.',
+      },
+      {
+        id: 'TC05',
+        title: 'Monday Morning vs Friday Afternoon',
+        scenario: 'Compare start-of-week AM demand against end-of-week PM demand for the same location.',
+        validationGoal: 'Tests sensitivity to day-of-week effects instead of treating all weekdays uniformly.',
+      },
+    ],
+  },
+  {
+    key: 'intersection-level',
+    title: 'Intersection-Level Behavior',
+    summary:
+      'This pair validates generalization across spatial contexts by contrasting heavy arterial demand with quieter local roads.',
+    tests: [
+      {
+        id: 'TC06',
+        title: 'High-Volume Intersection',
+        scenario: 'Use the busiest SCATS site in 2014 with consistently high daily flow.',
+        validationGoal: 'Checks model stability when predictions remain in a high-load regime for long periods.',
+      },
+      {
+        id: 'TC07',
+        title: 'Low-Volume Intersection',
+        scenario: 'Select a low-demand residential-style intersection as a contrast to TC06.',
+        validationGoal: 'Confirms performance does not collapse when absolute volumes are small and noisier.',
+      },
+    ],
+  },
+  {
+    key: 'temporal-stress',
+    title: 'Temporal Stress',
+    summary:
+      'Long contiguous sequences evaluate whether short-term accuracy remains consistent when forecasts are inspected over extended horizons.',
+    tests: [
+      {
+        id: 'TC08',
+        title: 'Full Monday (All 96 Intervals)',
+        scenario: 'Run a complete Monday profile at 15-minute resolution for one site.',
+        validationGoal: 'Assesses within-day consistency from overnight baseline through both rush periods and evening decay.',
+      },
+      {
+        id: 'TC09',
+        title: 'Full Week Sequence',
+        scenario: 'Evaluate seven consecutive days for a single intersection to form a long horizon test.',
+        validationGoal: 'Tests whether prediction error stays bounded or accumulates across repeated temporal cycles.',
+      },
+    ],
+  },
+  {
+    key: 'edge-case',
+    title: 'Edge Case',
+    summary:
+      'Transition windows are usually hardest because the system shifts from sparse demand to rapid growth in a short interval.',
+    tests: [
+      {
+        id: 'TC10',
+        title: 'Transition Period (6:00-8:00 AM)',
+        scenario: 'Focus on the ramp-up period where traffic leaves near-zero levels and climbs sharply toward peak.',
+        validationGoal: 'Reveals whether the model captures rate-of-change behavior, not just static level matching.',
+      },
+    ],
+  },
+];
 
 /* ─── Custom Tooltip Component ────────────────────────────────────────── */
 // Component này giúp hiển thị đầy đủ chỉ số bao gồm cả Average khi hover
-const CustomTooltip = ({ active, payload, label, avgValue, metricName }: any) => {
+const CustomTooltip = ({ active, payload, label, avgValue }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white/95 p-4 border border-gray-200 rounded-xl shadow-xl backdrop-blur-sm">
@@ -31,7 +146,7 @@ const CustomTooltip = ({ active, payload, label, avgValue, metricName }: any) =>
         <div className="space-y-1">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-8">
-              <span className="text-xs font-medium" style={{ color: entry.color }}>
+              <span className="text-xs font-medium text-slate-600">
                 {entry.name}:
               </span>
               <span className="text-xs font-bold text-gray-700">
@@ -118,6 +233,12 @@ export default function ModelEvaluation() {
           <LoaderCircle className="w-6 h-6 animate-spin text-blue-500" />
           <span className="text-sm font-medium">Processing metrics data...</span>
         </div>
+      ) : error ? (
+        <div className="bg-white rounded-2xl border border-red-100 p-8 shadow-sm flex flex-col items-center text-center gap-3">
+          <ServerCrash className="w-7 h-7 text-red-500" />
+          <p className="text-sm font-semibold text-slate-700">Could not load model evaluation metrics</p>
+          <p className="text-xs text-slate-500">{error}</p>
+        </div>
       ) : (
         <div className="space-y-6">
           {/* Quick Stats */}
@@ -175,7 +296,7 @@ export default function ModelEvaluation() {
                   
                   {/* Tooltip Tùy Chỉnh để thấy Average */}
                   <Tooltip 
-                    content={<CustomTooltip avgValue={overallAverage} metricName={activeMetric} />}
+                    content={<CustomTooltip avgValue={overallAverage} />}
                     cursor={{ fill: '#f1f5f9', opacity: 0.4 }} 
                   />
                   
@@ -224,6 +345,55 @@ export default function ModelEvaluation() {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Test Case Breakdown */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-900">Test Case Breakdown (10 Scenarios)</h2>
+              <p className="text-xs text-gray-500 mt-1">
+                Structured evaluation cases used to stress model behavior across peak demand, day-type shifts, spatial variability, and
+                long temporal windows.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {TEST_CASE_BREAKDOWN.map((category, categoryIndex) => (
+                <section
+                  key={category.key}
+                  className={`space-y-3 ${categoryIndex === 0 ? '' : 'pt-5 border-t border-gray-200'}`}
+                >
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">{category.title}</h3>
+                    <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 font-bold uppercase tracking-wide">
+                      {category.tests.length} case{category.tests.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">{category.summary}</p>
+
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                    {category.tests.map((test) => (
+                      <article
+                        key={test.id}
+                        className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 transition-all duration-200 hover:bg-white hover:border-slate-300 hover:shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{test.id}</p>
+                            <h4 className="text-sm font-bold text-gray-900 mt-1">{test.title}</h4>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-gray-600 mt-3 leading-relaxed">{test.scenario}</p>
+                        <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                          <span className="font-bold text-slate-700">Validation goal:</span> {test.validationGoal}
+                        </p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
           </div>
         </div>
       )}
