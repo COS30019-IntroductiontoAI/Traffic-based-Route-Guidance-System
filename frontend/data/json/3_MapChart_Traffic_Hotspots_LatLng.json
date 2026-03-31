@@ -1,0 +1,968 @@
+[
+    {
+        "scats_number": 3685,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD S of HIGHBURY_RD",
+        "traffic_volume": 261.5
+    },
+    {
+        "scats_number": 3001,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BARKERS_RD W of CHURCH_ST",
+        "traffic_volume": 191.8
+    },
+    {
+        "scats_number": 2000,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD S of BURWOOD_HWY",
+        "traffic_volume": 189.2
+    },
+    {
+        "scats_number": 970,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD N of HIGH STREET_RD",
+        "traffic_volume": 188.9
+    },
+    {
+        "scats_number": 3685,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD N of HIGHBURY_RD",
+        "traffic_volume": 185.1
+    },
+    {
+        "scats_number": 970,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD S of HIGH STREET_RD",
+        "traffic_volume": 184.3
+    },
+    {
+        "scats_number": 3126,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CANTERBURY_RD W of WARRIGAL_RD",
+        "traffic_volume": 181.6
+    },
+    {
+        "scats_number": 2827,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BULLEEN_RD N of THOMPSONS_RD",
+        "traffic_volume": 171.8
+    },
+    {
+        "scats_number": 4030,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S of DONCASTER_RD",
+        "traffic_volume": 167.6
+    },
+    {
+        "scats_number": 3127,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CANTERBURY_RD E of BALWYN_RD",
+        "traffic_volume": 162.7
+    },
+    {
+        "scats_number": 2000,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "BURWOOD_HWY E of WARRIGAL_RD",
+        "traffic_volume": 158.1
+    },
+    {
+        "scats_number": 3662,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "PRINCESS_ST N of HIGH_ST",
+        "traffic_volume": 153.3
+    },
+    {
+        "scats_number": 4032,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S of HARP_RD",
+        "traffic_volume": 152.2
+    },
+    {
+        "scats_number": 2820,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "PRINCESS_ST S of CHANDLER_HWY",
+        "traffic_volume": 150.5
+    },
+    {
+        "scats_number": 4034,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD N OF WHITEHORSE_RD",
+        "traffic_volume": 149.2
+    },
+    {
+        "scats_number": 4034,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S OF WHITEHORSE_RD",
+        "traffic_volume": 148.4
+    },
+    {
+        "scats_number": 3122,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CANTERBURY_RD E of STANHOPE_GV",
+        "traffic_volume": 147.0
+    },
+    {
+        "scats_number": 3126,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CANTERBURY_RD E of WARRIGAL_RD",
+        "traffic_volume": 144.8
+    },
+    {
+        "scats_number": 2825,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S of EASTERN_FWY",
+        "traffic_volume": 144.8
+    },
+    {
+        "scats_number": 2000,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "TOORAK_RD W of WARRIGAL_RD",
+        "traffic_volume": 144.7
+    },
+    {
+        "scats_number": 3127,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CANTERBURY_RD W of BALWYN_RD",
+        "traffic_volume": 142.6
+    },
+    {
+        "scats_number": 4273,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "TOORAK_RD E of TOORONGA_RD",
+        "traffic_volume": 141.3
+    },
+    {
+        "scats_number": 4035,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD N of MONT ALBERT_RD",
+        "traffic_volume": 140.5
+    },
+    {
+        "scats_number": 3120,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD N of CANTERBURY_RD",
+        "traffic_volume": 140.3
+    },
+    {
+        "scats_number": 4043,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD N of TOORAK_RD",
+        "traffic_volume": 138.1
+    },
+    {
+        "scats_number": 4043,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "TOORAK_RD W OF BURKE_RD",
+        "traffic_volume": 137.0
+    },
+    {
+        "scats_number": 2000,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD N of TOORAK_RD",
+        "traffic_volume": 136.0
+    },
+    {
+        "scats_number": 4043,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "TOORAK_RD E of BURKE_RD",
+        "traffic_volume": 134.5
+    },
+    {
+        "scats_number": 4032,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD N of HARP_RD",
+        "traffic_volume": 131.8
+    },
+    {
+        "scats_number": 4264,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BURWOOD_RD E of GLENFERRIE_RD",
+        "traffic_volume": 130.9
+    },
+    {
+        "scats_number": 3682,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD S OF RIVERSDALE_RD",
+        "traffic_volume": 130.3
+    },
+    {
+        "scats_number": 4262,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BRIDGE_RD SW of BURWOOD_RD",
+        "traffic_volume": 130.2
+    },
+    {
+        "scats_number": 4821,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "VICTORIA_ST E OF BURNLEY_ST",
+        "traffic_volume": 129.4
+    },
+    {
+        "scats_number": 4263,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "POWER_ST N of BURWOOD_RD",
+        "traffic_volume": 127.7
+    },
+    {
+        "scats_number": 4043,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S of TOORAK_RD",
+        "traffic_volume": 127.4
+    },
+    {
+        "scats_number": 3001,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BARKERS_RD E of HIGH_ST",
+        "traffic_volume": 127.1
+    },
+    {
+        "scats_number": 4821,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "VICTORIA_ST W OF BURNLEY_ST",
+        "traffic_volume": 127.0
+    },
+    {
+        "scats_number": 3002,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "DENMARK_ST N of BARKERS_RD",
+        "traffic_volume": 126.8
+    },
+    {
+        "scats_number": 2827,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "OFFRAMP_EASTERN_FWY E of BULLEEN_RD",
+        "traffic_volume": 126.8
+    },
+    {
+        "scats_number": 3002,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "POWER_ST S of BARKERS_RD",
+        "traffic_volume": 126.4
+    },
+    {
+        "scats_number": 4266,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BURWOOD_RD W of AUBURN_RD",
+        "traffic_volume": 124.5
+    },
+    {
+        "scats_number": 3002,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BARKERS_RD E of DENMARK_ST",
+        "traffic_volume": 122.2
+    },
+    {
+        "scats_number": 4264,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BURWOOD_RD W of GLENFERRIE_RD",
+        "traffic_volume": 120.7
+    },
+    {
+        "scats_number": 3120,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "RATHMINES_RD W of BURKE_RD",
+        "traffic_volume": 120.7
+    },
+    {
+        "scats_number": 2846,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "HIGH_ST E OF S.E.ARTERIAL",
+        "traffic_volume": 120.4
+    },
+    {
+        "scats_number": 4263,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "POWER_ST S of BURWOOD_RD",
+        "traffic_volume": 119.1
+    },
+    {
+        "scats_number": 3812,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CAMBERWELL_RD SE of TRAFALGAR_RD",
+        "traffic_volume": 117.3
+    },
+    {
+        "scats_number": 3120,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S of CANTERBURY_RD",
+        "traffic_volume": 116.0
+    },
+    {
+        "scats_number": 4266,
+        "nb_latitude": 0.0,
+        "nb_longitude": 0.0,
+        "location": "AUBURN_RD N of BURWOOD_RD",
+        "traffic_volume": 115.9
+    },
+    {
+        "scats_number": 970,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "HIGH STREET_RD W of WARRIGAL_RD",
+        "traffic_volume": 115.3
+    },
+    {
+        "scats_number": 3122,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CANTERBURY_RD W of STANHOPE_GV",
+        "traffic_volume": 115.3
+    },
+    {
+        "scats_number": 4263,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BURWOOD_RD E of POWER_ST",
+        "traffic_volume": 115.2
+    },
+    {
+        "scats_number": 4812,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "MADDEN_GV S OF SWAN_ST",
+        "traffic_volume": 114.8
+    },
+    {
+        "scats_number": 4266,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BURWOOD_RD E of AUBURN_RD",
+        "traffic_volume": 114.6
+    },
+    {
+        "scats_number": 3662,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "HIGH_ST NE of PRINCESS_ST",
+        "traffic_volume": 114.3
+    },
+    {
+        "scats_number": 4035,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S of BARKERS_RD",
+        "traffic_volume": 112.7
+    },
+    {
+        "scats_number": 3001,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "HIGH_ST NE of BARKERS_RD",
+        "traffic_volume": 110.8
+    },
+    {
+        "scats_number": 4270,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "RIVERSDALE_RD W of GLENFERRIE_RD",
+        "traffic_volume": 110.2
+    },
+    {
+        "scats_number": 3002,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BARKERS_RD W of DENMARK_ST",
+        "traffic_volume": 108.4
+    },
+    {
+        "scats_number": 4272,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "RIVERSDALE_RD W of TOORONGA_RD",
+        "traffic_volume": 107.1
+    },
+    {
+        "scats_number": 3120,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CANTERBURY_RD E of BURKE_RD",
+        "traffic_volume": 105.4
+    },
+    {
+        "scats_number": 4270,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "RIVERSDALE_RD E of GLENFERRIE_RD",
+        "traffic_volume": 104.6
+    },
+    {
+        "scats_number": 3804,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "RIVERSDALE_RD W of TRAFALGAR_RD",
+        "traffic_volume": 104.2
+    },
+    {
+        "scats_number": 2827,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "OFFRAMP_EASTERN_FWY W of BULLEEN_RD",
+        "traffic_volume": 102.1
+    },
+    {
+        "scats_number": 2846,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "HIGH_ST W OF WILLS_ST",
+        "traffic_volume": 101.9
+    },
+    {
+        "scats_number": 3122,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "STANHOPE_GV S of CANTERBURY_RD",
+        "traffic_volume": 100.0
+    },
+    {
+        "scats_number": 3804,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "TRAFALGAR_RD S of RIVERSDALE_RD",
+        "traffic_volume": 99.6
+    },
+    {
+        "scats_number": 970,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "HIGH STREET_RD E of WARRIGAL_RD",
+        "traffic_volume": 99.5
+    },
+    {
+        "scats_number": 3662,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "HIGH_ST SW of DENMARK_ST",
+        "traffic_volume": 98.0
+    },
+    {
+        "scats_number": 3682,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD N OF RIVERSDALE_RD",
+        "traffic_volume": 97.3
+    },
+    {
+        "scats_number": 4266,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "AUBURN_RD S of BURWOOD_RD",
+        "traffic_volume": 96.9
+    },
+    {
+        "scats_number": 4263,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BURWOOD_RD W of POWER_ST",
+        "traffic_volume": 96.7
+    },
+    {
+        "scats_number": 4035,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BARKERS_RD W of BURKE_RD",
+        "traffic_volume": 96.5
+    },
+    {
+        "scats_number": 3804,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "RIVERSDALE_RD E of TRAFALGAR_RD",
+        "traffic_volume": 96.4
+    },
+    {
+        "scats_number": 3812,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CAMBERWELL_RD NW of TRAFALGAR_RD",
+        "traffic_volume": 93.3
+    },
+    {
+        "scats_number": 2200,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "MAROONDAH_HWY W of UNION_RD",
+        "traffic_volume": 93.1
+    },
+    {
+        "scats_number": 4272,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "RIVERSDALE_RD E of TOORONGA_RD",
+        "traffic_volume": 93.0
+    },
+    {
+        "scats_number": 3180,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "DONCASTER_RD E of BALWYN_RD",
+        "traffic_volume": 91.5
+    },
+    {
+        "scats_number": 4057,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BALWYN_RD S OF BELMORE_RD",
+        "traffic_volume": 91.3
+    },
+    {
+        "scats_number": 4063,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "WHITEHORSE_RD E OF BALWYN_RD",
+        "traffic_volume": 91.1
+    },
+    {
+        "scats_number": 3682,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "RIVERSDALE_RD W OF WARRIGAL_RD",
+        "traffic_volume": 89.5
+    },
+    {
+        "scats_number": 3804,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "TRAFALGAR_RD N of RIVERSDALE_RD",
+        "traffic_volume": 89.5
+    },
+    {
+        "scats_number": 4324,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "COTHAM_RD E OF GLENFERRIE_RD",
+        "traffic_volume": 89.0
+    },
+    {
+        "scats_number": 2200,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "MAROONDAH_HWY E of UNION_RD",
+        "traffic_volume": 88.9
+    },
+    {
+        "scats_number": 4270,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "GLENFERRIE_RD S of RIVERSDALE_RD",
+        "traffic_volume": 88.3
+    },
+    {
+        "scats_number": 3126,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "WARRIGAL_RD S of CANTERBURY_RD",
+        "traffic_volume": 87.1
+    },
+    {
+        "scats_number": 4034,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "WHITEHORSE_RD E OF BURKE_RD",
+        "traffic_volume": 86.5
+    },
+    {
+        "scats_number": 4812,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "SWAN_ST SW of MADDEN_GV",
+        "traffic_volume": 84.9
+    },
+    {
+        "scats_number": 4040,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD N of RIVERSDALE_RD",
+        "traffic_volume": 84.6
+    },
+    {
+        "scats_number": 4035,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "MONT ALBERT_RD E of BURKE_RD",
+        "traffic_volume": 84.1
+    },
+    {
+        "scats_number": 4264,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "GLENFERRIE_RD N of BURWOOD_RD",
+        "traffic_volume": 83.3
+    },
+    {
+        "scats_number": 2827,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BULLEEN_RD S of EASTERN_FWY_W_BD_RAMPS",
+        "traffic_volume": 83.1
+    },
+    {
+        "scats_number": 4063,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BALWYN_RD N OF WHITEHORSE_RD",
+        "traffic_volume": 83.0
+    },
+    {
+        "scats_number": 4063,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "WHITEHORSE_RD W OF BALWYN_RD",
+        "traffic_volume": 82.7
+    },
+    {
+        "scats_number": 4321,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "HIGH_ST SW OF HARP_ST",
+        "traffic_volume": 82.5
+    },
+    {
+        "scats_number": 4040,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "RIVERSDALE_RD W of BURKE_RD",
+        "traffic_volume": 82.3
+    },
+    {
+        "scats_number": 4264,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "GLENFERRIE_RD S of BURWOOD_RD",
+        "traffic_volume": 80.4
+    },
+    {
+        "scats_number": 4032,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BELMORE_RD E of BURKE_RD",
+        "traffic_volume": 79.8
+    },
+    {
+        "scats_number": 4324,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "COTHAM_RD W OF GLENFERRIE_RD",
+        "traffic_volume": 79.6
+    },
+    {
+        "scats_number": 3812,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "SEYMOUR_GV W of CAMBERWELL_RD",
+        "traffic_volume": 79.4
+    },
+    {
+        "scats_number": 4273,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "TOORONGA_RD N of TOORAK_RD",
+        "traffic_volume": 79.2
+    },
+    {
+        "scats_number": 4057,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BALWYN_RD N OF BELMORE_RD",
+        "traffic_volume": 79.0
+    },
+    {
+        "scats_number": 4040,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BURKE_RD S of RIVERSDALE_RD",
+        "traffic_volume": 78.6
+    },
+    {
+        "scats_number": 4063,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BALWYN_RD S OF WHITEHORSE_RD",
+        "traffic_volume": 78.3
+    },
+    {
+        "scats_number": 2820,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "EARL_ST SE of PRINCESS_ST",
+        "traffic_volume": 77.3
+    },
+    {
+        "scats_number": 4051,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "DONCASTER_RD E of BULLEEN_RD",
+        "traffic_volume": 76.9
+    },
+    {
+        "scats_number": 3662,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "STUDLEY PARK_RD W of PRINCESS_ST",
+        "traffic_volume": 76.7
+    },
+    {
+        "scats_number": 4057,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BELMORE_RD W OF BALWYN_RD",
+        "traffic_volume": 76.3
+    },
+    {
+        "scats_number": 2200,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "UNION_RD S of MAROONDAH_HWY",
+        "traffic_volume": 75.4
+    },
+    {
+        "scats_number": 4270,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "GLENFERRIE_RD N of RIVERSDALE_RD",
+        "traffic_volume": 74.0
+    },
+    {
+        "scats_number": 3812,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "TRAFALGAR_RD NE of CAMBERWELL_RD",
+        "traffic_volume": 73.9
+    },
+    {
+        "scats_number": 4812,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "SWAN_ST NE of MADDEN_GV",
+        "traffic_volume": 73.3
+    },
+    {
+        "scats_number": 2200,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "UNION_RD N of MAROONDAH_HWY",
+        "traffic_volume": 73.1
+    },
+    {
+        "scats_number": 3180,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BALWYN_RD S of DONCASTER_RD",
+        "traffic_volume": 72.6
+    },
+    {
+        "scats_number": 4040,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "RIVERSDALE_RD E of BURKE_RD",
+        "traffic_volume": 72.4
+    },
+    {
+        "scats_number": 3682,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "RIVERSDALE_RD E OF WARRIGAL_RD",
+        "traffic_volume": 72.2
+    },
+    {
+        "scats_number": 3001,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "CHURCH_ST SW of BARKERS_RD",
+        "traffic_volume": 70.9
+    },
+    {
+        "scats_number": 4821,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "BURNLEY_ST S OF VICTORIA_ST",
+        "traffic_volume": 70.7
+    },
+    {
+        "scats_number": 4034,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "COTHAM_RD W OF BURKE_RD",
+        "traffic_volume": 70.4
+    },
+    {
+        "scats_number": 4030,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "HIGH_ST SW of BURKE_RD",
+        "traffic_volume": 70.4
+    },
+    {
+        "scats_number": 4057,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BELMORE_RD E OF BALWYN_RD",
+        "traffic_volume": 70.3
+    },
+    {
+        "scats_number": 4321,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "HIGH_ST NE OF HARP_ST",
+        "traffic_volume": 67.9
+    },
+    {
+        "scats_number": 3180,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "DONCASTER_RD W of BALWYN_RD",
+        "traffic_volume": 67.3
+    },
+    {
+        "scats_number": 4032,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "HARP_RD W of BURKE_RD",
+        "traffic_volume": 67.2
+    },
+    {
+        "scats_number": 3685,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "HIGHBURY_RD E of WARRIGAL_RD",
+        "traffic_volume": 67.1
+    },
+    {
+        "scats_number": 3127,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "BALWYN_RD N of CANTERBURY_RD",
+        "traffic_volume": 66.3
+    },
+    {
+        "scats_number": 4321,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "HARP_RD E OF HIGH_ST",
+        "traffic_volume": 65.9
+    },
+    {
+        "scats_number": 4040,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CAMBERWELL_RD NW of BURKE_RD",
+        "traffic_volume": 59.8
+    },
+    {
+        "scats_number": 4040,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "CAMBERWELL_RD SE of BURKE_RD",
+        "traffic_volume": 58.3
+    },
+    {
+        "scats_number": 2846,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "S.E.ARTERIAL N OF HIGH_ST",
+        "traffic_volume": 55.3
+    },
+    {
+        "scats_number": 4321,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "VALERIE_ST W OF HIGH_ST",
+        "traffic_volume": 55.0
+    },
+    {
+        "scats_number": 4051,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "DONCASTER_RD SW of SEVERN_ST",
+        "traffic_volume": 54.6
+    },
+    {
+        "scats_number": 4272,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "TOORONGA_RD S of RIVERSDALE_RD",
+        "traffic_volume": 53.4
+    },
+    {
+        "scats_number": 4324,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "GLENFERRIE_RD S OF COTHAM_RD",
+        "traffic_volume": 52.2
+    },
+    {
+        "scats_number": 4030,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "KILBY_RD W of BURKE_RD",
+        "traffic_volume": 16.5
+    },
+    {
+        "scats_number": 4051,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.1,
+        "location": "SEVERN_ST S of DONCASTER_RD",
+        "traffic_volume": 13.8
+    },
+    {
+        "scats_number": 2846,
+        "nb_latitude": -37.9,
+        "nb_longitude": 145.1,
+        "location": "WILLS_ST NW OF HIGH_ST",
+        "traffic_volume": 7.5
+    },
+    {
+        "scats_number": 4821,
+        "nb_latitude": -37.8,
+        "nb_longitude": 145.0,
+        "location": "WALMER_ST N OF VICTORIA_ST",
+        "traffic_volume": 3.3
+    }
+]
