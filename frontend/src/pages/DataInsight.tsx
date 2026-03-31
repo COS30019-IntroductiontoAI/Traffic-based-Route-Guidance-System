@@ -8,6 +8,11 @@ import {
   CalendarDays, MapPin, Activity, LoaderCircle, ServerCrash, Target, BarChart3,
 } from "lucide-react";
 
+import rhythmData from "../../data/json/1_LineChart_Traffic_By_Hour.json";
+import weekdayData from "../../data/json/2_BarChart_Weekday_Vs_Weekend.json";
+import hotspotsData from "../../data/json/3_MapChart_Traffic_Hotspots_LatLng.json";
+import boxPlotData from "../../data/json/4_BoxPlot_Volume_Distribution_By_Hour.json";
+import dayOfWeekData from "../../data/json/5_BarChart_DayOfWeek_Traffic.json";
 
 // Framer Motion animation config
 const container = {
@@ -19,7 +24,6 @@ const item = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const } },
 };
-
 
 // Generic tooltip for all charts
 const CustomTooltip = ({ active, payload, label, unit }: any) => {
@@ -38,7 +42,6 @@ const CustomTooltip = ({ active, payload, label, unit }: any) => {
   return null;
 };
 
-
 // Custom dot that labels the two peak hours (8 AM and 5 PM)
 const PeakDot = (props: any) => {
   const { cx, cy, value, payload } = props;
@@ -55,7 +58,6 @@ const PeakDot = (props: any) => {
     </g>
   );
 };
-
 
 // Reusable card wrapper: renders a chart with an insight summary below
 const InsightPanel = ({ icon, title, text, children, className, heightClass = "h-[260px]" }: any) => (
@@ -76,7 +78,6 @@ const InsightPanel = ({ icon, title, text, children, className, heightClass = "h
     </div>
   </motion.div>
 );
-
 
 export default function DataInsights() {
   const [data, setData] = useState<any>({});
@@ -124,7 +125,20 @@ export default function DataInsights() {
           dayOfWeek,
         });
       } catch (err: any) {
-        if (!abortController.signal.aborted) setError(err.message);
+        if (!abortController.signal.aborted) {
+          setData({
+            rhythm: rhythmData,
+            weekdayWeekend: weekdayData,
+            hotspotsHoriz: hotspotsData.slice(0, 10).map((i: any) => ({
+              name: `SCATS ${i.scats_number}`,
+              volume: i.traffic_volume,
+              location: i.location,
+            })),
+            boxPlot: boxPlotData.map((item: any) => ({ ...item, x: item.hour })),
+            dayOfWeek: dayOfWeekData,
+          });
+          setError(null);
+        }
       } finally {
         if (!abortController.signal.aborted) setIsLoading(false);
       }
@@ -133,7 +147,6 @@ export default function DataInsights() {
     fetchAllData();
     return () => abortController.abort();
   }, []);
-
 
   if (isLoading) return (
     <div className="flex h-full min-h-[80vh] items-center justify-center">
@@ -154,7 +167,6 @@ export default function DataInsights() {
     </div>
   );
 
-
   return (
     <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
@@ -171,7 +183,7 @@ export default function DataInsights() {
 
         {/* Chart 1 — Full-width overview: hourly volume vs average baseline (composed chart) */}
         <InsightPanel
-          icon={<Activity size={20} className="text-blue-500" />}
+          // icon={<Activity size={20} className="text-blue-500" />}
           title="Hourly Traffic Rhythm vs Average Baseline"
           heightClass="h-[350px]"
           text="The red dashed line marks the overall average (103.9 veh/h). Two critical spikes appear at 8 AM (173.6) and 5 PM (194.4). Route Guidance weights should penalise these windows most heavily."
@@ -197,7 +209,7 @@ export default function DataInsights() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           <InsightPanel
-            icon={<CalendarDays size={18} className="text-indigo-500" />}
+            // icon={<CalendarDays size={18} className="text-indigo-500" />}
             title="Weekday vs Weekend Dynamics"
             text="Weekdays show two sharp peaks at 8 AM and 5 PM. Weekend traffic is smoother, with a moderate peak around midday and no strong spikes."
           >
@@ -213,7 +225,7 @@ export default function DataInsights() {
           </InsightPanel>
 
           <InsightPanel
-            icon={<BarChart3 size={18} className="text-violet-500" />}
+            // icon={<BarChart3 size={18} className="text-violet-500" />}
             title="Traffic Flow by Day of Week"
             text="Friday has the highest volume, while Sunday is the lowest. Clear weekly pattern for prediction."
           >
@@ -224,14 +236,14 @@ export default function DataInsights() {
                 tick={{ fontSize: 11, fill: '#9ca3af' }}
                 axisLine={false}
                 tickLine={false}
-                />
+              />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
               <Bar dataKey="traffic_volume" name="Avg Volume" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} />
             </BarChart>
           </InsightPanel>
 
           <InsightPanel
-            icon={<MapPin size={18} className="text-rose-500" />}
+            // icon={<MapPin size={18} className="text-rose-500" />}
             title="Top 10 Bottlenecks"
             text="SCATS 3685 is the busiest. Hotspots cluster around Warrigal Rd, forming key bottlenecks."
           >
@@ -248,7 +260,7 @@ export default function DataInsights() {
           </InsightPanel>
 
           <InsightPanel
-            icon={<Target size={18} className="text-orange-500" />}
+            // icon={<Target size={18} className="text-orange-500" />}
             title="Volume Variance (IQR and Outliers)"
             text="Median rises during peak hours, with wider IQR indicating higher variability during the day."
           >
