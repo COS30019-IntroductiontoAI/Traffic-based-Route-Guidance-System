@@ -31,7 +31,7 @@ const teamMembers = [
     name: "Bui Quang Doan",
     id: "104993227",
     role: "Member",
-    tasks: "Data Processing & Dataset Preparation for 2006",
+    tasks: "Data Processing & Dataset Preparation for 2006, Frontend Supporter",
     icon: <Database className="w-5 h-5 text-blue-500" />,
     borderColor: "border-blue-200",
     bgColor: "bg-blue-50",
@@ -70,7 +70,7 @@ export default function AboutUs() {
             Traffic-based Route Guidance System
           </h1>
           <p className="text-[16px] text-slate-500 font-medium mt-2">
-            Assignment 2B – Machine Learning and Software Integration
+            Assignment 2B_Machine Learning and Software Integration
           </p>
         </motion.div>
 
