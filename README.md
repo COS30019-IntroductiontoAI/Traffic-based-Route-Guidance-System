@@ -37,7 +37,7 @@
 3. (Optional) Smoke test the backend engine:
 
    ```bash
-   py -m backend.main
+   python -m backend.main
    ```
 
    Runs a quick route query (node 970 → 4043) and prints JSON.
@@ -45,7 +45,7 @@
 4. Start the backend API server (keep it running):
 
    ```bash
-   py -m backend.api_server
+   python -m backend.api_server
    ```
 
    API base: http://127.0.0.1:8000
@@ -97,19 +97,19 @@ The sequence models train on `data/processed/2006_processed.csv` with 96-step in
 - LSTM:
 
    ```bash
-   python -m models.lstm_model
+   python -m src.models.lstm_model
    ```
 
 - GRU:
 
    ```bash
-   python -m models.gru_model
+   python -m src.models.gru_model
    ```
 
 - LightGBM:
 
    ```bash
-   python -m models.lightgbm_model
+   python -m src.models.lightgbm_model
    ```
 
 Artifacts: saved models and training curves in `results/trained_models/`.
