@@ -344,7 +344,7 @@ export default function RouteGuidance() {
   }
 
   return (
-    <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans">
+    <div className="p-8 max-w-[2000px] w-full min-h-screen font-sans">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
         <motion.div variants={item}>
           <h1 className="text-[26px] font-bold tracking-tight text-slate-800">Route Guidance</h1>

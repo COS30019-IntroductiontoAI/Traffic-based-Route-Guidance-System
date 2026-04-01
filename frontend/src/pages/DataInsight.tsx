@@ -7,7 +7,7 @@ import {
   Area, LineChart, Line, ComposedChart,
 } from "recharts";
 import {
-  LoaderCircle, ServerCrash,
+  LoaderCircle, ServerCrash
 } from "lucide-react";
 
 import rhythmData from "../../data/json/1_LineChart_Traffic_By_Hour.json";
@@ -170,7 +170,7 @@ export default function DataInsights() {
   );
 
   return (
-    <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans">
+    <div className="p-8 max-w-[2000px] w-full min-h-screen font-sans">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
         {/* Header */}

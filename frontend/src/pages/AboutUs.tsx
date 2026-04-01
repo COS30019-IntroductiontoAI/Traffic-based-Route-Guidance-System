@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { 
   Github, Mail, BookOpen, GraduationCap, Clock, UserCheck, 
-  Code, Database, LayoutTemplate, Network 
+  Code, Database, LayoutTemplate, Network, Youtube 
 } from "lucide-react";
 
 // Animation config
@@ -21,7 +21,7 @@ const teamMembers = [
     name: "Do Gia Huy",
     id: "104988294",
     role: "Leader",
-    tasks: "ML Implementation (LSTM/GRU), Model Evaluation, Data Processing & Dataset Preparation for 2014",
+    tasks: "Task Coordinator, ML Implementation (LSTM/GRU), Model Evaluation, Data Processing & Dataset Preparation for 2014",
     icon: <UserCheck className="w-5 h-5 text-amber-500" />,
     borderColor: "border-amber-200",
     bgColor: "bg-amber-50",
@@ -31,7 +31,7 @@ const teamMembers = [
     name: "Bui Quang Doan",
     id: "104993227",
     role: "Member",
-    tasks: "Data Processing & Dataset Preparation for 2006, Frontend Supporter",
+    tasks: "Data Processing & Dataset Preparation for 2006, Documentation, Frontend Supporter",
     icon: <Database className="w-5 h-5 text-blue-500" />,
     borderColor: "border-blue-200",
     bgColor: "bg-blue-50",
@@ -51,7 +51,7 @@ const teamMembers = [
     name: "Le Thanh Nam",
     id: "104999380",
     role: "Member",
-    tasks: "System Integration, Travel Time Estimation & GUI",
+    tasks: "System Integration, Travel Time Estimation & GUI Website",
     icon: <LayoutTemplate className="w-5 h-5 text-purple-500" />,
     borderColor: "border-purple-200",
     bgColor: "bg-purple-50",
@@ -61,7 +61,7 @@ const teamMembers = [
 
 export default function AboutUs() {
   return (
-    <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans bg-gray-50/30">
+    <div className="p-8 max-w-[2000px] w-full min-h-screen font-sans bg-gray-50/30">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
         
         {/* Header */}
@@ -75,12 +75,12 @@ export default function AboutUs() {
         </motion.div>
 
         {/* Project info */}
-        <motion.div variants={item} className="bg-white rounded-[24px] border border-slate-200/60 p-8 shadow-sm max-w-5xl mx-auto flex flex-col md:flex-row gap-8 justify-between items-center relative overflow-hidden">
+        <motion.div variants={item} className="bg-white rounded-[24px] border border-slate-200/60 p-8 shadow-sm max-w-5xl mx-auto flex flex-col lg:flex-row gap-8 justify-between items-center relative overflow-hidden">
           
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -z-10 opacity-60 translate-x-1/3 -translate-y-1/3"></div>
 
-          <div className="space-y-5 flex-1">
+          <div className="space-y-5 flex-1 w-full">
             <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-2">
               Unit Details
             </h2>
@@ -138,18 +138,31 @@ export default function AboutUs() {
             </div>
           </div>
 
-          {/* GitHub link */}
-          <div className="flex-shrink-0 flex flex-col items-center sm:items-end">
+          {/* Action Links: GitHub & YouTube */}
+          <div className="flex-shrink-0 flex flex-col sm:flex-row gap-4 w-full lg:w-auto mt-4 lg:mt-0">
             <a 
               href="https://github.com/COS30019-IntroductiontoAI/Traffic-based-Route-Guidance-System.git" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-2xl transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1"
+              className="group flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-2xl transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
             >
               <Github size={24} className="group-hover:scale-110 transition-transform" />
               <div className="text-left">
                 <p className="text-xs font-medium text-slate-300">View Source Code</p>
                 <p className="text-sm font-bold tracking-wide">GitHub Repository</p>
+              </div>
+            </a>
+
+            <a 
+              href="https://youtu.be/6hjmbEFw8G0" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white px-6 py-4 rounded-2xl transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
+            >
+              <Youtube size={24} className="group-hover:scale-110 transition-transform" />
+              <div className="text-left">
+                <p className="text-xs font-medium text-red-200">Watch Demo</p>
+                <p className="text-sm font-bold tracking-wide">YouTube Video</p>
               </div>
             </a>
           </div>

@@ -4,7 +4,7 @@
 
 | Name                  | Student ID | Task & Responsibility                                                                          |
 | :-------------------- | :--------- | :--------------------------------------------------------------------------------------------- |
-| Bui Quang Doan        | 104993227  | Data Processing & Dataset Preparation for 2006, Frontend Support                                                 |
+| Bui Quang Doan        | 104993227  | Data Processing & Dataset Preparation for 2006, Frontend Support                               |
 | Do Gia Huy (Leader)   | 104988294  | ML Implementation (LSTM/GRU), Model Evaluation, Data Processing & Dataset Preparation for 2014 |
 | Huynh Doan Hoang Minh | 104777308  | ML Implementation (LightGBM), Model Evaluation, Backend, Frontend Supporter                    |
 | Le Thanh Nam          | 104999380  | System Integration, Travel Time Estimation & GUI                                               |
@@ -14,66 +14,57 @@
 - Goal: Build a traffic-based route guidance system for the City of Boroondara.
 - Data: Historical SCATS traffic flow data from October 2006 (training) plus October 2014 (held-out temporal test).
 - Models: LSTM, GRU, and LightGBM models to forecast 15-minute traffic volume.
-- Routing: Forecasts will later be converted to travel times for A\* routing (not covered here).
-
----
+- Routing: Forecasts are converted to travel times for A* routing.
 
 ## Prerequisites
 
 - Python 3.12 or later
 - Node.js 18 or later
 
----
+## Run the GUI application locally
 
-## How to Run the Project
+1. Install dependencies (from project root):
 
-### 1. Install Python ML dependencies (from project root)
+   ```bash
+   pip install -r requirements.txt
+   pip install -r backend/requirements.txt
+   npm install
+   ```
 
-```bash
-pip install -r requirements.txt
-```
+2. Ensure prediction CSVs exist for the backend:
+   - Copy prepared files to `results/predictions/2006_predictions.csv` and `results/predictions/2014_predictions.csv`, **or** generate them via the steps in [Test the model locally (src)](#test-the-model-locally-src).
 
-### 2. Install Python backend dependencies
+3. (Optional) Smoke test the backend engine:
 
-```bash
-pip install -r backend/requirements.txt
-```
+   ```bash
+   py -m backend.main
+   ```
 
-### 3. Install frontend dependencies (from project root)
+   Runs a quick route query (node 970 → 4043) and prints JSON.
 
-```bash
-npm install
-```
+4. Start the backend API server (keep it running):
 
-### 4. (Optional) Verify the backend engine with a smoke test
+   ```bash
+   py -m backend.api_server
+   ```
 
-```bash
-py -m backend.main
-```
+   API base: http://127.0.0.1:8000
 
-This runs a quick route query (node `970` → `4043`) and prints the JSON result to the console. Use it to confirm the route engine and ML models are loading correctly **before** starting the full server.
+5. Start the frontend dev server (new terminal):
 
-### 5. Start the backend API server (from project root)
+   ```bash
+   npm run dev
+   ```
 
-```bash
-py -m backend.api_server
-```
+   App: http://localhost:5173 (or next free port)
 
-The API will be available at `http://127.0.0.1:8000`.
+> Both backend and frontend must stay running for the full GUI experience.
 
-### 6. Start the frontend dev server (from project root)
+## Test the model locally (src)
 
-```bash
-npm run dev
-```
+Use the `src` pipelines to process data, train models, generate predictions, and run evaluation suites. If you already installed Python dependencies in the GUI section, reuse that environment.
 
-The app will be available at `http://localhost:5173` (or the next available port).
-
-> Both servers must be running at the same time for the full GUI experience.
-
----
-
-## Datasets & Split Strategy
+### Datasets & split strategy
 
 - 2006 dataset is split **70/10/20** into train/validation/test using sliding 96-step windows per site.
 - Early stopping and learning-rate scheduling monitor the **2006 validation** split only.
@@ -81,50 +72,67 @@ The app will be available at `http://localhost:5173` (or the next available port
 - Feature scaling: `MinMaxScaler` is **fit on 2006 training only** and reused everywhere.
 - Road name encoding: `LabelEncoder` is fit on 2006; unseen 2014 road names map to **-1** to avoid leakage.
 
----
+### Data preparation
 
-## Data Preparation
+- 2006 processing:
 
-- 2006 processing  
-  `python -m src.process_2006`  
-  Output: `data/processed/2006_processed.csv`
+   ```bash
+   python -m src.process_2006
+   ```
 
-- 2014 processing (uses detector-direction lookup and 2006 metadata)  
-  `python -m src.process_2014`  
-  Output: `data/processed/2014_processed.csv`
+   Output: `data/processed/2006_processed.csv`
 
----
+- 2014 processing (uses detector-direction lookup and 2006 metadata):
 
-## Model Training (2006 only)
+   ```bash
+   python -m src.process_2014
+   ```
 
-The sequence models train on `data/processed/2006_processed.csv` with 96-step input sequences and 1-step (15-minute) forecasts. LightGBM uses the same dataset but converts each movement history into lag-based tabular rows.
+   Output: `data/processed/2014_processed.csv`
 
-- LSTM: `python -m models.lstm_model`
-- GRU : `python -m models.gru_model`
-- LightGBM: `python -m models.lightgbm_model`
+### Model training (2006 only)
+
+The sequence models train on `data/processed/2006_processed.csv` with 96-step input sequences and 1-step (15-minute) forecasts. LightGBM converts each movement history into lag-based tabular rows.
+
+- LSTM:
+
+   ```bash
+   python -m models.lstm_model
+   ```
+
+- GRU:
+
+   ```bash
+   python -m models.gru_model
+   ```
+
+- LightGBM:
+
+   ```bash
+   python -m models.lightgbm_model
+   ```
 
 Artifacts: saved models and training curves in `results/trained_models/`.
 
----
-
-## Prediction Pipeline
+### Prediction pipeline
 
 Predictions are generated on **full continuous datasets** to preserve 96-step sequence integrity before any filtering.
 
-- Run on 2014 (temporal generalisation):  
-  `python -m src.predict --data 2014`
+- Run on 2014 (temporal generalisation):
 
-- Run on 2006 (in-domain check):  
-  `python -m src.predict --data 2006`
+   ```bash
+   python -m src.predict --data 2014
+   ```
 
-Outputs: `results/predictions/{year}_predictions.csv` with columns  
-`datetime, scats_number, location, hour, day_of_week, is_weekend, actual, predicted_lstm, predicted_gru, predicted_lightgbm`.
+- Run on 2006 (in-domain check):
 
----
+   ```bash
+   python -m src.predict --data 2006
+   ```
 
-## Scenario Tests (post-prediction)
+Outputs: `results/predictions/{year}_predictions.csv` with columns `datetime, scats_number, location, hour, day_of_week, is_weekend, actual, predicted_lstm, predicted_gru, predicted_lightgbm`.
 
-### Full Dataset Test Runner
+### Scenario tests (post-prediction)
 
 `src/test_runner.py` filters the **precomputed predictions CSVs** (no model re-run) so every evaluated point comes from a valid 96-step window.
 
@@ -145,24 +153,24 @@ Test Case Descriptions:
 
 Usage:
 
-- Run all tests and aggregate to CSV (2014 data):  
-  `python -m src.test_runner --data 2014`
+```bash
+# Run all tests and aggregate to CSV (2014 data)
+python -m src.test_runner --data 2014
 
-- Run single test:  
-  `python -m src.test_runner --test T01 --data 2014`
+# Run single test
+python -m src.test_runner --test T01 --data 2014
 
-- Run specific model:  
-  `python -m src.test_runner --test T06 --model lstm --data 2014`
+# Run specific model
+python -m src.test_runner --test T06 --model lstm --data 2014
+```
 
 Outputs:
 - Aggregated metrics: `results/test_results/test_metrics_full.csv`
 - Individual plots: `results/test_graphs/T01/lstm_predictions.png`, etc.
 
-### Stratified Dataset Test Runner (20% Test Split Only)
+### Stratified dataset test runner (20% test split only)
 
 `src/test_stratified.py` runs the same 10 test cases but **only on the 20% test split** of the 2006 dataset (the portion held out during model training/validation).
-
-This provides a stratified evaluation that is independent of the full dataset performance.
 
 Usage:
 
