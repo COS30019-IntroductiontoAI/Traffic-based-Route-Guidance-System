@@ -80,6 +80,9 @@ Use the `src` pipelines to process data, train models, generate predictions, and
    python -m src.process_2006
    ```
 
+   ```bash
+   run all cells in notebooks/01_feature_selection.ipynb
+   ```
    Output: `data/processed/2006_processed.csv`
 
 - 2014 processing (uses detector-direction lookup and 2006 metadata):
