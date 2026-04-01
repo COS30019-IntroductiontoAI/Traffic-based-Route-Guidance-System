@@ -52,3 +52,6 @@ Thumbs.db
 # Environment
 .env
 *.log
+
+# Ignore large processed datasets
+src/data/processed/master_dataset.csv
