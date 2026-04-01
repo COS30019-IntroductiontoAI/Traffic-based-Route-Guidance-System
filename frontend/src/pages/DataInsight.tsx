@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  AreaChart, Area, LineChart, Line, ComposedChart,
+  Area, LineChart, Line, ComposedChart,
 } from "recharts";
 import {
-  CalendarDays, MapPin, Activity, LoaderCircle, ServerCrash, Target, BarChart3,
+  LoaderCircle, ServerCrash
 } from "lucide-react";
 
 import rhythmData from "../../data/json/1_LineChart_Traffic_By_Hour.json";
@@ -168,7 +168,7 @@ export default function DataInsights() {
   );
 
   return (
-    <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans">
+    <div className="p-8 max-w-[2000px] w-full min-h-screen font-sans">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
         {/* Header */}

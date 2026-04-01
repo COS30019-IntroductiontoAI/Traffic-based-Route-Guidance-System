@@ -61,7 +61,7 @@ const teamMembers = [
 
 export default function AboutUs() {
   return (
-    <div className="p-8 max-w-[1500px] w-full min-h-screen font-sans bg-gray-50/30">
+    <div className="p-8 max-w-[2000px] w-full min-h-screen font-sans bg-gray-50/30">
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
         
         {/* Header */}
