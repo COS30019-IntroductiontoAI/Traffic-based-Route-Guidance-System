@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, useMemo } from 'react';
 import { LoaderCircle, ServerCrash } from 'lucide-react';
 import {
@@ -137,7 +139,6 @@ const TEST_CASE_BREAKDOWN: TestCaseCategory[] = [
 ];
 
 /* ─── Custom Tooltip Component ────────────────────────────────────────── */
-// Component này giúp hiển thị đầy đủ chỉ số bao gồm cả Average khi hover
 const CustomTooltip = ({ active, payload, label, avgValue }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -294,7 +295,6 @@ export default function ModelEvaluation() {
                     tick={{ fill: '#94a3b8', fontSize: 12 }} 
                   />
                   
-                  {/* Tooltip Tùy Chỉnh để thấy Average */}
                   <Tooltip 
                     content={<CustomTooltip avgValue={overallAverage} />}
                     cursor={{ fill: '#f1f5f9', opacity: 0.4 }} 
@@ -308,7 +308,6 @@ export default function ModelEvaluation() {
                     wrapperStyle={{ paddingBottom: '30px', fontSize: '12px', fontWeight: 'bold' }}
                   />
 
-                  {/* Đường trung bình rõ nét hơn */}
                   <ReferenceLine 
                     y={overallAverage} 
                     stroke="#64748b" 

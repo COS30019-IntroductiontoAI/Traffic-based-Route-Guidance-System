@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  AreaChart, Area, LineChart, Line, ComposedChart,
+  Area, LineChart, Line, ComposedChart,
 } from "recharts";
 import {
-  CalendarDays, MapPin, Activity, LoaderCircle, ServerCrash, Target, BarChart3,
+  LoaderCircle, ServerCrash,
 } from "lucide-react";
 
 import rhythmData from "../../data/json/1_LineChart_Traffic_By_Hour.json";

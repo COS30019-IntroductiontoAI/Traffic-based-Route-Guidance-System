@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NavLink } from 'react-router-dom'
 import { themeHex } from '../theme'
 

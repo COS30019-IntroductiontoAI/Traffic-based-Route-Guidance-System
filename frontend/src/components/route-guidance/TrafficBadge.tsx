@@ -3,7 +3,7 @@ interface TrafficBadgeProps {
   size?: "sm" | "md";
 }
 
-// Muted, understated palette — not the vivid "AI" look
+// Muted, understated palette
 const config = {
   clear: {
     label: "Clear",
