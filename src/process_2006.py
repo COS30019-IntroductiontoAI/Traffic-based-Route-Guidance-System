@@ -11,7 +11,8 @@ RAW_2006_DIR = SRC_DIR / "data" / "2006_raw"
 PROCESSED_DIR = SRC_DIR / "data" / "processed"
 
 def main():
-    print("Start preprocessing pipeline...\n")
+    print("____________________________________________")
+    print("\nSTARTING PREPROCESSING PIPELINE\n")
 
     raw_sites_path = str(RAW_2006_DIR / "SCATSSiteListingSpreadsheet_VicRoads.xlsx")
     raw_traffic_path = str(RAW_2006_DIR / "Scats Data October 2006.xls")
@@ -25,28 +26,31 @@ def main():
 
     os.makedirs(PROCESSED_DIR, exist_ok=True)
 
-    print("--- Phase 1: Cleaning data ---")
+    # Phase 1
+    print("Cleaning raw datasets\n")
 
-    print("Cleaning sites...")
+    print("Cleaning SCATS site data\n")
     clean_scats_sites(
         input_path=raw_sites_path,
         output_path=cleaned_sites_path
     )
 
-    print("Cleaning traffic...")
+    print("Cleaning SCATS traffic data\n")
     clean_scats_traffic(
         input_path=raw_traffic_path,
         output_path=cleaned_traffic_path
     )
 
-    print("Cleaning AADT...")
+    print("Cleaning AADT location data\n")
     clean_aadt_locations(
         input_path=raw_aadt_path,
         output_path=cleaned_aadt_path
     )
-    print("Done cleaning.\n")
 
-    print("--- Phase 2: Merging data ---")
+    print("Data cleaning completed\n")
+
+    # Phase 2
+    print("Merging datasets\n")
     
     merge_datasets(
         traffic_path=cleaned_traffic_path,
@@ -54,10 +58,11 @@ def main():
         aadt_path=cleaned_aadt_path,
         output_path=master_output_path
     )
-    print("Done merging.\n")
 
-    print("All done!")
-    print(f"Master dataset successfully saved to: {master_output_path}")
+    print("Merging completed\n")
+
+    print("Preprocessing pipeline finished successfully")
+    print(f"Master dataset saved to: {master_output_path}\n")
 
 if __name__ == "__main__":
     main()
