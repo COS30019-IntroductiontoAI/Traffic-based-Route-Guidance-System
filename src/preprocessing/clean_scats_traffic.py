@@ -95,6 +95,7 @@ def clean_scats_traffic(input_path: str, output_path: str):
     print("Data sorted\n")
 
     # Step 9: Remove invalid and duplicate data
+    # Exclude site 4335 (pedestrian counts) to prevent skewed vehicle predictions
     print("Removing invalid and duplicate records\n")
     traffic_data = traffic_data[traffic_data["scats_number"] != 4335].copy()
     traffic_data = traffic_data.drop_duplicates()
@@ -102,6 +103,7 @@ def clean_scats_traffic(input_path: str, output_path: str):
     print("Invalid site removed and duplicates handled\n")
 
     # Step 10: Filter insufficient data
+    # Keep sites with >= 25 days of data (accommodates valid sites like 4262 with 26 days)
     print("Filtering SCATS sites with insufficient data\n")
     unique_days_per_site = traffic_data.groupby("scats_number")["datetime"].transform(
         lambda values: values.dt.date.nunique()
