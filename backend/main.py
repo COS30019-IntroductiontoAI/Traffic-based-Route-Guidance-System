@@ -13,6 +13,8 @@ def main() -> None:
     # Sample pair from the generated SCATS graph.
     origin = "970"
     destination = "4043"
+    # This script intentionally stays tiny: it is only meant to prove the route stack can run end-to-end.
+    # It is not part of the frontend flow and should stay safe to run from the command line.
     routes = service.get_routes(origin=origin, destination=destination, k=3, algorithm="lightgbm")
     print(json.dumps(routes, indent=2))
 

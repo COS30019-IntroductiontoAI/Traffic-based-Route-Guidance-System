@@ -26,10 +26,12 @@ def congestion_multiplier(
         return 1.0
 
     if reference_flow is None or reference_flow <= 0:
+        # This fallback keeps the function usable even when only predicted flow exists.
+        # The absolute divisor is deliberately simple because it is only a backup path.
         normalized_flow = predicted_flow / 200.0
     else:
-        # Exaggerate the impact of high predictions and remove the hard 1.0 bottleneck 
-        # so that slight differences between ML models produce different route choices
+        # We amplify the ratio slightly so different models can produce meaningfully different route rankings
+        # without making travel-time estimates explode for one noisy prediction.
         normalized_flow = (predicted_flow / reference_flow) ** 1.5
 
     return min(1.0 + normalized_flow * scale, MAX_CONGESTION_MULTIPLIER)
@@ -44,8 +46,10 @@ def classify_congestion_level(
         return "clear"
 
     if reference_flow is None or reference_flow <= 0:
+        # Fall back to a simple absolute scale when we cannot compare against a historical baseline.
         normalized_flow = min(predicted_flow / 200.0, 1.0)
     else:
+        # The traffic badge only needs a coarse label, so the ratio is clipped to keep thresholding simple.
         normalized_flow = min(predicted_flow / reference_flow, 1.0)
 
     if normalized_flow >= 0.85:
@@ -64,6 +68,8 @@ def estimate_edge_travel_time_minutes(
     include_intersection_delay: bool = True,
     intersection_delay_seconds: float = DEFAULT_INTERSECTION_DELAY_SECONDS,
 ) -> float:
+    # The route engine always starts from free-flow time, then adds congestion and finally
+    # a junction delay so every segment includes a small intersection penalty.
     base_minutes = free_flow_time_minutes(distance_km, speed_kmph)
     travel_minutes = base_minutes * congestion_multiplier(predicted_flow, reference_flow)
 

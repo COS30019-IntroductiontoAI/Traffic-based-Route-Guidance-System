@@ -6,6 +6,7 @@ from backend.route_guidance.types import RouteResult
 # Fallback badge mapping for segments that do not have a congestion label yet.
 def classify_traffic_level(time_minutes: float) -> str:
     # Map segment duration to the UI traffic badge levels as a safe fallback.
+    # This only runs when a richer ML-based traffic label was not attached earlier.
     if time_minutes >= 3.0:
         return "heavy"
     if time_minutes >= 2.0:
@@ -15,6 +16,8 @@ def classify_traffic_level(time_minutes: float) -> str:
 
 # Convert a backend route result into the structure expected by the frontend.
 def to_frontend_route(route: RouteResult, rank: int) -> dict[str, object]:
+    # Formatting is kept here so UI field names stay isolated from the search and scoring code.
+    # The frontend should not need to know about RouteResult or RouteSegment internals.
     return {
         "rank": rank,
         "nodes": route.nodes,

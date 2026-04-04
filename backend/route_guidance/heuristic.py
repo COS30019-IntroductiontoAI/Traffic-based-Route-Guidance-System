@@ -26,5 +26,6 @@ def straight_line_time_minutes(
 ) -> float:
     if speed_kmph <= 0:
         return 0.0
+    # Straight-line time stays optimistic, so A* still prefers paths without overestimating the remaining cost.
     distance_km = haversine_distance_km(origin.lat, origin.lng, destination.lat, destination.lng)
     return (distance_km / speed_kmph) * 60.0
