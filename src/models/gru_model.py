@@ -40,6 +40,7 @@ from tensorflow.keras.optimizers import Adam
 SRC_ROOT: Path = Path(__file__).resolve().parents[1]
 PROCESSED_2006_PATH: Path = SRC_ROOT / "data" / "processed" / "2006_processed.csv"
 TRAINED_MODELS_DIR: Path = SRC_ROOT / "results" / "trained_models"
+GRAPHS_DIR: Path = SRC_ROOT / "results" / "graphs"
 
 
 def build_gru_model(
@@ -163,6 +164,7 @@ def plot_training_curve(history: History, output_path: Path, title: str) -> None
 def train_gru_model(
   data_path: Path = PROCESSED_2006_PATH,
   model_dir: Path = TRAINED_MODELS_DIR,
+  graphs_dir: Path = GRAPHS_DIR,
   seq_len: int = SEQ_LEN,
   forecast_horizon: int = FORECAST_HORIZON,
   input_features: int = INPUT_FEATURES,
@@ -181,7 +183,8 @@ def train_gru_model(
 
   Args:
     data_path: Path to processed training CSV data.
-    model_dir: Directory where model artifacts and plots are saved.
+    model_dir: Directory where model checkpoint artifacts are saved.
+    graphs_dir: Directory where training curves are saved.
     seq_len: Number of historical timesteps per training sample.
     forecast_horizon: Forecast horizon used by the data loader.
     input_features: Number of input features per timestep.
@@ -234,7 +237,7 @@ def train_gru_model(
   )
   plot_training_curve(
     history=history,
-    output_path=model_dir / "gru_training_curve.png",
+    output_path=graphs_dir / "gru_training_curve.png",
     title="GRU Model Training and Validation Loss",
   )
   return model
