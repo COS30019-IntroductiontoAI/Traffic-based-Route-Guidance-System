@@ -1,0 +1,20 @@
+{
+  "supported_data_keys": ["2006", "2014"],
+  "route_guidance_month": 10,
+  "route_guidance_month_label": "October",
+  "max_route_k": 5,
+  "traffic_profile_hour_step": 3,
+  "graph_neighbors_per_site": 3,
+  "graph_component_query_neighbors": 8,
+  "scats_coordinate_corrections": {
+    "4266": [-37.8246, 145.0396]
+  },
+  "default_route_guidance_selection": {
+    "data": "2014",
+    "date_by_data": {
+      "2006": "2006-10-17",
+      "2014": "2014-10-17"
+    },
+    "time": "08:00"
+  }
+}
