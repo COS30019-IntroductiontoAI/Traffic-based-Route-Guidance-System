@@ -1,3 +1,5 @@
+"""Create storytelling data files for the web dashboard visualizations (Data Insight page)."""
+
 import pandas as pd
 import os
 import json

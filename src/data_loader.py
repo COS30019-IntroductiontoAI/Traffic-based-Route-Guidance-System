@@ -1,6 +1,10 @@
-﻿import pandas as pd
+﻿"""Shared data loading and feature engineering for sequence and tabular models."""
+
+from __future__ import annotations
+
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 SEQUENCE_FEATURE_COLUMNS = [
   "traffic_volume",
@@ -43,20 +47,34 @@ TABULAR_EXTRA_FEATURE_COLUMNS = [
 ]
 
 
-# --------------------------------------
+# ---------------------------------------
 # --- Shared Data Preparation Helpers ---
-# --------------------------------------
+# ---------------------------------------
 
-# Normalize minor schema differences between processed datasets.
 def normalize_processed_schema(df: pd.DataFrame) -> pd.DataFrame:
+  """Normalize known processed-schema naming differences.
+
+  Args:
+    df: Input dataframe from a processed CSV.
+
+  Returns:
+    Schema-normalized dataframe copy.
+  """
   df = df.copy()
   if "nb_longtitude" in df.columns and "nb_longitude" not in df.columns:
     df = df.rename(columns={"nb_longtitude": "nb_longitude"})
   return df
 
 
-# Parse processed datetime values consistently across loaders.
-def parse_processed_datetime(values) -> pd.Series:
+def parse_processed_datetime(values: pd.Series) -> pd.Series:
+  """Parse mixed datetime formats used by processed datasets.
+
+  Args:
+    values: Datetime-like string series.
+
+  Returns:
+    Parsed pandas datetime series.
+  """
   datetime_strings = values.astype(str)
   iso_mask = datetime_strings.str.match(r"^\d{4}-\d{2}-\d{2}\s")
   slash_mask = datetime_strings.str.match(r"^\d{2}/\d{2}/\d{4}\s")
@@ -74,8 +92,15 @@ def parse_processed_datetime(values) -> pd.Series:
   return parsed
 
 
-# Add shared cyclical time features used by both sequence and tabular models.
 def add_common_time_features(df: pd.DataFrame) -> pd.DataFrame:
+  """Add cyclical time features derived from hour and day-of-week.
+
+  Args:
+    df: Input dataframe containing hour and day_of_week columns.
+
+  Returns:
+    Dataframe copy with cyclical columns added.
+  """
   df = df.copy()
   df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
   df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
@@ -84,8 +109,15 @@ def add_common_time_features(df: pd.DataFrame) -> pd.DataFrame:
   return df
 
 
-# Read one processed CSV with a consistent schema and ordering.
 def read_processed_data(filepath: str) -> pd.DataFrame:
+  """Load processed CSV with normalized schema and stable ordering.
+
+  Args:
+    filepath: Processed CSV path.
+
+  Returns:
+    Cleaned dataframe sorted by site, location, and datetime.
+  """
   df = pd.read_csv(filepath)
   df = normalize_processed_schema(df)
   df["datetime"] = parse_processed_datetime(df["datetime"])
@@ -94,11 +126,19 @@ def read_processed_data(filepath: str) -> pd.DataFrame:
   return df
 
 
-# Encode road_name with either a fresh encoder or an existing one.
 def encode_road_names(
   df: pd.DataFrame,
   label_encoder: LabelEncoder | None = None,
 ) -> tuple[pd.DataFrame, LabelEncoder]:
+  """Encode road names using a fitted or newly-created label encoder.
+
+  Args:
+    df: Input dataframe with road_name column.
+    label_encoder: Optional existing fitted encoder.
+
+  Returns:
+    Tuple of transformed dataframe and fitted encoder.
+  """
   df = df.copy()
   if label_encoder is None:
     label_encoder = LabelEncoder()
@@ -112,12 +152,21 @@ def encode_road_names(
   return df, label_encoder
 
 
-# --------------------------------------
+# ----------------------------------
 # ---   Sequence Model Helpers   ---
-# --------------------------------------
+# ----------------------------------
 
-# Build sliding window sequences for time series forecasting, ensuring that sequences do not cross group boundaries
-def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int): 
+def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int) -> tuple[np.ndarray, np.ndarray]:
+  """Build fixed-length history windows and aligned targets.
+
+  Args:
+    data: Movement-level feature matrix sorted by time.
+    seq_len: Number of historical timesteps per sequence.
+    forecast_horizon: Number of steps ahead for target selection.
+
+  Returns:
+    Tuple of sequence tensor and target vector.
+  """
   X, y = [], []
 
   # Iterate through the data to create sequences of length seq_len and corresponding targets at forecast_horizon steps ahead
@@ -128,8 +177,27 @@ def create_sequences(data: np.ndarray, seq_len: int, forecast_horizon: int):
   return np.array(X), np.array(y)
 
 
-# Split the sequences into train/validation/test sets based on specified ratios
-def split_sequences(X: np.ndarray, y: np.ndarray, train_ratio: float = 0.7, val_ratio: float = 0.1):
+def split_sequences(
+  X: np.ndarray,
+  y: np.ndarray,
+  train_ratio: float = 0.7,
+  val_ratio: float = 0.1,
+) -> tuple[
+  tuple[np.ndarray, np.ndarray],
+  tuple[np.ndarray, np.ndarray],
+  tuple[np.ndarray, np.ndarray],
+]:
+  """Split sequence arrays into chronological train/validation/test segments.
+
+  Args:
+    X: Sequence tensor.
+    y: Target vector.
+    train_ratio: Fraction reserved for training.
+    val_ratio: Fraction reserved for validation.
+
+  Returns:
+    Train, validation, and test tuple pairs.
+  """
   train_end = int(len(X) * train_ratio)
   val_end = int(len(X) * (train_ratio + val_ratio))
 
@@ -140,8 +208,30 @@ def split_sequences(X: np.ndarray, y: np.ndarray, train_ratio: float = 0.7, val_
   return (X_train, y_train), (X_val, y_val), (X_test, y_test)
 
 
-# Main function to prepare the data for training the models
-def prepare_data(filepath, seq_len, forecast_horizon):
+def prepare_data(
+  filepath: str,
+  seq_len: int,
+  forecast_horizon: int,
+) -> tuple[
+  tuple[np.ndarray, np.ndarray],
+  tuple[np.ndarray, np.ndarray],
+  tuple[np.ndarray, np.ndarray],
+  MinMaxScaler,
+  LabelEncoder,
+]:
+  """Prepare sequence-model data splits and scaling artifacts.
+
+  Args:
+    filepath: Processed CSV path.
+    seq_len: Sequence length.
+    forecast_horizon: Forecast horizon.
+
+  Returns:
+    Train, validation, test splits plus fitted scaler and label encoder.
+
+  Raises:
+    ValueError: If no valid grouped sequences are available.
+  """
   df = read_processed_data(filepath)
 
   # Feature engineering: cyclic encoding for hour and day of week, log transformation for traffic_volume
@@ -156,7 +246,7 @@ def prepare_data(filepath, seq_len, forecast_horizon):
   X_test_all, y_test_all = [], []
 
   # Create sequences for each (scats_number, location) group to ensure that sequences do not mix data from different groups
-  for (scats, location), group in df.groupby(["scats_number", "location"]):
+  for (_scats, _location), group in df.groupby(["scats_number", "location"]):
     if len(group) < seq_len + forecast_horizon:
       continue
 
@@ -173,6 +263,9 @@ def prepare_data(filepath, seq_len, forecast_horizon):
     X_val_all.append(X_v); y_val_all.append(y_v)
     X_test_all.append(X_te); y_test_all.append(y_te)
 
+  if not X_train_all or not y_train_all or not X_val_all or not y_val_all or not X_test_all or not y_test_all:
+    raise ValueError("No valid grouped sequences were produced for one or more splits.")
+
   X_train = np.concatenate(X_train_all)
   y_train = np.concatenate(y_train_all)
   X_val = np.concatenate(X_val_all)
@@ -185,12 +278,14 @@ def prepare_data(filepath, seq_len, forecast_horizon):
   scaler.fit(X_train.reshape(-1, X_train.shape[-1]))
 
   # Helper functions to scale the 3D input arrays and 1D target arrays using the fitted scaler
-  def scale_X(arr):
+  def scale_X(arr: np.ndarray) -> np.ndarray:
+    """Scale sequence tensors with the fitted training scaler."""
     s = arr.shape
     return scaler.transform(arr.reshape(-1, s[-1])).reshape(s)
 
   # Helper function to scale the target variable using the same scaler
-  def scale_y(arr):
+  def scale_y(arr: np.ndarray) -> np.ndarray:
+    """Scale target vectors using the fitted training scaler."""
     dummy = np.zeros((len(arr), scaler.n_features_in_))
     dummy[:, 0] = arr
     return scaler.transform(dummy)[:, 0]
@@ -206,16 +301,35 @@ def prepare_data(filepath, seq_len, forecast_horizon):
 # ---   Tabular Model Helpers   ---
 # --------------------------------------
 
-# Load movement-level rows and preserve time ordering inside each movement.
 def load_movement_level_data(filepath: str) -> pd.DataFrame:
+  """Load processed rows and add movement identifiers for tabular modeling.
+
+  Args:
+    filepath: Processed CSV path.
+
+  Returns:
+    Movement-level dataframe with cyclical features and movement_id.
+  """
   df = read_processed_data(filepath)
   df = add_common_time_features(df)
   df["movement_id"] = df["scats_number"].astype(str) + " | " + df["location"].astype(str)
   return df
 
 
-# Convert each movement history into one tabular row with lag features and engineered context.
 def create_tabular_sequences_by_movement(df: pd.DataFrame, seq_len: int, forecast_horizon: int) -> pd.DataFrame:
+  """Create tabular lag-feature rows for each movement history.
+
+  Args:
+    df: Movement-level dataframe.
+    seq_len: Number of lag values per row.
+    forecast_horizon: Steps ahead used for target alignment.
+
+  Returns:
+    Engineered tabular dataframe for LightGBM training/inference.
+
+  Raises:
+    ValueError: If no feature rows are generated.
+  """
   feature_rows = []
 
   for (_, _), group_df in df.groupby(["scats_number", "location"], sort=False):
@@ -261,14 +375,36 @@ def create_tabular_sequences_by_movement(df: pd.DataFrame, seq_len: int, forecas
       row["nb_longitude"] = float(target_row["nb_longitude"])
       feature_rows.append(row)
 
+  if not feature_rows:
+    raise ValueError("No tabular feature rows were generated from movement data.")
+
   feature_df = pd.DataFrame(feature_rows)
   feature_df["scats_number"] = feature_df["scats_number"].astype("category")
   feature_df["location"] = feature_df["location"].astype("category")
   return feature_df
 
 
-# Split tabular data chronologically by target timestamp.
-def split_tabular_by_time(feature_df: pd.DataFrame, train_ratio: float = 0.7, val_ratio: float = 0.1):
+def split_tabular_by_time(
+  feature_df: pd.DataFrame,
+  train_ratio: float = 0.7,
+  val_ratio: float = 0.1,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Timestamp, pd.Timestamp]:
+  """Split tabular rows by chronological target timestamp.
+
+  Args:
+    feature_df: Engineered tabular feature dataframe.
+    train_ratio: Fraction of unique times in train split.
+    val_ratio: Fraction of unique times in validation split.
+
+  Returns:
+    Full, train, validation, and test dataframes plus split boundary timestamps.
+
+  Raises:
+    ValueError: If the input dataframe is empty.
+  """
+  if feature_df.empty:
+    raise ValueError("Tabular split cannot be computed from an empty dataframe.")
+
   unique_times = feature_df["datetime"].sort_values().drop_duplicates().reset_index(drop=True)
   train_end_idx = int(len(unique_times) * train_ratio) - 1
   val_end_idx = int(len(unique_times) * (train_ratio + val_ratio)) - 1
@@ -288,8 +424,21 @@ def split_tabular_by_time(feature_df: pd.DataFrame, train_ratio: float = 0.7, va
   return feature_df, train_df, val_df, test_df, train_end, val_end
 
 
-# Prepare the movement-level tabular dataset and feature columns for LightGBM.
-def prepare_tabular_data(filepath: str, seq_len: int, forecast_horizon: int):
+def prepare_tabular_data(
+  filepath: str,
+  seq_len: int,
+  forecast_horizon: int,
+) -> tuple[pd.DataFrame, list[str], pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Timestamp, pd.Timestamp]:
+  """Prepare movement-level tabular dataset and feature-column layout.
+
+  Args:
+    filepath: Processed CSV path.
+    seq_len: Number of lag features to include.
+    forecast_horizon: Steps ahead used for target alignment.
+
+  Returns:
+    Full feature dataframe, feature columns, split dataframes, and split timestamps.
+  """
   movement_df = load_movement_level_data(filepath)
   feature_df = create_tabular_sequences_by_movement(movement_df, seq_len, forecast_horizon)
 

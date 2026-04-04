@@ -25,7 +25,7 @@ const teamMembers = [
     icon: <UserCheck className="w-5 h-5 text-amber-500" />,
     borderColor: "border-amber-200",
     bgColor: "bg-amber-50",
-    image: "/image/huy.jpg"
+    image: "./huy.jpg"
   },
   {
     name: "Bui Quang Doan",
@@ -35,7 +35,7 @@ const teamMembers = [
     icon: <Database className="w-5 h-5 text-blue-500" />,
     borderColor: "border-blue-200",
     bgColor: "bg-blue-50",
-    image: "/image/doan.jpg"
+    image: "./doan.jpg"
   },
   {
     name: "Huynh Doan Hoang Minh",
@@ -45,7 +45,7 @@ const teamMembers = [
     icon: <Code className="w-5 h-5 text-emerald-500" />,
     borderColor: "border-emerald-200",
     bgColor: "bg-emerald-50",
-    image: "/image/minh.jpg"
+    image: "./minh.jpg"
   },
   {
     name: "Le Thanh Nam",
@@ -55,7 +55,7 @@ const teamMembers = [
     icon: <LayoutTemplate className="w-5 h-5 text-purple-500" />,
     borderColor: "border-purple-200",
     bgColor: "bg-purple-50",
-    image: "/image/nam.jpg"
+    image: "./nam.jpg"
   }
 ];
 
