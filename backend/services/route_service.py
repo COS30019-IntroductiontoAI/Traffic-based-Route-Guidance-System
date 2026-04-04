@@ -1,23 +1,48 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Callable
 
 from backend.core.config import (
+    MAX_ROUTE_K,
     get_route_guidance_defaults_payload,
     get_scats_edges_path,
     get_scats_nodes_path,
 )
 from backend.core.config import normalize_data_key
+from backend.core.assumptions import DEFAULT_SPEED_LIMIT_KMPH
+from backend.models.prediction_inference import PredictionInference
 from backend.route_guidance.build_scats_graph import export_scats_graph
-from src.models.prediction_inference import PredictionInference
 from backend.route_guidance.graph_builder import RouteGraph, load_graph_from_json
 from backend.route_guidance.route_formatter import to_frontend_route
 from backend.route_guidance.top_k import find_top_k_routes
 from backend.route_guidance.travel_time import classify_congestion_level
 from backend.route_guidance.travel_time import estimate_edge_travel_time_minutes
+from backend.route_guidance.types import RouteEdge
 
 SUPPORTED_ALGORITHMS = {"lightgbm", "lstm", "gru"}
 SUPPORTED_DATA_KEYS = {"2006", "2014"}
+
+
+# Return a stable sort key even if future node ids stop being purely numeric.
+def _node_sort_key(node_id: str) -> tuple[int, str]:
+    # Numeric ids should sort numerically for a cleaner UI, but the fallback still works for any string id.
+    return (0, f"{int(node_id):08d}") if node_id.isdigit() else (1, node_id)
+
+
+# Blend two optional site-level values into one edge-level proxy.
+def _blend_endpoint_values(
+    from_value: float | None,
+    to_value: float | None,
+) -> float | None:
+    # Routing works on edges, while predictions are site-level, so we average both ends when possible.
+    if from_value is not None and to_value is not None:
+        return (from_value + to_value) / 2.0
+    if from_value is not None:
+        return from_value
+    if to_value is not None:
+        return to_value
+    return None
 
 
 # Coordinate graph loading, prediction lookup, and route formatting.
@@ -37,6 +62,7 @@ class RouteService:
     # Load the generated SCATS/Boroondara graph for real model-aligned routing.
     # Build the default service with one graph per supported dataset.
     def from_scats_graph(cls) -> "RouteService":
+        # Load one graph per supported dataset year so switching years in the UI does not require a rebuild.
         graphs_by_data = {
             data_key: cls._load_or_generate_graph(data_key)
             for data_key in SUPPORTED_DATA_KEYS
@@ -53,6 +79,8 @@ class RouteService:
         nodes_path = get_scats_nodes_path(normalized_data_key)
         edges_path = get_scats_edges_path(normalized_data_key)
         if not nodes_path.exists() or not edges_path.exists():
+            # Graph generation is a fallback, not the normal runtime path.
+            # In normal use the generated JSON should already exist.
             export_scats_graph(normalized_data_key)
         return load_graph_from_json(nodes_path, edges_path)
 
@@ -67,7 +95,8 @@ class RouteService:
     def get_graph_payload(self, data_key: str = "2014") -> dict[str, object]:
         graph = self.get_graph(data_key)
         edges = []
-        for from_node in sorted(graph.adjacency):
+        # The frontend graph payload mirrors the structure its map code already expects.
+        for from_node in sorted(graph.adjacency, key=_node_sort_key):
             for edge in graph.adjacency[from_node]:
                 edges.append(
                     {
@@ -89,7 +118,7 @@ class RouteService:
                     "y": 0,
                     "label": node.label,
                 }
-                for node in sorted(graph.nodes.values(), key=lambda item: int(item.id))
+                for node in sorted(graph.nodes.values(), key=lambda item: _node_sort_key(item.id))
             ],
             "edges": edges,
         }
@@ -127,7 +156,7 @@ class RouteService:
         algorithm: str = "lightgbm",
         data_key: str = "2014",
         target_datetime: str | None = None,
-    ):
+    ) -> dict[str, object]:
         normalized_algorithm = algorithm.strip().lower()
         normalized_data_key = data_key.strip().lower()
 
@@ -143,12 +172,15 @@ class RouteService:
             raise ValueError(f"Destination '{destination}' does not exist in the {normalized_data_key} graph")
         if k < 1:
             raise ValueError("k must be at least 1")
+        if k > MAX_ROUTE_K:
+            raise ValueError(f"k must be at most {MAX_ROUTE_K}")
 
         prediction_timestamp = None
         predicted_site_flows: dict[str, float] = {}
         reference_site_flows: dict[str, float] = {}
         prediction_column = f"predicted_{normalized_algorithm}"
 
+        # Prediction lookup is optional here so the service can still be smoke-tested with a bare graph.
         if self.model_inference is not None:
             prediction_timestamp, predicted_site_flows = self.model_inference.predict_site_flow_map(
                 target_datetime=target_datetime,
@@ -157,35 +189,29 @@ class RouteService:
             )
             reference_site_flows = self.model_inference.get_site_reference_flows(normalized_data_key)
 
-        # Estimate edge cost from the predicted flow around both ends of the segment.
-        def edge_cost(edge):
-            from_flow = predicted_site_flows.get(edge.from_node)
-            to_flow = predicted_site_flows.get(edge.to_node)
-            predicted_flow = None
-            if from_flow is not None and to_flow is not None:
-                predicted_flow = (from_flow + to_flow) / 2.0
-            elif from_flow is not None:
-                predicted_flow = from_flow
-            elif to_flow is not None:
-                predicted_flow = to_flow
+        # Convert site-level predictions into an edge cost without pretending the model predicts per-segment flow.
+        # This keeps the route engine honest about what the models actually provide.
+        def edge_cost(edge: RouteEdge) -> float:
+            predicted_flow = _blend_endpoint_values(
+                predicted_site_flows.get(edge.from_node),
+                predicted_site_flows.get(edge.to_node),
+            )
+            reference_flow = _blend_endpoint_values(
+                reference_site_flows.get(edge.from_node),
+                reference_site_flows.get(edge.to_node),
+            )
 
-            from_reference = reference_site_flows.get(edge.from_node)
-            to_reference = reference_site_flows.get(edge.to_node)
-            reference_flow = None
-            if from_reference is not None and to_reference is not None:
-                reference_flow = (from_reference + to_reference) / 2.0
-            elif from_reference is not None:
-                reference_flow = from_reference
-            elif to_reference is not None:
-                reference_flow = to_reference
-
+            # When graph files miss distance_km, recover distance from the edge's free-flow time using the same speed assumption.
+            fallback_distance_km = max((edge.base_time_minutes * DEFAULT_SPEED_LIMIT_KMPH) / 60.0, 0.01)
             return estimate_edge_travel_time_minutes(
-                distance_km=edge.distance_km if edge.distance_km > 0 else max(edge.base_time_minutes / 60.0, 0.01),
+                distance_km=edge.distance_km if edge.distance_km > 0 else fallback_distance_km,
                 predicted_flow=predicted_flow,
                 reference_flow=reference_flow,
                 include_intersection_delay=True,
             )
 
+        # The search layer only sees graph + edge cost.
+        # Presentation details like traffic labels are attached afterwards.
         routes = find_top_k_routes(
             graph=graph,
             origin=origin,
@@ -194,29 +220,17 @@ class RouteService:
             edge_cost_lookup=edge_cost,
         )
         # Attach a frontend-friendly traffic label to every segment after routing is complete.
+        # We do this after search so labels never influence the actual path cost calculation.
         for route in routes:
             for segment in route.segments:
-                from_flow = predicted_site_flows.get(segment.from_node)
-                to_flow = predicted_site_flows.get(segment.to_node)
-                from_reference = reference_site_flows.get(segment.from_node)
-                to_reference = reference_site_flows.get(segment.to_node)
-
-                predicted_flow = None
-                if from_flow is not None and to_flow is not None:
-                    predicted_flow = (from_flow + to_flow) / 2.0
-                elif from_flow is not None:
-                    predicted_flow = from_flow
-                elif to_flow is not None:
-                    predicted_flow = to_flow
-
-                reference_flow = None
-                if from_reference is not None and to_reference is not None:
-                    reference_flow = (from_reference + to_reference) / 2.0
-                elif from_reference is not None:
-                    reference_flow = from_reference
-                elif to_reference is not None:
-                    reference_flow = to_reference
-
+                predicted_flow = _blend_endpoint_values(
+                    predicted_site_flows.get(segment.from_node),
+                    predicted_site_flows.get(segment.to_node),
+                )
+                reference_flow = _blend_endpoint_values(
+                    reference_site_flows.get(segment.from_node),
+                    reference_site_flows.get(segment.to_node),
+                )
                 segment.traffic_level = classify_congestion_level(predicted_flow, reference_flow)
 
         return {
