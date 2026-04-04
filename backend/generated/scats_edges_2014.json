@@ -3,912 +3,924 @@
     "from": "970",
     "to": "2000",
     "weight": 1.73,
-    "distance_km": 1.734
+    "distance_km": 1.732
   },
   {
     "from": "2000",
     "to": "970",
     "weight": 1.73,
-    "distance_km": 1.734
+    "distance_km": 1.732
   },
   {
     "from": "970",
     "to": "2846",
-    "weight": 3.02,
-    "distance_km": 3.016
+    "weight": 3.18,
+    "distance_km": 3.176
   },
   {
     "from": "2846",
     "to": "970",
-    "weight": 3.02,
-    "distance_km": 3.016
+    "weight": 3.18,
+    "distance_km": 3.176
   },
   {
     "from": "970",
     "to": "3685",
-    "weight": 1.4,
-    "distance_km": 1.398
+    "weight": 1.53,
+    "distance_km": 1.535
   },
   {
     "from": "3685",
     "to": "970",
-    "weight": 1.4,
-    "distance_km": 1.398
+    "weight": 1.53,
+    "distance_km": 1.535
   },
   {
     "from": "2000",
     "to": "3682",
-    "weight": 1.62,
-    "distance_km": 1.62
+    "weight": 1.79,
+    "distance_km": 1.785
   },
   {
     "from": "3682",
     "to": "2000",
-    "weight": 1.62,
-    "distance_km": 1.62
+    "weight": 1.79,
+    "distance_km": 1.785
   },
   {
     "from": "2000",
     "to": "3685",
-    "weight": 0.34,
-    "distance_km": 0.336
+    "weight": 0.2,
+    "distance_km": 0.197
   },
   {
     "from": "3685",
     "to": "2000",
-    "weight": 0.34,
-    "distance_km": 0.336
+    "weight": 0.2,
+    "distance_km": 0.197
   },
   {
     "from": "2200",
     "to": "3126",
-    "weight": 1.25,
-    "distance_km": 1.246
+    "weight": 1.24,
+    "distance_km": 1.243
   },
   {
     "from": "3126",
     "to": "2200",
-    "weight": 1.25,
-    "distance_km": 1.246
+    "weight": 1.24,
+    "distance_km": 1.243
   },
   {
     "from": "2200",
     "to": "4043",
-    "weight": 5.25,
-    "distance_km": 5.246
+    "weight": 5.42,
+    "distance_km": 5.417
   },
   {
     "from": "4043",
     "to": "2200",
-    "weight": 5.25,
-    "distance_km": 5.246
+    "weight": 5.42,
+    "distance_km": 5.417
   },
   {
     "from": "2200",
     "to": "4051",
-    "weight": 3.53,
-    "distance_km": 3.526
+    "weight": 3.52,
+    "distance_km": 3.52
   },
   {
     "from": "4051",
     "to": "2200",
-    "weight": 3.53,
-    "distance_km": 3.526
+    "weight": 3.52,
+    "distance_km": 3.52
   },
   {
     "from": "2200",
     "to": "4057",
-    "weight": 1.92,
-    "distance_km": 1.918
+    "weight": 2.01,
+    "distance_km": 2.008
   },
   {
     "from": "4057",
     "to": "2200",
-    "weight": 1.92,
-    "distance_km": 1.918
+    "weight": 2.01,
+    "distance_km": 2.008
   },
   {
     "from": "2200",
     "to": "4063",
-    "weight": 1.6,
-    "distance_km": 1.603
+    "weight": 1.61,
+    "distance_km": 1.612
   },
   {
     "from": "4063",
     "to": "2200",
-    "weight": 1.6,
-    "distance_km": 1.603
+    "weight": 1.61,
+    "distance_km": 1.612
   },
   {
     "from": "2825",
     "to": "2827",
-    "weight": 1.45,
-    "distance_km": 1.451
+    "weight": 1.51,
+    "distance_km": 1.508
   },
   {
     "from": "2827",
     "to": "2825",
-    "weight": 1.45,
-    "distance_km": 1.451
+    "weight": 1.51,
+    "distance_km": 1.508
   },
   {
     "from": "2825",
     "to": "4030",
-    "weight": 1.0,
-    "distance_km": 1.004
+    "weight": 1.17,
+    "distance_km": 1.166
   },
   {
     "from": "4030",
     "to": "2825",
-    "weight": 1.0,
-    "distance_km": 1.004
+    "weight": 1.17,
+    "distance_km": 1.166
   },
   {
     "from": "2825",
     "to": "4051",
-    "weight": 1.07,
-    "distance_km": 1.072
+    "weight": 1.17,
+    "distance_km": 1.168
   },
   {
     "from": "4051",
     "to": "2825",
-    "weight": 1.07,
-    "distance_km": 1.072
+    "weight": 1.17,
+    "distance_km": 1.168
   },
   {
     "from": "2827",
     "to": "3180",
-    "weight": 1.7,
-    "distance_km": 1.702
+    "weight": 1.79,
+    "distance_km": 1.786
   },
   {
     "from": "3180",
     "to": "2827",
-    "weight": 1.7,
-    "distance_km": 1.702
+    "weight": 1.79,
+    "distance_km": 1.786
   },
   {
     "from": "2827",
     "to": "4051",
     "weight": 1.55,
-    "distance_km": 1.548
+    "distance_km": 1.552
   },
   {
     "from": "4051",
     "to": "2827",
     "weight": 1.55,
-    "distance_km": 1.548
+    "distance_km": 1.552
   },
   {
     "from": "2846",
     "to": "3812",
-    "weight": 2.7,
-    "distance_km": 2.698
+    "weight": 2.75,
+    "distance_km": 2.748
   },
   {
     "from": "3812",
     "to": "2846",
-    "weight": 2.7,
-    "distance_km": 2.698
+    "weight": 2.75,
+    "distance_km": 2.748
   },
   {
     "from": "2846",
     "to": "4043",
-    "weight": 1.66,
-    "distance_km": 1.66
+    "weight": 1.61,
+    "distance_km": 1.612
   },
   {
     "from": "4043",
     "to": "2846",
-    "weight": 1.66,
-    "distance_km": 1.66
+    "weight": 1.61,
+    "distance_km": 1.612
   },
   {
     "from": "2846",
     "to": "4273",
-    "weight": 2.05,
-    "distance_km": 2.045
+    "weight": 2.08,
+    "distance_km": 2.075
   },
   {
     "from": "4273",
     "to": "2846",
-    "weight": 2.05,
-    "distance_km": 2.045
+    "weight": 2.08,
+    "distance_km": 2.075
   },
   {
     "from": "3001",
     "to": "3002",
-    "weight": 0.4,
-    "distance_km": 0.397
+    "weight": 0.47,
+    "distance_km": 0.473
   },
   {
     "from": "3002",
     "to": "3001",
-    "weight": 0.4,
-    "distance_km": 0.397
+    "weight": 0.47,
+    "distance_km": 0.473
   },
   {
     "from": "3001",
     "to": "3662",
-    "weight": 0.8,
-    "distance_km": 0.8
+    "weight": 0.85,
+    "distance_km": 0.848
   },
   {
     "from": "3662",
     "to": "3001",
-    "weight": 0.8,
-    "distance_km": 0.8
+    "weight": 0.85,
+    "distance_km": 0.848
   },
   {
     "from": "3001",
     "to": "4263",
-    "weight": 0.96,
-    "distance_km": 0.962
+    "weight": 0.84,
+    "distance_km": 0.838
   },
   {
     "from": "4263",
     "to": "3001",
-    "weight": 0.96,
-    "distance_km": 0.962
+    "weight": 0.84,
+    "distance_km": 0.838
   },
   {
     "from": "3001",
     "to": "4812",
-    "weight": 1.73,
-    "distance_km": 1.733
+    "weight": 1.55,
+    "distance_km": 1.554
   },
   {
     "from": "4812",
     "to": "3001",
-    "weight": 1.73,
-    "distance_km": 1.733
+    "weight": 1.55,
+    "distance_km": 1.554
   },
   {
     "from": "3001",
     "to": "4821",
-    "weight": 1.21,
-    "distance_km": 1.213
+    "weight": 1.14,
+    "distance_km": 1.14
   },
   {
     "from": "4821",
     "to": "3001",
-    "weight": 1.21,
-    "distance_km": 1.213
+    "weight": 1.14,
+    "distance_km": 1.14
   },
   {
     "from": "3002",
     "to": "3662",
-    "weight": 0.7,
-    "distance_km": 0.704
+    "weight": 0.82,
+    "distance_km": 0.816
   },
   {
     "from": "3662",
     "to": "3002",
-    "weight": 0.7,
-    "distance_km": 0.704
+    "weight": 0.82,
+    "distance_km": 0.816
   },
   {
     "from": "3002",
     "to": "4263",
-    "weight": 0.88,
-    "distance_km": 0.876
+    "weight": 0.69,
+    "distance_km": 0.687
   },
   {
     "from": "4263",
     "to": "3002",
-    "weight": 0.88,
-    "distance_km": 0.876
+    "weight": 0.69,
+    "distance_km": 0.687
   },
   {
     "from": "3002",
     "to": "4324",
-    "weight": 1.12,
-    "distance_km": 1.12
+    "weight": 1.11,
+    "distance_km": 1.108
   },
   {
     "from": "4324",
     "to": "3002",
-    "weight": 1.12,
-    "distance_km": 1.12
+    "weight": 1.11,
+    "distance_km": 1.108
   },
   {
     "from": "3002",
     "to": "4812",
-    "weight": 1.87,
-    "distance_km": 1.869
+    "weight": 1.63,
+    "distance_km": 1.629
   },
   {
     "from": "4812",
     "to": "3002",
-    "weight": 1.87,
-    "distance_km": 1.869
+    "weight": 1.63,
+    "distance_km": 1.629
   },
   {
     "from": "3002",
     "to": "4821",
     "weight": 1.61,
-    "distance_km": 1.61
+    "distance_km": 1.611
   },
   {
     "from": "4821",
     "to": "3002",
     "weight": 1.61,
-    "distance_km": 1.61
+    "distance_km": 1.611
   },
   {
     "from": "3120",
     "to": "3122",
-    "weight": 0.63,
-    "distance_km": 0.633
+    "weight": 0.64,
+    "distance_km": 0.641
   },
   {
     "from": "3122",
     "to": "3120",
-    "weight": 0.63,
-    "distance_km": 0.633
+    "weight": 0.64,
+    "distance_km": 0.641
   },
   {
     "from": "3120",
     "to": "4034",
-    "weight": 1.23,
-    "distance_km": 1.234
+    "weight": 1.41,
+    "distance_km": 1.41
   },
   {
     "from": "4034",
     "to": "3120",
-    "weight": 1.23,
-    "distance_km": 1.234
+    "weight": 1.41,
+    "distance_km": 1.41
   },
   {
     "from": "3120",
     "to": "4035",
-    "weight": 0.54,
-    "distance_km": 0.537
+    "weight": 0.68,
+    "distance_km": 0.683
   },
   {
     "from": "4035",
     "to": "3120",
-    "weight": 0.54,
-    "distance_km": 0.537
+    "weight": 0.68,
+    "distance_km": 0.683
   },
   {
     "from": "3120",
     "to": "4040",
-    "weight": 1.12,
-    "distance_km": 1.119
+    "weight": 1.11,
+    "distance_km": 1.113
   },
   {
     "from": "4040",
     "to": "3120",
-    "weight": 1.12,
-    "distance_km": 1.119
+    "weight": 1.11,
+    "distance_km": 1.113
   },
   {
     "from": "3122",
     "to": "3127",
-    "weight": 1.2,
-    "distance_km": 1.199
+    "weight": 1.17,
+    "distance_km": 1.175
   },
   {
     "from": "3127",
     "to": "3122",
-    "weight": 1.2,
-    "distance_km": 1.199
+    "weight": 1.17,
+    "distance_km": 1.175
   },
   {
     "from": "3122",
     "to": "3804",
-    "weight": 1.12,
-    "distance_km": 1.12
+    "weight": 1.22,
+    "distance_km": 1.222
   },
   {
     "from": "3804",
     "to": "3122",
-    "weight": 1.12,
-    "distance_km": 1.12
+    "weight": 1.22,
+    "distance_km": 1.222
   },
   {
     "from": "3122",
     "to": "4035",
-    "weight": 0.83,
-    "distance_km": 0.833
+    "weight": 0.9,
+    "distance_km": 0.895
   },
   {
     "from": "4035",
     "to": "3122",
-    "weight": 0.83,
-    "distance_km": 0.833
+    "weight": 0.9,
+    "distance_km": 0.895
   },
   {
     "from": "3126",
     "to": "3127",
-    "weight": 1.81,
-    "distance_km": 1.81
+    "weight": 1.87,
+    "distance_km": 1.87
   },
   {
     "from": "3127",
     "to": "3126",
-    "weight": 1.81,
-    "distance_km": 1.81
+    "weight": 1.87,
+    "distance_km": 1.87
   },
   {
     "from": "3126",
     "to": "3682",
-    "weight": 1.09,
-    "distance_km": 1.092
+    "weight": 1.06,
+    "distance_km": 1.062
   },
   {
     "from": "3682",
     "to": "3126",
-    "weight": 1.09,
-    "distance_km": 1.092
+    "weight": 1.06,
+    "distance_km": 1.062
   },
   {
     "from": "3127",
     "to": "3804",
-    "weight": 1.66,
-    "distance_km": 1.657
+    "weight": 1.79,
+    "distance_km": 1.788
   },
   {
     "from": "3804",
     "to": "3127",
-    "weight": 1.66,
-    "distance_km": 1.657
+    "weight": 1.79,
+    "distance_km": 1.788
   },
   {
     "from": "3127",
     "to": "4063",
-    "weight": 1.23,
-    "distance_km": 1.233
+    "weight": 1.02,
+    "distance_km": 1.017
   },
   {
     "from": "4063",
     "to": "3127",
-    "weight": 1.23,
-    "distance_km": 1.233
+    "weight": 1.02,
+    "distance_km": 1.017
   },
   {
     "from": "3180",
     "to": "4051",
-    "weight": 1.25,
-    "distance_km": 1.245
+    "weight": 1.29,
+    "distance_km": 1.29
   },
   {
     "from": "4051",
     "to": "3180",
-    "weight": 1.25,
-    "distance_km": 1.245
+    "weight": 1.29,
+    "distance_km": 1.29
   },
   {
     "from": "3180",
     "to": "4057",
-    "weight": 0.99,
-    "distance_km": 0.989
+    "weight": 0.83,
+    "distance_km": 0.83
   },
   {
     "from": "4057",
     "to": "3180",
-    "weight": 0.99,
-    "distance_km": 0.989
+    "weight": 0.83,
+    "distance_km": 0.83
   },
   {
     "from": "3180",
     "to": "4063",
-    "weight": 2.04,
-    "distance_km": 2.043
+    "weight": 2.09,
+    "distance_km": 2.095
   },
   {
     "from": "4063",
     "to": "3180",
-    "weight": 2.04,
-    "distance_km": 2.043
+    "weight": 2.09,
+    "distance_km": 2.095
   },
   {
     "from": "3662",
     "to": "4321",
-    "weight": 2.09,
-    "distance_km": 2.093
+    "weight": 2.01,
+    "distance_km": 2.009
   },
   {
     "from": "4321",
     "to": "3662",
-    "weight": 2.09,
-    "distance_km": 2.093
+    "weight": 2.01,
+    "distance_km": 2.009
   },
   {
     "from": "3662",
     "to": "4324",
-    "weight": 0.82,
-    "distance_km": 0.819
+    "weight": 0.86,
+    "distance_km": 0.858
   },
   {
     "from": "4324",
     "to": "3662",
-    "weight": 0.82,
-    "distance_km": 0.819
+    "weight": 0.86,
+    "distance_km": 0.858
   },
   {
     "from": "3662",
     "to": "4821",
-    "weight": 1.74,
-    "distance_km": 1.738
+    "weight": 1.7,
+    "distance_km": 1.7
   },
   {
     "from": "4821",
     "to": "3662",
-    "weight": 1.74,
-    "distance_km": 1.738
+    "weight": 1.7,
+    "distance_km": 1.7
   },
   {
     "from": "3682",
     "to": "3685",
-    "weight": 1.96,
-    "distance_km": 1.956
+    "weight": 1.98,
+    "distance_km": 1.982
   },
   {
     "from": "3685",
     "to": "3682",
-    "weight": 1.96,
-    "distance_km": 1.956
+    "weight": 1.98,
+    "distance_km": 1.982
   },
   {
     "from": "3682",
     "to": "4270",
-    "weight": 5.68,
-    "distance_km": 5.678
+    "weight": 5.69,
+    "distance_km": 5.694
   },
   {
     "from": "4270",
     "to": "3682",
-    "weight": 5.68,
-    "distance_km": 5.678
+    "weight": 5.69,
+    "distance_km": 5.694
   },
   {
     "from": "3804",
     "to": "3812",
-    "weight": 0.42,
-    "distance_km": 0.422
+    "weight": 0.27,
+    "distance_km": 0.27
   },
   {
     "from": "3812",
     "to": "3804",
-    "weight": 0.42,
-    "distance_km": 0.422
+    "weight": 0.27,
+    "distance_km": 0.27
   },
   {
     "from": "3804",
     "to": "4040",
     "weight": 0.62,
-    "distance_km": 0.623
+    "distance_km": 0.62
   },
   {
     "from": "4040",
     "to": "3804",
     "weight": 0.62,
-    "distance_km": 0.623
+    "distance_km": 0.62
   },
   {
     "from": "3812",
     "to": "4040",
-    "weight": 0.72,
-    "distance_km": 0.719
+    "weight": 0.55,
+    "distance_km": 0.55
   },
   {
     "from": "4040",
     "to": "3812",
-    "weight": 0.72,
-    "distance_km": 0.719
+    "weight": 0.55,
+    "distance_km": 0.55
   },
   {
     "from": "3812",
     "to": "4043",
-    "weight": 1.32,
-    "distance_km": 1.321
+    "weight": 1.44,
+    "distance_km": 1.441
   },
   {
     "from": "4043",
     "to": "3812",
-    "weight": 1.32,
-    "distance_km": 1.321
+    "weight": 1.44,
+    "distance_km": 1.441
   },
   {
     "from": "3812",
-    "to": "4273",
-    "weight": 1.79,
-    "distance_km": 1.79
+    "to": "4272",
+    "weight": 1.34,
+    "distance_km": 1.337
   },
   {
-    "from": "4273",
+    "from": "4272",
     "to": "3812",
-    "weight": 1.79,
-    "distance_km": 1.79
+    "weight": 1.34,
+    "distance_km": 1.337
   },
   {
     "from": "4030",
     "to": "4032",
-    "weight": 0.74,
-    "distance_km": 0.743
+    "weight": 0.79,
+    "distance_km": 0.787
   },
   {
     "from": "4032",
     "to": "4030",
-    "weight": 0.74,
-    "distance_km": 0.743
+    "weight": 0.79,
+    "distance_km": 0.787
   },
   {
     "from": "4030",
     "to": "4051",
-    "weight": 0.7,
-    "distance_km": 0.701
+    "weight": 0.65,
+    "distance_km": 0.65
   },
   {
     "from": "4051",
     "to": "4030",
-    "weight": 0.7,
-    "distance_km": 0.701
+    "weight": 0.65,
+    "distance_km": 0.65
   },
   {
     "from": "4030",
     "to": "4321",
-    "weight": 1.26,
-    "distance_km": 1.256
+    "weight": 1.39,
+    "distance_km": 1.386
   },
   {
     "from": "4321",
     "to": "4030",
-    "weight": 1.26,
-    "distance_km": 1.256
+    "weight": 1.39,
+    "distance_km": 1.386
   },
   {
     "from": "4032",
     "to": "4034",
-    "weight": 1.08,
-    "distance_km": 1.081
+    "weight": 0.9,
+    "distance_km": 0.898
   },
   {
     "from": "4034",
     "to": "4032",
-    "weight": 1.08,
-    "distance_km": 1.081
+    "weight": 0.9,
+    "distance_km": 0.898
   },
   {
     "from": "4032",
     "to": "4051",
-    "weight": 1.16,
-    "distance_km": 1.164
+    "weight": 1.26,
+    "distance_km": 1.262
   },
   {
     "from": "4051",
     "to": "4032",
-    "weight": 1.16,
-    "distance_km": 1.164
+    "weight": 1.26,
+    "distance_km": 1.262
   },
   {
     "from": "4032",
     "to": "4321",
-    "weight": 1.08,
-    "distance_km": 1.077
+    "weight": 1.22,
+    "distance_km": 1.219
   },
   {
     "from": "4321",
     "to": "4032",
-    "weight": 1.08,
-    "distance_km": 1.077
+    "weight": 1.22,
+    "distance_km": 1.219
   },
   {
     "from": "4034",
     "to": "4035",
-    "weight": 0.7,
-    "distance_km": 0.697
+    "weight": 0.73,
+    "distance_km": 0.732
   },
   {
     "from": "4035",
     "to": "4034",
-    "weight": 0.7,
-    "distance_km": 0.697
+    "weight": 0.73,
+    "distance_km": 0.732
   },
   {
     "from": "4040",
     "to": "4043",
-    "weight": 1.61,
-    "distance_km": 1.613
+    "weight": 1.54,
+    "distance_km": 1.537
   },
   {
     "from": "4043",
     "to": "4040",
-    "weight": 1.61,
-    "distance_km": 1.613
+    "weight": 1.54,
+    "distance_km": 1.537
   },
   {
     "from": "4040",
     "to": "4272",
-    "weight": 0.77,
-    "distance_km": 0.767
+    "weight": 0.8,
+    "distance_km": 0.804
   },
   {
     "from": "4272",
     "to": "4040",
-    "weight": 0.77,
-    "distance_km": 0.767
+    "weight": 0.8,
+    "distance_km": 0.804
+  },
+  {
+    "from": "4040",
+    "to": "4273",
+    "weight": 1.72,
+    "distance_km": 1.723
+  },
+  {
+    "from": "4273",
+    "to": "4040",
+    "weight": 1.72,
+    "distance_km": 1.723
   },
   {
     "from": "4043",
     "to": "4273",
-    "weight": 0.73,
-    "distance_km": 0.728
+    "weight": 0.74,
+    "distance_km": 0.738
   },
   {
     "from": "4273",
     "to": "4043",
-    "weight": 0.73,
-    "distance_km": 0.728
+    "weight": 0.74,
+    "distance_km": 0.738
   },
   {
     "from": "4051",
     "to": "4057",
-    "weight": 1.61,
-    "distance_km": 1.613
+    "weight": 1.51,
+    "distance_km": 1.515
   },
   {
     "from": "4057",
     "to": "4051",
-    "weight": 1.61,
-    "distance_km": 1.613
+    "weight": 1.51,
+    "distance_km": 1.515
   },
   {
     "from": "4057",
     "to": "4063",
-    "weight": 1.05,
-    "distance_km": 1.054
+    "weight": 1.27,
+    "distance_km": 1.272
   },
   {
     "from": "4063",
     "to": "4057",
-    "weight": 1.05,
-    "distance_km": 1.054
+    "weight": 1.27,
+    "distance_km": 1.272
   },
   {
     "from": "4263",
     "to": "4264",
-    "weight": 0.79,
-    "distance_km": 0.793
+    "weight": 0.9,
+    "distance_km": 0.904
   },
   {
     "from": "4264",
     "to": "4263",
-    "weight": 0.79,
-    "distance_km": 0.793
+    "weight": 0.9,
+    "distance_km": 0.904
   },
   {
     "from": "4263",
     "to": "4270",
-    "weight": 1.05,
-    "distance_km": 1.053
+    "weight": 1.07,
+    "distance_km": 1.069
   },
   {
     "from": "4270",
     "to": "4263",
-    "weight": 1.05,
-    "distance_km": 1.053
+    "weight": 1.07,
+    "distance_km": 1.069
   },
   {
     "from": "4263",
     "to": "4812",
-    "weight": 1.15,
-    "distance_km": 1.148
+    "weight": 1.0,
+    "distance_km": 0.998
   },
   {
     "from": "4812",
     "to": "4263",
-    "weight": 1.15,
-    "distance_km": 1.148
+    "weight": 1.0,
+    "distance_km": 0.998
   },
   {
     "from": "4264",
     "to": "4266",
-    "weight": 0.49,
-    "distance_km": 0.491
+    "weight": 0.4,
+    "distance_km": 0.401
   },
   {
     "from": "4266",
     "to": "4264",
-    "weight": 0.49,
-    "distance_km": 0.491
+    "weight": 0.4,
+    "distance_km": 0.401
   },
   {
     "from": "4264",
     "to": "4270",
-    "weight": 0.68,
-    "distance_km": 0.679
+    "weight": 0.54,
+    "distance_km": 0.537
   },
   {
     "from": "4270",
     "to": "4264",
-    "weight": 0.68,
-    "distance_km": 0.679
+    "weight": 0.54,
+    "distance_km": 0.537
   },
   {
     "from": "4264",
     "to": "4324",
-    "weight": 1.67,
-    "distance_km": 1.673
+    "weight": 1.61,
+    "distance_km": 1.608
   },
   {
     "from": "4324",
     "to": "4264",
-    "weight": 1.67,
-    "distance_km": 1.673
+    "weight": 1.61,
+    "distance_km": 1.608
   },
   {
     "from": "4266",
     "to": "4270",
-    "weight": 0.85,
-    "distance_km": 0.852
+    "weight": 0.71,
+    "distance_km": 0.707
   },
   {
     "from": "4270",
     "to": "4266",
-    "weight": 0.85,
-    "distance_km": 0.852
+    "weight": 0.71,
+    "distance_km": 0.707
   },
   {
     "from": "4266",
     "to": "4272",
-    "weight": 1.02,
-    "distance_km": 1.019
+    "weight": 1.03,
+    "distance_km": 1.026
   },
   {
     "from": "4272",
     "to": "4266",
-    "weight": 1.02,
-    "distance_km": 1.019
+    "weight": 1.03,
+    "distance_km": 1.026
   },
   {
     "from": "4270",
     "to": "4272",
-    "weight": 1.22,
-    "distance_km": 1.224
+    "weight": 1.28,
+    "distance_km": 1.277
   },
   {
     "from": "4272",
     "to": "4270",
-    "weight": 1.22,
-    "distance_km": 1.224
+    "weight": 1.28,
+    "distance_km": 1.277
   },
   {
     "from": "4270",
     "to": "4812",
-    "weight": 1.62,
-    "distance_km": 1.616
+    "weight": 1.44,
+    "distance_km": 1.437
   },
   {
     "from": "4812",
     "to": "4270",
-    "weight": 1.62,
-    "distance_km": 1.616
+    "weight": 1.44,
+    "distance_km": 1.437
   },
   {
     "from": "4272",
     "to": "4273",
-    "weight": 1.65,
-    "distance_km": 1.65
+    "weight": 1.58,
+    "distance_km": 1.579
   },
   {
     "from": "4273",
     "to": "4272",
-    "weight": 1.65,
-    "distance_km": 1.65
+    "weight": 1.58,
+    "distance_km": 1.579
   },
   {
     "from": "4321",
     "to": "4324",
-    "weight": 1.42,
-    "distance_km": 1.424
+    "weight": 1.43,
+    "distance_km": 1.428
   },
   {
     "from": "4324",
     "to": "4321",
-    "weight": 1.42,
-    "distance_km": 1.424
+    "weight": 1.43,
+    "distance_km": 1.428
   }
 ]

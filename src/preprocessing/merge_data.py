@@ -91,10 +91,19 @@ def merge_datasets(
 
     print("AADT features merged\n")
 
+    # Overwrite original SCATS coordinates with exact AADT spatial points
+    print("Correcting SCATS coordinates using AADT matched points\n")
+    
+    master_data["nb_latitude"] = master_data["aadt_latitude"]
+    master_data["nb_longitude"] = master_data["aadt_longitude"]
+    
+    # Drop redundant AADT coordinate columns to clean up dataset
+    master_data = master_data.drop(columns=["aadt_latitude", "aadt_longitude"])
+
     # Final checks
     print("Running final checks\n")
 
-    missing_aadt = master_data["aadt_longitude"].isnull().sum()
+    missing_aadt = master_data["distance_to_aadt"].isnull().sum()
     print(f"Rows without matching AADT data: {missing_aadt}")
     print(f"Final dataset shape: {master_data.shape}\n")
 
