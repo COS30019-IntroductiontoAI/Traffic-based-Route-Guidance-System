@@ -255,7 +255,7 @@ export default function DataInsights() {
               <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#4b5563', fontWeight: 500 }} axisLine={false} tickLine={false} width={80} />
               <Tooltip
                 contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 12 }}
-                formatter={(value: any, name: any, props: any) => [`${value.toLocaleString()} vehicles`, props.payload.location]}
+                formatter={(value: any, _name: any, props: any) => [`${value.toLocaleString()} vehicles`, props.payload.location]}
               />
               <Bar dataKey="volume" name="Volume" fill="#f43f5e" radius={[0, 4, 4, 0]} barSize={14} />
             </BarChart>
