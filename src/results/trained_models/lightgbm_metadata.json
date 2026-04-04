@@ -1,5 +1,4 @@
-﻿{
-  "data_path": "F:\\AI_Model\\asm2\\data\\processed\\2006_processed.csv",
+{
   "feature_columns": [
     "scats_number",
     "location",
@@ -122,11 +121,12 @@
   "target_column": "traffic_volume",
   "sequence_length": 96,
   "forecast_horizon": 1,
-  "train_end": "2006-09-10T16:30:00",
-  "val_end": "2006-10-10T18:45:00",
-  "row_count_after_features": 144288,
+  "train_end": "2006-10-22T23:30:00",
+  "val_end": "2006-10-25T23:45:00",
+  "row_count_after_features": 383232,
   "categorical_features": [
     "scats_number",
     "location"
-  ]
+  ],
+  "data_path": "data/processed/2006_processed.csv"
 }
