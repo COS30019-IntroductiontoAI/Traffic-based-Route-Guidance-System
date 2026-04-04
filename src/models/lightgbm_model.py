@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TRAINED_MODELS_DIR = PROJECT_ROOT / "results" / "trained_models"
-METRICS_DIR = PROJECT_ROOT / "results" / "metrics"
+METRICS_DIR = PROJECT_ROOT / "results" / "general_metrics"
 GRAPHS_DIR = PROJECT_ROOT / "results" / "graphs"
 DATA_PATH = PROJECT_ROOT / "data" / "processed" / "2006_processed.csv"
 MODEL_PATH = TRAINED_MODELS_DIR / "lightgbm_model.txt"
@@ -45,6 +45,21 @@ DEFAULT_RANDOM_STATE: int = int(getattr(model_config, "LIGHTGBM_RANDOM_STATE", 4
 DEFAULT_VERBOSE: int = int(getattr(model_config, "LIGHTGBM_VERBOSE", -1))
 DEFAULT_EVAL_METRIC: str = str(getattr(model_config, "LIGHTGBM_EVAL_METRIC", "rmse"))
 DEFAULT_EARLY_STOPPING_ROUNDS: int = int(getattr(model_config, "LIGHTGBM_EARLY_STOPPING_ROUNDS", 80))
+
+
+def _project_relative_path(path: Path) -> str | None:
+  """Convert a path to a project-relative POSIX string when possible.
+
+  Args:
+    path: Path to normalize.
+
+  Returns:
+    Project-relative POSIX path string, or None if path is outside project root.
+  """
+  try:
+    return str(path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix())
+  except ValueError:
+    return None
 
 
 # Return feature matrix X and target vector y from a prepared dataframe.
@@ -139,7 +154,6 @@ def save_metadata(
   """
   metadata_path.parent.mkdir(parents=True, exist_ok=True)
   metadata = {
-    "data_path": str(data_path),
     "feature_columns": feature_columns,
     "target_column": TARGET_COLUMN,
     "sequence_length": sequence_length,
@@ -149,6 +163,12 @@ def save_metadata(
     "row_count_after_features": row_count,
     "categorical_features": ["scats_number", "location"],
   }
+  relative_data_path = _project_relative_path(data_path)
+  if relative_data_path is not None:
+    metadata["data_path"] = relative_data_path
+  else:
+    LOGGER.warning("Omitting metadata data_path because it is outside project root: %s", data_path)
+
   metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
 

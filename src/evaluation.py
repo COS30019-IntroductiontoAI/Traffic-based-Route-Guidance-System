@@ -28,7 +28,7 @@ MetricDict = dict[str, float]
 
 SRC_ROOT: Path = Path(__file__).resolve().parent
 GRAPH_DIR: Path = SRC_ROOT / "results" / "graphs"
-METRICS_DIR: Path = SRC_ROOT / "results" / "metrics"
+METRICS_DIR: Path = SRC_ROOT / "results" / "general_metrics"
 PROCESSED_2006_PATH: Path = SRC_ROOT / "data" / "processed" / "2006_processed.csv"
 
 
