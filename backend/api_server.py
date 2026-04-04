@@ -1,22 +1,61 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
+from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any
 from urllib.parse import parse_qs, urlparse
 
-from backend.core.config import get_predictions_path
+import pandas as pd
+
+from backend.core.config import MAX_ROUTE_K, TRAFFIC_PROFILE_HOUR_STEP, get_predictions_path
 from backend.services.route_service import RouteService, SUPPORTED_ALGORITHMS, SUPPORTED_DATA_KEYS
 
 
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", 8000))
-ROUTE_SERVICE = RouteService.from_scats_graph()
-if ROUTE_SERVICE.model_inference is not None:
-    ROUTE_SERVICE.model_inference.predict_site_flow_map()
+LOGGER = logging.getLogger("backend.api_server")
 
 
-# Send a JSON response with CORS headers for the frontend.
+# Represent one controlled API error that should be shown to the client.
+class ApiError(Exception):
+    # Keep an HTTP status and a simple category so the frontend gets consistent responses.
+    def __init__(self, message: str, status_code: int, category: str):
+        super().__init__(message)
+        self.status_code = status_code
+        self.category = category
+
+
+# Mark a client-side request problem such as invalid params.
+class ApiValidationError(ApiError):
+    def __init__(self, message: str):
+        super().__init__(message, status_code=400, category="validation")
+
+
+# Mark a missing-file or data-read problem from prepared artifacts.
+class ApiDataError(ApiError):
+    def __init__(self, message: str):
+        super().__init__(message, status_code=500, category="data")
+
+
+# Mark an unknown endpoint without treating it as an internal failure.
+class ApiNotFoundError(ApiError):
+    def __init__(self, message: str = "Not found"):
+        super().__init__(message, status_code=404, category="not_found")
+
+
+# Build the shared route service lazily so import itself stays cheap and predictable.
+@lru_cache(maxsize=1)
+def get_route_service() -> RouteService:
+    # We create the service only when the first request needs it.
+    # This avoids expensive startup work during import and makes tests safer to import.
+    return RouteService.from_scats_graph()
+
+
+# Send one JSON response with CORS headers for the frontend.
 def _json_response(handler: BaseHTTPRequestHandler, status_code: int, payload: dict[str, object]) -> None:
     body = json.dumps(payload).encode("utf-8")
     handler.send_response(status_code)
@@ -29,104 +68,166 @@ def _json_response(handler: BaseHTTPRequestHandler, status_code: int, payload: d
     handler.wfile.write(body)
 
 
-# Compute summary metrics from the prepared predictions file.
-def _compute_metrics(data_key: str) -> dict:
-    """Compute real MAE / RMSE / Accuracy from the predictions CSV."""
-    import pandas as pd
-    import numpy as np
+# Return one consistent error payload instead of leaking raw internal exceptions.
+def _error_response(handler: BaseHTTPRequestHandler, error: ApiError) -> None:
+    _json_response(
+        handler,
+        error.status_code,
+        {
+            "error": str(error),
+            "category": error.category,
+        },
+    )
 
+
+# Convert one raw exception into an API-safe error category.
+def _wrap_exception(exc: Exception) -> ApiError:
+    if isinstance(exc, ApiError):
+        return exc
+    if isinstance(exc, FileNotFoundError):
+        return ApiDataError(str(exc))
+    if isinstance(exc, ValueError):
+        return ApiValidationError(str(exc))
+    return ApiError("Internal server error", status_code=500, category="internal")
+
+
+# Read one required query value and strip surrounding whitespace.
+def _get_query_value(params: dict[str, list[str]], name: str, default: str = "") -> str:
+    return params.get(name, [default])[0].strip()
+
+
+# Validate a required SCATS node id.
+def _parse_node_id(params: dict[str, list[str]], name: str) -> str:
+    value = _get_query_value(params, name)
+    if not value:
+        raise ApiValidationError(f"{name} is required")
+    if not value.isdigit():
+        raise ApiValidationError(f"{name} must be a numeric SCATS ID")
+    return value
+
+
+# Validate one integer query parameter with a minimum and maximum.
+def _parse_positive_int(
+    params: dict[str, list[str]],
+    field_name: str,
+    *,
+    minimum: int,
+    maximum: int | None = None,
+    default: int,
+) -> int:
+    raw_value = _get_query_value(params, field_name, str(default))
+    try:
+        value = int(raw_value)
+    except ValueError as exc:
+        raise ApiValidationError(f"{field_name} must be an integer") from exc
+
+    if value < minimum:
+        raise ApiValidationError(f"{field_name} must be at least {minimum}")
+    if maximum is not None and value > maximum:
+        raise ApiValidationError(f"{field_name} must be at most {maximum}")
+    return value
+
+
+# Normalize one query option and reject unsupported values early.
+def _normalize_choice(params: dict[str, list[str]], field_name: str, allowed: set[str], default: str) -> str:
+    value = _get_query_value(params, field_name, default).lower()
+    if value not in allowed:
+        raise ApiValidationError(f"{field_name} must be one of {sorted(allowed)}")
+    return value
+
+
+# Resolve the optional timestamp from either a direct ISO string or date/time pair.
+def _parse_timestamp(params: dict[str, list[str]]) -> str | None:
+    timestamp = _get_query_value(params, "timestamp") or None
+    if timestamp is not None:
+        return timestamp
+
+    date_value = _get_query_value(params, "date") or None
+    time_of_day = _get_query_value(params, "time") or None
+    if date_value and time_of_day:
+        return f"{date_value}T{time_of_day}:00"
+    return None
+
+
+# Compute summary metrics from the prepared predictions file.
+def _compute_metrics(data_key: str) -> dict[str, object]:
     path = get_predictions_path(data_key)
+    if not path.exists():
+        raise ApiDataError(f"Predictions file not found for dataset '{data_key}'")
+
     df = pd.read_csv(path, parse_dates=["datetime"])
+    results: list[dict[str, Any]] = []
 
     models_info = [
         ("LightGBM", "predicted_lightgbm"),
-        ("LSTM",     "predicted_lstm"),
-        ("GRU",      "predicted_gru"),
+        ("LSTM", "predicted_lstm"),
+        ("GRU", "predicted_gru"),
     ]
 
-    results = []
-    for name, col in models_info:
-        if col not in df.columns:
+    # These metrics are intentionally computed from the prepared predictions CSV.
+    # The backend should report model quality, not trigger another prediction pipeline run.
+    for model_name, prediction_column in models_info:
+        if prediction_column not in df.columns:
             continue
-        actual = df["actual"].values
-        pred   = df[col].values
-        mae    = float(np.mean(np.abs(actual - pred)))
-        rmse   = float(np.sqrt(np.mean((actual - pred) ** 2)))
+
+        actual = df["actual"].to_numpy(dtype=float)
+        predicted = df[prediction_column].to_numpy(dtype=float)
+        mae = float((abs(actual - predicted)).mean())
+        rmse = float((((actual - predicted) ** 2).mean()) ** 0.5)
         nonzero = actual != 0
-        if nonzero.any():
-            mape = float(np.mean(np.abs((actual[nonzero] - pred[nonzero]) / actual[nonzero])) * 100)
-        else:
-            mape = 100.0
-        accuracy = max(0.0, 100.0 - mape)
-        results.append({
-            "model":    name,
-            "mae":      round(mae, 3),
-            "rmse":     round(rmse, 3),
-            "mape":     round(mape, 2),
-        })
+        mape = float((abs((actual[nonzero] - predicted[nonzero]) / actual[nonzero])).mean() * 100) if nonzero.any() else 100.0
 
-    # Sort by accuracy descending so the best model is first
-    results.sort(key=lambda x: x["mape"])
+        results.append(
+            {
+                "model": model_name,
+                "mae": round(mae, 3),
+                "rmse": round(rmse, 3),
+                "mape": round(mape, 2),
+            }
+        )
 
-    # Dataset-level stats
+    results.sort(key=lambda item: item["mape"])
+
     n_sites = int(df["scats_number"].nunique())
     n_records = len(df)
     dt_min = str(df["datetime"].min().date())
     dt_max = str(df["datetime"].max().date())
 
-    # Load detailed metrics from CSV
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    metrics_path = os.path.join(base_dir, "src", "results", "test_results", f"test_metrics_full_{data_key}.csv")
-    
-    try:
-        if not os.path.exists(metrics_path):
-            raise FileNotFoundError
-    except FileNotFoundError:
-        metrics_path = os.path.join(base_dir, "frontend", "data", "csv", f"test_metrics_full_{data_key}.csv")
-        
-    detailed_metrics = []
-    chart_data = None
-    if os.path.exists(metrics_path):
+    base_dir = Path(__file__).resolve().parents[1]
+    primary_metrics_path = base_dir / "src" / "results" / "test_results" / f"test_metrics_full_{data_key}.csv"
+    fallback_metrics_path = base_dir / "frontend" / "data" / "csv" / f"test_metrics_full_{data_key}.csv"
+    metrics_path = primary_metrics_path if primary_metrics_path.exists() else fallback_metrics_path
+
+    detailed_metrics: list[dict[str, object]] = []
+    chart_data: dict[str, object] | None = None
+
+    if metrics_path.exists():
         df_metrics = pd.read_csv(metrics_path)
-        # Convert dataframe to a list of dicts, keeping necessary columns
         if not df_metrics.empty:
-            # fillna(0) to ensure JSON compliant output
             detailed_metrics = df_metrics.fillna(0).to_dict(orient="records")
 
-            chart_data = {
-                "mae": { "lstmData": [], "gruData": [], "lgbmData": [], "testIds": [], "overallAverage": 0.0 },
-                "rmse": { "lstmData": [], "gruData": [], "lgbmData": [], "testIds": [], "overallAverage": 0.0 },
-                "mape": { "lstmData": [], "gruData": [], "lgbmData": [], "testIds": [], "overallAverage": 0.0 }
-            }
-            
-            unique_test_ids = sorted([str(x) for x in df_metrics["test_id"].unique()])
-            
-            for metric in ["mae", "rmse", "mape"]:
-                lst_data = []
-                gru_data = []
-                lgbm_data = []
-                
-                for tid in unique_test_ids:
-                    sub = df_metrics[df_metrics["test_id"].astype(str) == tid]
-                    
-                    lstm = sub[sub["model"].str.upper() == "LSTM"][metric].values
-                    lst_data.append(float(lstm[0]) if len(lstm) else 0.0)
-                    
-                    gru = sub[sub["model"].str.upper() == "GRU"][metric].values
-                    gru_data.append(float(gru[0]) if len(gru) else 0.0)
-                    
-                    lgbm = sub[sub["model"].str.upper() == "LIGHTGBM"][metric].values
-                    lgbm_data.append(float(lgbm[0]) if len(lgbm) else 0.0)
-                
-                all_vals = lst_data + gru_data + lgbm_data
-                avg = sum(all_vals) / len(all_vals) if all_vals else 0.0
-                
+            # We pivot once here because the frontend wants one series per model and per metric.
+            # Doing that upfront avoids repeated filtering loops over the same table.
+            pivot = (
+                df_metrics.assign(test_id=df_metrics["test_id"].astype(str), model=df_metrics["model"].str.upper())
+                .pivot_table(index="test_id", columns="model", values=["mae", "rmse", "mape"], aggfunc="first")
+                .fillna(0.0)
+            )
+
+            test_ids = sorted(pivot.index.tolist())
+            chart_data = {}
+            for metric in ("mae", "rmse", "mape"):
+                lstm_data = [float(pivot.get((metric, "LSTM"), pd.Series(index=test_ids, dtype=float)).get(test_id, 0.0)) for test_id in test_ids]
+                gru_data = [float(pivot.get((metric, "GRU"), pd.Series(index=test_ids, dtype=float)).get(test_id, 0.0)) for test_id in test_ids]
+                lgbm_data = [float(pivot.get((metric, "LIGHTGBM"), pd.Series(index=test_ids, dtype=float)).get(test_id, 0.0)) for test_id in test_ids]
+                all_values = lstm_data + gru_data + lgbm_data
+
                 chart_data[metric] = {
-                    "testIds": unique_test_ids,
-                    "lstmData": lst_data,
+                    "testIds": test_ids,
+                    "lstmData": lstm_data,
                     "gruData": gru_data,
                     "lgbmData": lgbm_data,
-                    "overallAverage": avg
+                    "overallAverage": (sum(all_values) / len(all_values)) if all_values else 0.0,
                 }
 
     return {
@@ -136,39 +237,61 @@ def _compute_metrics(data_key: str) -> dict:
         "stats": {
             "intersections": n_sites,
             "records": f"{n_records:,}",
-            "date_range": f"{dt_min} – {dt_max}",
+            "date_range": f"{dt_min} - {dt_max}",
         },
     }
 
 
 # Build an hourly traffic profile for dashboard-style charts.
-def _compute_traffic_profile(data_key: str) -> list[dict]:
-    """Return average hourly traffic volume aggregated across all sites and days."""
-    import pandas as pd
-
+def _compute_traffic_profile(data_key: str) -> list[dict[str, object]]:
     path = get_predictions_path(data_key)
-    df = pd.read_csv(path, parse_dates=["datetime"])
+    if not path.exists():
+        raise ApiDataError(f"Predictions file not found for dataset '{data_key}'")
 
+    df = pd.read_csv(path, parse_dates=["datetime"])
     if "hour" not in df.columns:
         df["hour"] = df["datetime"].dt.hour
 
+    # The dashboard profile is meant to show a simple day-shape summary for the selected dataset,
+    # so we average by hour across all sites and all days rather than exposing raw time series.
     profile = (
-        df.groupby("hour")["actual"]
+        df.groupby("hour", observed=False)["actual"]
         .mean()
         .reset_index()
-        .rename(columns={"hour": "hour", "actual": "volume"})
+        .rename(columns={"actual": "volume"})
     )
 
+    # Sample every few hours intentionally so the dashboard remains readable instead of noisy.
     return [
         {"time": f"{int(row.hour):02d}:00", "volume": round(float(row.volume), 1)}
         for row in profile.itertuples(index=False)
-        if int(row.hour) % 3 == 0  # return every 3 hours for chart readability
+        if int(row.hour) % TRAFFIC_PROFILE_HOUR_STEP == 0
     ]
+
+
+# Read one storytelling JSON file from the backend-first, frontend-second search path.
+def _load_storytelling_payload(file_name: str) -> dict[str, object]:
+    if not file_name:
+        raise ApiValidationError("file is required")
+
+    base_dir = Path(__file__).resolve().parents[1]
+    candidate_paths = [
+        base_dir / "src" / "data" / "storytelling_vis" / file_name,
+        base_dir / "frontend" / "data" / "json" / file_name,
+    ]
+
+    for candidate_path in candidate_paths:
+        if candidate_path.exists():
+            with candidate_path.open("r", encoding="utf-8") as file_handle:
+                return json.load(file_handle)
+
+    raise ApiDataError(f"File not found: {file_name}")
 
 
 # Expose the small local HTTP API used by the frontend.
 class RouteGuidanceHandler(BaseHTTPRequestHandler):
     # Minimal local backend API for frontend route-guidance integration.
+
     # Handle CORS preflight requests from the frontend.
     def do_OPTIONS(self) -> None:  # noqa: N802
         self.send_response(204)
@@ -180,105 +303,59 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
     # Route every GET request to the matching backend endpoint.
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+        params = parse_qs(parsed.query)
 
-        if parsed.path == "/api/health":
-            _json_response(self, 200, {"status": "ok"})
-            return
-
-        if parsed.path == "/api/graph":
-            params = parse_qs(parsed.query)
-            data_key = params.get("data", ["2014"])[0].strip().lower()
-            if data_key not in SUPPORTED_DATA_KEYS:
-                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
-                return
-            _json_response(
-                self,
-                200,
-                ROUTE_SERVICE.get_graph_payload(data_key),
-            )
-            return
-
-        if parsed.path == "/api/route-guidance-config":
-            try:
-                payload = ROUTE_SERVICE.get_route_guidance_config()
-            except Exception as exc:  # noqa: BLE001
-                _json_response(self, 500, {"error": str(exc)})
-                return
-            _json_response(self, 200, payload)
-            return
-
-        if parsed.path == "/api/timestamps":
-            params = parse_qs(parsed.query)
-            data_key = params.get("data", ["2014"])[0].strip().lower()
-            if data_key not in SUPPORTED_DATA_KEYS:
-                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
-                return
-            try:
-                payload = ROUTE_SERVICE.get_time_options(data_key)
-            except Exception as exc:  # noqa: BLE001
-                _json_response(self, 500, {"error": str(exc)})
-                return
-            _json_response(self, 200, payload)
-            return
-
-        if parsed.path == "/api/metrics":
-            params   = parse_qs(parsed.query)
-            data_key = params.get("data", ["2014"])[0].strip().lower()
-            if data_key not in SUPPORTED_DATA_KEYS:
-                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
-                return
-            try:
-                result = _compute_metrics(data_key)
-            except Exception as exc:  # noqa: BLE001
-                _json_response(self, 500, {"error": str(exc)})
-                return
-            _json_response(self, 200, result)
-            return
-
-        if parsed.path == "/api/traffic-profile":
-            params   = parse_qs(parsed.query)
-            data_key = params.get("data", ["2014"])[0].strip().lower()
-            if data_key not in SUPPORTED_DATA_KEYS:
-                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
-                return
-            try:
-                profile = _compute_traffic_profile(data_key)
-            except Exception as exc:  # noqa: BLE001
-                _json_response(self, 500, {"error": str(exc)})
-                return
-            _json_response(self, 200, {"profile": profile})
-            return
-
-        if parsed.path == "/api/routes":
-            params = parse_qs(parsed.query)
-            origin = params.get("origin", [""])[0]
-            destination = params.get("destination", [""])[0]
-            algorithm = params.get("algorithm", ["lightgbm"])[0]
-            data_key = params.get("data", ["2014"])[0]
-            timestamp = params.get("timestamp", [""])[0].strip() or None
-            date_value = params.get("date", [""])[0].strip() or None
-            time_of_day = params.get("time", [""])[0].strip() or None
-            if timestamp is None and date_value and time_of_day:
-                timestamp = f"{date_value}T{time_of_day}:00"
-            print(f"[API] Route search: origin={origin}, destination={destination}, algorithm={algorithm}, data={data_key}, date={date_value}, time={time_of_day}, k={params.get('k', ['5'])[0]}")
-            try:
-                k = int(params.get("k", ["5"])[0])
-            except ValueError:
-                _json_response(self, 400, {"error": "k must be an integer"})
+        try:
+            # Keep simple read-only endpoints first because they are the cheapest and easiest to reason about.
+            if parsed.path == "/api/health":
+                _json_response(self, 200, {"status": "ok"})
                 return
 
-            if not origin or not destination:
-                _json_response(self, 400, {"error": "origin and destination are required"})
-                return
-            if algorithm.strip().lower() not in SUPPORTED_ALGORITHMS:
-                _json_response(self, 400, {"error": f"algorithm must be one of {sorted(SUPPORTED_ALGORITHMS)}"})
-                return
-            if data_key.strip().lower() not in SUPPORTED_DATA_KEYS:
-                _json_response(self, 400, {"error": f"data must be one of {sorted(SUPPORTED_DATA_KEYS)}"})
+            if parsed.path == "/api/graph":
+                data_key = _normalize_choice(params, "data", SUPPORTED_DATA_KEYS, "2014")
+                _json_response(self, 200, get_route_service().get_graph_payload(data_key))
                 return
 
-            try:
-                result = ROUTE_SERVICE.get_routes(
+            if parsed.path == "/api/route-guidance-config":
+                _json_response(self, 200, get_route_service().get_route_guidance_config())
+                return
+
+            if parsed.path == "/api/timestamps":
+                data_key = _normalize_choice(params, "data", SUPPORTED_DATA_KEYS, "2014")
+                _json_response(self, 200, get_route_service().get_time_options(data_key))
+                return
+
+            if parsed.path == "/api/metrics":
+                data_key = _normalize_choice(params, "data", SUPPORTED_DATA_KEYS, "2014")
+                _json_response(self, 200, _compute_metrics(data_key))
+                return
+
+            if parsed.path == "/api/traffic-profile":
+                data_key = _normalize_choice(params, "data", SUPPORTED_DATA_KEYS, "2014")
+                _json_response(self, 200, {"profile": _compute_traffic_profile(data_key)})
+                return
+
+            if parsed.path == "/api/routes":
+                # Validate the route inputs before touching the route engine so user errors fail fast
+                # and never propagate as algorithm/runtime failures deeper in the stack.
+                origin = _parse_node_id(params, "origin")
+                destination = _parse_node_id(params, "destination")
+                algorithm = _normalize_choice(params, "algorithm", SUPPORTED_ALGORITHMS, "lightgbm")
+                data_key = _normalize_choice(params, "data", SUPPORTED_DATA_KEYS, "2014")
+                k = _parse_positive_int(params, "k", minimum=1, maximum=MAX_ROUTE_K, default=5)
+                timestamp = _parse_timestamp(params)
+
+                # The log keeps enough context to reproduce the route request later without dumping internals.
+                LOGGER.info(
+                    "Route search request origin=%s destination=%s algorithm=%s data=%s timestamp=%s k=%s",
+                    origin,
+                    destination,
+                    algorithm,
+                    data_key,
+                    timestamp,
+                    k,
+                )
+                result = get_route_service().get_routes(
                     origin=origin,
                     destination=destination,
                     k=k,
@@ -286,54 +363,36 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
                     data_key=data_key,
                     target_datetime=timestamp,
                 )
-            except ValueError as exc:
-                _json_response(self, 400, {"error": str(exc)})
-                return
-            except Exception as exc:  # noqa: BLE001
-                _json_response(self, 500, {"error": str(exc)})
+                _json_response(self, 200, result)
                 return
 
-            _json_response(self, 200, result)
-            return
-
-
-        if parsed.path == "/api/storytelling":
-            params = parse_qs(parsed.query)
-            file_name = params.get("file", [""])[0]
-            
-            if not file_name:
-                _json_response(self, 400, {"error": "Missing file parameter"})
+            if parsed.path == "/api/storytelling":
+                file_name = _get_query_value(params, "file")
+                _json_response(self, 200, _load_storytelling_payload(file_name))
                 return
-                
-            import os
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            file_path = os.path.join(base_dir, "src", "data", "storytelling_vis", file_name)
-            
-            try:
-                import json
-                with open(file_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                _json_response(self, 200, data)
-            except FileNotFoundError:
-                try:
-                    fallback_file_path = os.path.join(base_dir, "frontend", "data", "json", file_name)
-                    with open(fallback_file_path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    _json_response(self, 200, data)
-                except FileNotFoundError:
-                    _json_response(self, 404, {"error": f"File not found: {file_name}"})
-            except Exception as exc:  # noqa: BLE001
-                _json_response(self, 500, {"error": str(exc)})
-            return
 
+            raise ApiNotFoundError()
 
-        _json_response(self, 404, {"error": "Not found"})
+        except Exception as exc:  # noqa: BLE001
+            error = _wrap_exception(exc)
+            # Internal failures should be logged with stack traces.
+            # Client-side validation failures should stay clean and readable.
+            if error.status_code >= 500:
+                LOGGER.exception("API request failed path=%s", parsed.path, exc_info=exc)
+            else:
+                LOGGER.warning("API request rejected path=%s error=%s", parsed.path, error)
+            _error_response(self, error)
 
 
 # Start the local backend HTTP server.
 def main() -> None:
+    # Configure logging here so imports stay side-effect light and tests can override logging if needed.
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+    )
     server = ThreadingHTTPServer((HOST, PORT), RouteGuidanceHandler)
-    print(f"Backend API running at http://{HOST}:{PORT}")
+    LOGGER.info("Backend API running at http://%s:%s", HOST, PORT)
     server.serve_forever()
 
 
