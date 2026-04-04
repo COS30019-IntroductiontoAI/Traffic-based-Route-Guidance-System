@@ -1,9 +1,15 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const frontendDir = path.dirname(fileURLToPath(import.meta.url))
+const fromFrontend = (pattern) => path.posix.join(frontendDir.replace(/\\/g, '/'), pattern)
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
   content: [
-    "./frontend/index.html",
-    "./frontend/src/**/*.{js,ts,jsx,tsx}",
+    fromFrontend("index.html"),
+    fromFrontend("src/**/*.{js,ts,jsx,tsx}"),
   ],
   theme: {
     extend: {
