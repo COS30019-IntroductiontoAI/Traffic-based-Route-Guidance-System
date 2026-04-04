@@ -6,9 +6,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from lightgbm import LGBMRegressor, early_stopping
 import numpy as np
 import pandas as pd
+from lightgbm import LGBMRegressor, early_stopping
+from numpy.typing import NDArray
 
 from src.config import model_config
 from src.data_loader import prepare_tabular_data
@@ -26,36 +27,29 @@ MODEL_PATH = TRAINED_MODELS_DIR / "lightgbm_model.txt"
 METADATA_PATH = TRAINED_MODELS_DIR / "lightgbm_metadata.json"
 METRICS_PATH = METRICS_DIR / "lightgbm_metrics.json"
 
-TARGET_COLUMN = "traffic_volume"
+TARGET_COLUMN = model_config.LIGHTGBM_TARGET_COLUMN
 
-DEFAULT_SEQUENCE_LENGTH: int = int(getattr(model_config, "SEQ_LEN", 96))
-DEFAULT_FORECAST_HORIZON: int = int(getattr(model_config, "FORECAST_HORIZON", 1))
-DEFAULT_OBJECTIVE: str = str(getattr(model_config, "LIGHTGBM_OBJECTIVE", "poisson"))
-DEFAULT_DEVICE: str = str(getattr(model_config, "LIGHTGBM_DEVICE", "cpu"))
-DEFAULT_N_ESTIMATORS: int = int(getattr(model_config, "LIGHTGBM_N_ESTIMATORS", 2200))
-DEFAULT_LEARNING_RATE: float = float(getattr(model_config, "LIGHTGBM_LEARNING_RATE", 0.03))
-DEFAULT_NUM_LEAVES: int = int(getattr(model_config, "LIGHTGBM_NUM_LEAVES", 255))
-DEFAULT_MAX_DEPTH: int = int(getattr(model_config, "LIGHTGBM_MAX_DEPTH", 12))
-DEFAULT_MIN_CHILD_SAMPLES: int = int(getattr(model_config, "LIGHTGBM_MIN_CHILD_SAMPLES", 80))
-DEFAULT_SUBSAMPLE: float = float(getattr(model_config, "LIGHTGBM_SUBSAMPLE", 1.0))
-DEFAULT_COLSAMPLE_BYTREE: float = float(getattr(model_config, "LIGHTGBM_COLSAMPLE_BYTREE", 0.6))
-DEFAULT_REG_ALPHA: float = float(getattr(model_config, "LIGHTGBM_REG_ALPHA", 0.05))
-DEFAULT_REG_LAMBDA: float = float(getattr(model_config, "LIGHTGBM_REG_LAMBDA", 1.0))
-DEFAULT_RANDOM_STATE: int = int(getattr(model_config, "LIGHTGBM_RANDOM_STATE", 42))
-DEFAULT_VERBOSE: int = int(getattr(model_config, "LIGHTGBM_VERBOSE", -1))
-DEFAULT_EVAL_METRIC: str = str(getattr(model_config, "LIGHTGBM_EVAL_METRIC", "rmse"))
-DEFAULT_EARLY_STOPPING_ROUNDS: int = int(getattr(model_config, "LIGHTGBM_EARLY_STOPPING_ROUNDS", 80))
+DEFAULT_SEQUENCE_LENGTH: int = int(model_config.SEQ_LEN)
+DEFAULT_FORECAST_HORIZON: int = int(model_config.FORECAST_HORIZON)
+DEFAULT_OBJECTIVE: str = str(model_config.LIGHTGBM_OBJECTIVE)
+DEFAULT_DEVICE: str = str(model_config.LIGHTGBM_DEVICE)
+DEFAULT_N_ESTIMATORS: int = int(model_config.LIGHTGBM_N_ESTIMATORS)
+DEFAULT_LEARNING_RATE: float = float(model_config.LIGHTGBM_LEARNING_RATE)
+DEFAULT_NUM_LEAVES: int = int(model_config.LIGHTGBM_NUM_LEAVES)
+DEFAULT_MAX_DEPTH: int = int(model_config.LIGHTGBM_MAX_DEPTH)
+DEFAULT_MIN_CHILD_SAMPLES: int = int(model_config.LIGHTGBM_MIN_CHILD_SAMPLES)
+DEFAULT_SUBSAMPLE: float = float(model_config.LIGHTGBM_SUBSAMPLE)
+DEFAULT_COLSAMPLE_BYTREE: float = float(model_config.LIGHTGBM_COLSAMPLE_BYTREE)
+DEFAULT_REG_ALPHA: float = float(model_config.LIGHTGBM_REG_ALPHA)
+DEFAULT_REG_LAMBDA: float = float(model_config.LIGHTGBM_REG_LAMBDA)
+DEFAULT_RANDOM_STATE: int = int(model_config.LIGHTGBM_RANDOM_STATE)
+DEFAULT_VERBOSE: int = int(model_config.LIGHTGBM_VERBOSE)
+DEFAULT_EVAL_METRIC: str = str(model_config.LIGHTGBM_EVAL_METRIC)
+DEFAULT_EARLY_STOPPING_ROUNDS: int = int(model_config.LIGHTGBM_EARLY_STOPPING_ROUNDS)
 
 
 def _project_relative_path(path: Path) -> str | None:
-  """Convert a path to a project-relative POSIX string when possible.
-
-  Args:
-    path: Path to normalize.
-
-  Returns:
-    Project-relative POSIX path string, or None if path is outside project root.
-  """
+  """Convert one path to a project-relative POSIX string when possible."""
   try:
     return str(path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix())
   except ValueError:
@@ -64,15 +58,7 @@ def _project_relative_path(path: Path) -> str | None:
 
 # Return feature matrix X and target vector y from a prepared dataframe.
 def get_xy(df: pd.DataFrame, feature_columns: list[str]) -> tuple[pd.DataFrame, pd.Series]:
-  """Return model matrix and target vector from a prepared split dataframe.
-
-  Args:
-    df: Prepared split dataframe.
-    feature_columns: Ordered list of feature columns.
-
-  Returns:
-    Feature dataframe and target series tuple.
-  """
+  """Return the model matrix and target vector from one prepared split."""
   return df[feature_columns], df[TARGET_COLUMN]
 
 
@@ -92,26 +78,7 @@ def create_model(
   random_state: int = DEFAULT_RANDOM_STATE,
   verbose: int = DEFAULT_VERBOSE,
 ) -> LGBMRegressor:
-  """Build one LightGBM regressor from caller-provided or configured settings.
-
-  Args:
-    objective: LightGBM objective function.
-    device: LightGBM compute device.
-    n_estimators: Maximum number of boosting rounds.
-    learning_rate: Gradient boosting learning rate.
-    num_leaves: Maximum leaf count per tree.
-    max_depth: Maximum tree depth.
-    min_child_samples: Minimum child sample count.
-    subsample: Row sampling ratio per tree.
-    colsample_bytree: Column sampling ratio per tree.
-    reg_alpha: L1 regularization strength.
-    reg_lambda: L2 regularization strength.
-    random_state: Random seed.
-    verbose: LightGBM verbosity.
-
-  Returns:
-    Configured LightGBM regressor.
-  """
+  """Build one configured LightGBM regressor."""
   return LGBMRegressor(
     objective=objective,
     device=device,
@@ -140,18 +107,7 @@ def save_metadata(
   sequence_length: int,
   forecast_horizon: int,
 ) -> None:
-  """Persist metadata required for downstream LightGBM inference.
-
-  Args:
-    metadata_path: Metadata output path.
-    data_path: Source data path used for training.
-    train_end: End timestamp of training split.
-    val_end: End timestamp of validation split.
-    row_count: Number of engineered feature rows.
-    feature_columns: Ordered feature columns.
-    sequence_length: Sequence length used for lag feature generation.
-    forecast_horizon: Forecast horizon used for target alignment.
-  """
+  """Persist the metadata required for downstream LightGBM inference."""
   metadata_path.parent.mkdir(parents=True, exist_ok=True)
   metadata = {
     "feature_columns": feature_columns,
@@ -161,7 +117,7 @@ def save_metadata(
     "train_end": train_end.isoformat(),
     "val_end": val_end.isoformat(),
     "row_count_after_features": row_count,
-    "categorical_features": ["scats_number", "location"],
+    "categorical_features": model_config.LIGHTGBM_CATEGORICAL_FEATURES,
   }
   relative_data_path = _project_relative_path(data_path)
   if relative_data_path is not None:
@@ -173,7 +129,11 @@ def save_metadata(
 
 
 # Build the movement-level tabular splits from the shared data loader.
-def prepare_datasets(data_path: Path, sequence_length: int, forecast_horizon: int) -> tuple[
+def prepare_datasets(
+  data_path: Path,
+  sequence_length: int,
+  forecast_horizon: int,
+) -> tuple[
   pd.DataFrame,
   list[str],
   pd.DataFrame,
@@ -182,35 +142,17 @@ def prepare_datasets(data_path: Path, sequence_length: int, forecast_horizon: in
   pd.Timestamp,
   pd.Timestamp,
 ]:
-  """Build movement-level tabular splits from shared loader logic.
-
-  Args:
-    data_path: Path to processed input CSV.
-    sequence_length: Sequence length used for lag feature generation.
-    forecast_horizon: Forecast horizon used for target alignment.
-
-  Returns:
-    Prepared tabular dataset bundle from data_loader.
-  """
+  """Build movement-level tabular splits from shared loader logic."""
   return prepare_tabular_data(str(data_path), sequence_length, forecast_horizon)
 
 
 # Select one representative movement slice so the saved plot stays readable.
 def build_plot_slice(
   test_df: pd.DataFrame,
-  predictions: Any,
+  predictions: NDArray[np.float64] | list[float] | tuple[float, ...] | Any,
   max_points: int = 400,
-) -> tuple[np.ndarray, np.ndarray, str]:
-  """Build one representative timeseries slice for plotting.
-
-  Args:
-    test_df: Test dataframe aligned to predictions.
-    predictions: Predicted values in test order.
-    max_points: Maximum points to include in saved chart.
-
-  Returns:
-    Actual array, predicted array, and chart title.
-  """
+) -> tuple[NDArray[np.float64], NDArray[np.float64], str]:
+  """Build one representative timeseries slice for the saved prediction plot."""
   plot_df = test_df[["movement_id", "datetime", TARGET_COLUMN]].copy()
   plot_df["predicted"] = predictions
 
@@ -254,37 +196,7 @@ def train_lightgbm_model(
   eval_metric: str = DEFAULT_EVAL_METRIC,
   early_stopping_rounds: int = DEFAULT_EARLY_STOPPING_ROUNDS,
 ) -> tuple[LGBMRegressor, dict[str, dict[str, float]]]:
-  """Train and persist a LightGBM model and related artifacts.
-
-  Args:
-    data_path: Input processed dataset path.
-    trained_models_dir: Directory for serialized model artifacts.
-    metrics_dir: Directory for metric JSON outputs.
-    graphs_dir: Directory for generated charts.
-    model_path: Destination LightGBM model path.
-    metadata_path: Destination metadata JSON path.
-    metrics_path: Destination metrics JSON path.
-    sequence_length: Sequence length used during tabular feature generation.
-    forecast_horizon: Forecast horizon used during target alignment.
-    objective: LightGBM objective.
-    device: LightGBM compute device.
-    n_estimators: Maximum boosting rounds.
-    learning_rate: Boosting learning rate.
-    num_leaves: Maximum number of leaves.
-    max_depth: Maximum tree depth.
-    min_child_samples: Minimum child sample count.
-    subsample: Row sampling ratio.
-    colsample_bytree: Feature sampling ratio.
-    reg_alpha: L1 regularization strength.
-    reg_lambda: L2 regularization strength.
-    random_state: Random seed.
-    verbose: Model verbosity.
-    eval_metric: Validation metric for early stopping.
-    early_stopping_rounds: Early-stopping patience.
-
-  Returns:
-    Trained model and split metrics dictionary.
-  """
+  """Train and persist a LightGBM model together with its artifacts."""
   trained_models_dir.mkdir(parents=True, exist_ok=True)
   metrics_dir.mkdir(parents=True, exist_ok=True)
   graphs_dir.mkdir(parents=True, exist_ok=True)

@@ -14,49 +14,25 @@ CONFIG_PATH: Path = PROJECT_ROOT / "config" / "model_config.json"
 
 
 def _load_config(config_path: Path) -> dict[str, Any]:
-	"""Load raw model configuration data from disk.
+  """Load raw model configuration data from disk."""
+  if not config_path.exists():
+    raise FileNotFoundError(f"Model configuration file not found: {config_path}")
 
-	Args:
-		config_path: Absolute path to JSON configuration file.
+  with config_path.open("r", encoding="utf-8") as config_file:
+    config_data = json.load(config_file)
 
-	Returns:
-		Parsed JSON dictionary.
+  if not isinstance(config_data, dict):
+    raise ValueError("Model configuration JSON root must be an object.")
 
-	Raises:
-		FileNotFoundError: If JSON file is missing.
-		ValueError: If JSON root is not a dictionary.
-		json.JSONDecodeError: If JSON is malformed.
-		OSError: If file cannot be read.
-	"""
-	if not config_path.exists():
-		raise FileNotFoundError(f"Model configuration file not found: {config_path}")
-
-	with config_path.open("r", encoding="utf-8") as config_file:
-		config_data = json.load(config_file)
-
-	if not isinstance(config_data, dict):
-		raise ValueError("Model configuration JSON root must be an object.")
-
-	LOGGER.info("Loaded model configuration from %s", config_path)
-	return config_data
+  LOGGER.info("Loaded model configuration from %s", config_path)
+  return config_data
 
 
 def _require(config_data: dict[str, Any], key: str) -> Any:
-	"""Return required configuration value by key.
-
-	Args:
-		config_data: Parsed configuration dictionary.
-		key: Required configuration key.
-
-	Returns:
-		Value mapped to key.
-
-	Raises:
-		KeyError: If key is missing.
-	"""
-	if key not in config_data:
-		raise KeyError(f"Missing required configuration key: {key}")
-	return config_data[key]
+  """Return one required configuration value."""
+  if key not in config_data:
+    raise KeyError(f"Missing required configuration key: {key}")
+  return config_data[key]
 
 
 CONFIG_DATA: dict[str, Any] = _load_config(CONFIG_PATH)
@@ -92,3 +68,8 @@ LIGHTGBM_RANDOM_STATE: int = int(_require(CONFIG_DATA, "LIGHTGBM_RANDOM_STATE"))
 LIGHTGBM_VERBOSE: int = int(_require(CONFIG_DATA, "LIGHTGBM_VERBOSE"))
 LIGHTGBM_EVAL_METRIC: str = str(_require(CONFIG_DATA, "LIGHTGBM_EVAL_METRIC"))
 LIGHTGBM_EARLY_STOPPING_ROUNDS: int = int(_require(CONFIG_DATA, "LIGHTGBM_EARLY_STOPPING_ROUNDS"))
+
+# Keep these metadata fields here so the LightGBM artifact schema is still defined
+# next to the rest of the model configuration.
+LIGHTGBM_TARGET_COLUMN: str = "traffic_volume"
+LIGHTGBM_CATEGORICAL_FEATURES: list[str] = ["scats_number", "location"]
