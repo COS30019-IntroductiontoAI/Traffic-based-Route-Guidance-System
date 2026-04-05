@@ -10,7 +10,7 @@ const frontendDir = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   root: frontendDir,
   build: {
-    outDir: path.resolve(frontendDir, '../dist'),
+    outDir: path.resolve(frontendDir, '../docs'),
     emptyOutDir: true,
   },
   plugins: [

@@ -44,7 +44,7 @@ export interface TrafficPoint {
   volume: number
 }
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '')
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? 'https://traffic-based-route-guidance-system.onrender.com').replace(/\/$/, '')
 
 export async function fetchMetrics(year: string): Promise<MetricsResponse> {
   const res = await fetch(`${API_BASE}/api/metrics?data=${year}`)
