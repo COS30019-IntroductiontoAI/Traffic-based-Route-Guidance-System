@@ -17,11 +17,9 @@ interface CityMapProps {
   selectingFor?: "origin" | "destination" | null;
 }
 
-
 const DEFAULT_CENTER: [number, number] = [-37.82, 145.045];
 const DEFAULT_ZOOM = 13;
 
-// Only fits the map to all nodes once on initial load — never auto-zooms after that.
 function InitialMapFit({ nodes }: { nodes: MapNode[] }) {
   const map = useMap();
   const hasFit = useRef(false);
@@ -29,7 +27,6 @@ function InitialMapFit({ nodes }: { nodes: MapNode[] }) {
   useEffect(() => {
     if (hasFit.current || nodes.length === 0) return;
 
-    // Filter out outlier nodes (coordinates far from Boroondara, Melbourne)
     const boroondara = nodes.filter(
       (n) => n.lat > -38.1 && n.lat < -37.6 && n.lng > 144.8 && n.lng < 145.3,
     );
@@ -147,7 +144,6 @@ export function CityMap({
   );
 
   const dragBounds: LatLngBoundsExpression = useMemo(() => {
-    // Use only nodes that are plausibly within Victoria, Australia
     const validNodes = nodes.filter(
       (n) => n.lat > -39.5 && n.lat < -33.5 && n.lng > 140.0 && n.lng < 150.5,
     );
@@ -212,10 +208,9 @@ export function CityMap({
           );
         })}
 
-         {/* Unselected (alternative) routes — all rendered in neutral grey */}
         {routes.map((route, routeIndex) => {
           if (routeIndex === selectedRoute) {
-            return null; // draw selected route last so it renders on top
+            return null;
           }
 
           const positions = getRoutePositions(route, routeIndex);
@@ -228,21 +223,21 @@ export function CityMap({
               key={`alt-route-${route.rank ?? routeIndex}`}
               positions={positions}
               pathOptions={{
-                color: "#9ca3af",   // fixed grey for every non-selected route
-                weight: 5,          // increased weight slightly for easier clicking
+                color: "#9ca3af",
+                weight: 5,
                 opacity: 0.5,
                 dashArray: "6 4",
-                className: "cursor-pointer hover:stroke-slate-500", // adding cursor pointer and hover color
+                className: "cursor-pointer hover:stroke-slate-500",
               }}
               eventHandlers={{
                 click: () => onSelectRoute?.(routeIndex),
                 mouseover: (e) => {
                   const layer = e.target;
-                  layer.setStyle({ color: "#64748b", opacity: 0.8 }); // slate-500 equivalent
+                  layer.setStyle({ color: "#64748b", opacity: 0.8 });
                 },
                 mouseout: (e) => {
                   const layer = e.target;
-                  layer.setStyle({ color: "#9ca3af", opacity: 0.5 }); // original color
+                  layer.setStyle({ color: "#9ca3af", opacity: 0.5 });
                 }
               }}
             >
@@ -253,12 +248,11 @@ export function CityMap({
           );
         })}
 
-        {/* Selected route — one solid blue line, always on top */}
         {selectedRoutePositions.length >= 2 && (
           <Polyline
             positions={selectedRoutePositions}
             pathOptions={{
-              color: "#2563eb",  // solid blue — single colour for the chosen route
+              color: "#2563eb",
               weight: 6,
               opacity: 0.92,
               lineCap: "round",
