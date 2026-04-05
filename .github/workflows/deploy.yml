@@ -66,10 +66,14 @@ jobs:
             </body>
           </html>
           EOF
+
+      - name: Check if docs folder was created
         run: |
           if [ -d "docs" ]; then
             echo "✓ Build successful - docs folder created"
-            ls -la docs
+            echo "Index.html exists: $([ -f docs/index.html ] && echo 'YES' || echo 'NO')"
+            echo "Checking assets:"
+            ls -la docs/assets/ 2>/dev/null || echo "No assets folder"
           else
             echo "✗ Build failed - docs folder not found"
             exit 1
@@ -79,13 +83,12 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add docs/
+          git add -f docs/
           if git diff --quiet --cached; then
             echo "No changes to commit"
           else
             git commit -m "chore: deploy frontend build to GitHub Pages"
-            git pull --rebase origin deploy
-            git push origin deploy
+            git push -u origin deploy --force
           fi
 
   deploy:
@@ -99,6 +102,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: deploy
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
