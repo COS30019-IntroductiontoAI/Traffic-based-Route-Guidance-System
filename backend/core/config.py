@@ -1,16 +1,27 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
-# Dynamically resolve the project root to ensure compatibility with deployment environments.
-# The config.py file is at: PROJECT_ROOT/backend/core/config.py
-# So we go up 2 levels to reach PROJECT_ROOT
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# Hardcode path for Render deployment, with fallback for local development
+# Render deploys to: /opt/render/project/src/
+# Our config.py is at: /opt/render/project/src/backend/core/config.py
+# So PROJECT_ROOT = /opt/render/project/src
 
-# Export the project root path so other modules can use it if needed
-__all__ = [
+if "RENDER" in os.environ:
+    # Running on Render - use hardcoded path
+    PROJECT_ROOT = Path("/opt/render/project/src")
+else:
+    # Local development - use dynamic resolution
+    # The config.py file is at: PROJECT_ROOT/backend/core/config.py
+    # So we go up 2 levels to reach PROJECT_ROOT
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+print(f"Using PROJECT_ROOT: {PROJECT_ROOT}", file=sys.stderr)
+print(f"RENDER env var: {os.environ.get('RENDER', 'Not set')}", file=sys.stderr)
+
     "PROJECT_ROOT",
     "CONFIG_DIR",
     "BACKEND_CONFIG_PATH",

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -403,13 +404,20 @@ def main() -> None:
     
     try:
         LOGGER.info("Starting backend API server with HOST=%s PORT=%s", HOST, PORT)
+        LOGGER.info("Python version: %s", sys.version)
         
         # Validate that required configuration can be loaded before starting the server
         from backend.core.config import (
             BACKEND_CONFIG_PATH,
             GENERATED_DIR,
             PREDICTIONS_DIR,
+            PROJECT_ROOT,
         )
+        
+        LOGGER.info("PROJECT_ROOT: %s", PROJECT_ROOT)
+        LOGGER.info("BACKEND_CONFIG_PATH: %s", BACKEND_CONFIG_PATH)
+        LOGGER.info("GENERATED_DIR: %s", GENERATED_DIR)
+        LOGGER.info("PREDICTIONS_DIR: %s", PREDICTIONS_DIR)
         
         if not BACKEND_CONFIG_PATH.exists():
             LOGGER.error("Configuration file not found: %s", BACKEND_CONFIG_PATH)
@@ -429,6 +437,8 @@ def main() -> None:
         
     except Exception as exc:
         LOGGER.exception("Failed to start backend API server: %s", exc)
+        import traceback
+        traceback.print_exc()
         raise
 
 
