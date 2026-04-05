@@ -16,7 +16,17 @@ from backend.services.route_service import RouteService, SUPPORTED_ALGORITHMS, S
 
 # Use environment variables for host and port to ensure compatibility with Render.
 HOST = os.environ.get("HOST", "0.0.0.0")
-PORT = int(os.environ.get("PORT", 8000))
+PORT_STR = os.environ.get("PORT", "8000")
+
+# Handle cases where PORT might be set to a full URL or have extra formatting
+if ":" in PORT_STR:
+    # Extract port number from URLs like 'http://localhost:8000'
+    PORT_STR = PORT_STR.split(":")[-1]
+
+try:
+    PORT = int(PORT_STR.strip())
+except (ValueError, AttributeError):
+    PORT = 8000
 LOGGER = logging.getLogger("backend.api_server")
 
 
