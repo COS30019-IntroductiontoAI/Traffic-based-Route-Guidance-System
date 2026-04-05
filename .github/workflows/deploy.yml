@@ -37,6 +37,8 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+        env:
+          VITE_API_BASE_URL: https://traffic-based-route-guidance-system.onrender.com
 
       - name: Create GitHub Pages routing files
         run: |
