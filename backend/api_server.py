@@ -390,9 +390,36 @@ def main() -> None:
         level=logging.INFO,
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
     )
-    server = ThreadingHTTPServer((HOST, PORT), RouteGuidanceHandler)
-    LOGGER.info("Backend API running at http://%s:%s", HOST, PORT)
-    server.serve_forever()
+    
+    try:
+        LOGGER.info("Starting backend API server with HOST=%s PORT=%s", HOST, PORT)
+        
+        # Validate that required configuration can be loaded before starting the server
+        from backend.core.config import (
+            BACKEND_CONFIG_PATH,
+            GENERATED_DIR,
+            PREDICTIONS_DIR,
+        )
+        
+        if not BACKEND_CONFIG_PATH.exists():
+            LOGGER.error("Configuration file not found: %s", BACKEND_CONFIG_PATH)
+            raise FileNotFoundError(f"Backend config not found at {BACKEND_CONFIG_PATH}")
+        
+        LOGGER.info("Config file found at %s", BACKEND_CONFIG_PATH)
+        
+        # Initialize route service (this is expensive, so we do it once during startup validation)
+        LOGGER.info("Initializing route service and loading graphs...")
+        service = get_route_service()
+        LOGGER.info("Route service initialized successfully with graphs: %s", list(service.graphs_by_data.keys()))
+        
+        # Create the server
+        server = ThreadingHTTPServer((HOST, PORT), RouteGuidanceHandler)
+        LOGGER.info("Backend API running at http://%s:%s", HOST, PORT)
+        server.serve_forever()
+        
+    except Exception as exc:
+        LOGGER.exception("Failed to start backend API server: %s", exc)
+        raise
 
 
 if __name__ == "__main__":

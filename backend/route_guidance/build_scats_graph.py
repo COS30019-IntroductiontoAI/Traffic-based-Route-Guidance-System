@@ -47,7 +47,11 @@ def _get_processed_traffic_path(data_key: str) -> Path:
         # Keep the fallback only for older local setups that have not been split by year yet.
         return fallback
 
-    raise FileNotFoundError(f"Could not find a processed traffic CSV for dataset '{data_key}'")
+    raise FileNotFoundError(
+        f"Could not find a processed traffic CSV for dataset '{data_key}'. "
+        f"Looked in: {PROCESSED_DIR}. "
+        f"Please ensure the processed data files exist or run the preprocessing pipeline first."
+    )
 
 
 # Detect the longitude column name used by the processed dataset.
@@ -69,6 +73,14 @@ def _series_mode_or_first(series: pd.Series) -> object:
 # Build one cleaned site record per SCATS intersection for a dataset year.
 def load_site_records(data_key: str) -> list[SiteRecord]:
     traffic_path = _get_processed_traffic_path(data_key)
+    
+    # Validate that the site listing file exists
+    if not SITE_LISTING_PATH.exists():
+        raise FileNotFoundError(
+            f"SCATS site listing file not found at {SITE_LISTING_PATH}. "
+            f"This file is required to build the route graph."
+        )
+    
     traffic_df = pd.read_csv(traffic_path)
     listing_df = pd.read_csv(SITE_LISTING_PATH).rename(columns={"site_number": "scats_number"})
 

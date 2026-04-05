@@ -91,6 +91,21 @@ def build_graph(nodes_data: list[dict[str, object]], edges_data: list[dict[str, 
 # Load graph JSON files and convert them into an in-memory route graph.
 def load_graph_from_json(nodes_path: str | Path, edges_path: str | Path) -> RouteGraph:
     # JSON files are the boundary between preprocessing/generation and runtime route search.
-    nodes_data = json.loads(Path(nodes_path).read_text(encoding="utf-8"))
-    edges_data = json.loads(Path(edges_path).read_text(encoding="utf-8"))
+    nodes_path = Path(nodes_path)
+    edges_path = Path(edges_path)
+    
+    # Validate that the files exist
+    if not nodes_path.exists():
+        raise FileNotFoundError(f"Graph nodes file not found at {nodes_path}")
+    if not edges_path.exists():
+        raise FileNotFoundError(f"Graph edges file not found at {edges_path}")
+    
+    try:
+        nodes_data = json.loads(nodes_path.read_text(encoding="utf-8"))
+        edges_data = json.loads(edges_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse graph JSON files: {e}") from e
+    except Exception as e:
+        raise RuntimeError(f"Failed to load graph files: {e}") from e
+    
     return build_graph(nodes_data, edges_data)
