@@ -58,3 +58,18 @@ def get_predictions_path(data_key: str = "2014") -> Path:
     """
     normalized = normalize_data_key(data_key)
     return PREDICTIONS_DIR / f"{normalized}_predictions.csv"
+
+
+def get_route_guidance_defaults_payload() -> dict:
+    """
+    Return the default route guidance payload from the backend configuration.
+    This is used to initialize the frontend with default values.
+    """
+    return DEFAULT_ROUTE_GUIDANCE_SELECTION
+
+
+def get_default_data_key() -> str:
+    """
+    Return the default dataset key shown when Route Guidance first loads.
+    """
+    return DEFAULT_ROUTE_GUIDANCE_SELECTION.get("data_key", "2014")
