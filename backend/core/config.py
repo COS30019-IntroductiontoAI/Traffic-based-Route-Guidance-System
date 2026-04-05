@@ -50,3 +50,11 @@ def get_scats_nodes_path(data_key: str = "2014") -> Path:
 def get_scats_edges_path(data_key: str = "2014") -> Path:
     normalized = normalize_data_key(data_key)
     return GENERATED_DIR / f"scats_edges_{normalized}.json"
+
+# Added missing function `get_predictions_path` to resolve ImportError.
+def get_predictions_path(data_key: str = "2014") -> Path:
+    """
+    Dynamically resolve the predictions file path for the given dataset key.
+    """
+    normalized = normalize_data_key(data_key)
+    return PREDICTIONS_DIR / f"{normalized}_predictions.csv"
