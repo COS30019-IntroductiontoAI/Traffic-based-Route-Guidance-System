@@ -14,7 +14,7 @@ import pandas as pd
 from backend.core.config import MAX_ROUTE_K, TRAFFIC_PROFILE_HOUR_STEP, get_predictions_path
 from backend.services.route_service import RouteService, SUPPORTED_ALGORITHMS, SUPPORTED_DATA_KEYS
 
-
+# Use environment variables for host and port to ensure compatibility with Render.
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", 8000))
 LOGGER = logging.getLogger("backend.api_server")
@@ -22,7 +22,6 @@ LOGGER = logging.getLogger("backend.api_server")
 
 # Represent one controlled API error that should be shown to the client.
 class ApiError(Exception):
-    # Keep an HTTP status and a simple category so the frontend gets consistent responses.
     def __init__(self, message: str, status_code: int, category: str):
         super().__init__(message)
         self.status_code = status_code
