@@ -91,6 +91,18 @@ def _wrap_exception(exc: Exception) -> ApiError:
     return ApiError("Internal server error", status_code=500, category="internal")
 
 
+# Identify expected client disconnects so we do not treat them as backend failures.
+def _is_client_disconnect(exc: Exception) -> bool:
+    if isinstance(exc, (BrokenPipeError, ConnectionAbortedError, ConnectionResetError)):
+        return True
+    if isinstance(exc, OSError):
+        if getattr(exc, "winerror", None) in {10053, 10054}:
+            return True
+        if getattr(exc, "errno", None) in {32, 54}:
+            return True
+    return False
+
+
 # Read one required query value and strip surrounding whitespace.
 def _get_query_value(params: dict[str, list[str]], name: str, default: str = "") -> str:
     return params.get(name, [default])[0].strip()
@@ -374,6 +386,10 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
             raise ApiNotFoundError()
 
         except Exception as exc:  # noqa: BLE001
+            if _is_client_disconnect(exc):
+                LOGGER.info("Client disconnected before response was sent path=%s", parsed.path)
+                return
+
             error = _wrap_exception(exc)
             # Internal failures should be logged with stack traces.
             # Client-side validation failures should stay clean and readable.
@@ -381,7 +397,13 @@ class RouteGuidanceHandler(BaseHTTPRequestHandler):
                 LOGGER.exception("API request failed path=%s", parsed.path, exc_info=exc)
             else:
                 LOGGER.warning("API request rejected path=%s error=%s", parsed.path, error)
-            _error_response(self, error)
+            try:
+                _error_response(self, error)
+            except Exception as response_exc:  # noqa: BLE001
+                if _is_client_disconnect(response_exc):
+                    LOGGER.info("Client disconnected while sending error response path=%s", parsed.path)
+                    return
+                raise
 
 
 # Start the local backend HTTP server.
