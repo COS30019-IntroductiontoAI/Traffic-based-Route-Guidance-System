@@ -4,6 +4,7 @@ import { useApp } from "@/App";
 import { CityMap } from "@/components/route-guidance/CityMap";
 import { RouteControls } from "@/components/route-guidance/RouteControls";
 import { RouteDetails } from "@/components/route-guidance/RouteDetails";
+import { useRoadGeometries } from "@/hooks/useRoadGeometry";
 import {
   fetchGraph,
   fetchRouteGuidanceConfig,
@@ -69,6 +70,12 @@ export default function RouteGuidance() {
   const maxDate = currentSelectionOptions.max_date;
   const availableTimes = currentSelectionOptions.times;
   const availableDates = currentSelectionOptions.available_dates;
+  const { routeGeometries, isFetchingGeometry } = useRoadGeometries({
+    routes,
+    nodes,
+    dataKey: year,
+    selectedRoute,
+  });
 
   const requestRoutes = useCallback(
     async ({
@@ -411,6 +418,7 @@ export default function RouteGuidance() {
                   nodes={nodes}
                   edges={edges}
                   routes={routes}
+                  routeGeometries={routeGeometries}
                   selectedRoute={selectedRoute}
                   origin={origin}
                   destination={destination}
@@ -426,6 +434,13 @@ export default function RouteGuidance() {
                   <div className="absolute top-6 left-6 z-[1000] rounded-full border border-blue-100 bg-white/95 px-4 py-2 text-sm text-blue-600 flex items-center gap-2 shadow-sm">
                     <LoaderCircle className="w-4 h-4 animate-spin" />
                     Finding routes...
+                  </div>
+                )}
+
+                {!isRoutesLoading && isFetchingGeometry && (
+                  <div className="absolute top-6 left-6 z-[1000] rounded-full border border-emerald-100 bg-white/95 px-4 py-2 text-sm text-emerald-700 flex items-center gap-2 shadow-sm">
+                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                    Snapping route to roads...
                   </div>
                 )}
 

@@ -8,6 +8,7 @@ interface CityMapProps {
   nodes: MapNode[];
   edges: MapEdge[];
   routes: RouteResult[];
+  routeGeometries?: Record<number, [number, number][]>;
   selectedRoute: number;
   origin: string;
   destination: string;
@@ -54,6 +55,7 @@ export function CityMap({
   nodes,
   edges,
   routes,
+  routeGeometries,
   selectedRoute,
   origin,
   destination,
@@ -83,6 +85,17 @@ export function CityMap({
     });
   }, [edges]);
 
+  const getRoutePositions = useCallback(
+    (_route: RouteResult, routeIndex: number): [number, number][] => {
+      const geometry = routeGeometries?.[routeIndex];
+      if (geometry && geometry.length >= 2) {
+        return geometry;
+      }
+      return [];
+    },
+    [routeGeometries],
+  );
+
   const activeRouteNodes = useMemo(() => {
     const result = new Set<string>();
     if (routes[selectedRoute]) {
@@ -92,6 +105,14 @@ export function CityMap({
     }
     return result;
   }, [routes, selectedRoute]);
+
+  const selectedRoutePositions = useMemo(() => {
+    const selected = routes[selectedRoute];
+    if (!selected) {
+      return [] as [number, number][];
+    }
+    return getRoutePositions(selected, selectedRoute);
+  }, [getRoutePositions, routes, selectedRoute]);
 
   const getNodeColor = useCallback(
     (node: MapNode) => {
@@ -197,10 +218,10 @@ export function CityMap({
             return null; // draw selected route last so it renders on top
           }
 
-          const positions = route.nodes
-            .map((nodeId) => nodeMap[nodeId])
-            .filter((node): node is MapNode => Boolean(node))
-            .map((node) => [node.lat, node.lng] as [number, number]);
+          const positions = getRoutePositions(route, routeIndex);
+          if (positions.length < 2) {
+            return null;
+          }
 
           return (
             <Polyline
@@ -233,12 +254,9 @@ export function CityMap({
         })}
 
         {/* Selected route — one solid blue line, always on top */}
-        {routes[selectedRoute] && (
+        {selectedRoutePositions.length >= 2 && (
           <Polyline
-            positions={routes[selectedRoute].nodes
-              .map((nodeId) => nodeMap[nodeId])
-              .filter((node): node is MapNode => Boolean(node))
-              .map((node) => [node.lat, node.lng] as [number, number])}
+            positions={selectedRoutePositions}
             pathOptions={{
               color: "#2563eb",  // solid blue — single colour for the chosen route
               weight: 6,
