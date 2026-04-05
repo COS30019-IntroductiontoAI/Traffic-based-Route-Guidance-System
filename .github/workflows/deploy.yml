@@ -57,7 +57,8 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "chore: deploy frontend build to GitHub Pages"
-            git push
+            git pull --rebase origin deploy
+            git push origin deploy
           fi
 
   deploy:
