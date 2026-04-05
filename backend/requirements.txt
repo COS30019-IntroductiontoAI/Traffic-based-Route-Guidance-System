@@ -4,3 +4,5 @@ pydantic
 gunicorn
 python-dotenv
 pandas
+numpy
+scikit-learn
