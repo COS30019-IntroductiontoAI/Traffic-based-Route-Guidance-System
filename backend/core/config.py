@@ -22,6 +22,7 @@ else:
 print(f"Using PROJECT_ROOT: {PROJECT_ROOT}", file=sys.stderr)
 print(f"RENDER env var: {os.environ.get('RENDER', 'Not set')}", file=sys.stderr)
 
+__all__ = [
     "PROJECT_ROOT",
     "CONFIG_DIR",
     "BACKEND_CONFIG_PATH",
@@ -123,19 +124,49 @@ def get_route_guidance_defaults_payload() -> dict:
     Return the default route guidance payload from the backend configuration.
     This is used to initialize the frontend with default values.
     """
-    return DEFAULT_ROUTE_GUIDANCE_SELECTION
+    supported_data = sorted(SUPPORTED_DATA_KEYS)
+    return {
+        "supported_data": supported_data,
+        "month": ROUTE_GUIDANCE_MONTH,
+        "month_label": ROUTE_GUIDANCE_MONTH_LABEL,
+        "defaults": {
+            "data": get_default_data_key(),
+            "time": get_default_time_of_day(),
+            "date_by_data": {
+                data_key: get_default_date(data_key)
+                for data_key in supported_data
+            },
+        },
+    }
 
 def get_default_data_key() -> str:
     """
     Return the default dataset key shown when Route Guidance first loads.
     """
-    return DEFAULT_ROUTE_GUIDANCE_SELECTION.get("data_key", "2014")
+    default_data_key = str(DEFAULT_ROUTE_GUIDANCE_SELECTION.get("data", "2014"))
+    try:
+        return normalize_data_key(default_data_key)
+    except ValueError:
+        return "2014"
 
-def get_default_date() -> str:
+def get_default_date(data_key: str = "2014") -> str:
     """
     Return the default date for route guidance from configuration.
+    Supports both legacy "date" and year-specific "date_by_data" config.
     """
-    return DEFAULT_ROUTE_GUIDANCE_SELECTION.get("date", "2014-10-01")
+    normalized_data_key = normalize_data_key(data_key)
+    date_by_data = DEFAULT_ROUTE_GUIDANCE_SELECTION.get("date_by_data")
+
+    if isinstance(date_by_data, dict):
+        configured_date = date_by_data.get(normalized_data_key)
+        if isinstance(configured_date, str) and configured_date:
+            return configured_date
+
+    legacy_date = DEFAULT_ROUTE_GUIDANCE_SELECTION.get("date")
+    if isinstance(legacy_date, str) and legacy_date:
+        return legacy_date
+
+    return f"{normalized_data_key}-{ROUTE_GUIDANCE_MONTH:02d}-01"
 
 def get_default_time_of_day() -> str:
     """
