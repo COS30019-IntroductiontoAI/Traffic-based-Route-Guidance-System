@@ -38,7 +38,34 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      - name: Check if docs folder was created
+      - name: Create GitHub Pages routing files
+        run: |
+          # Create .nojekyll to prevent Jekyll processing
+          touch docs/.nojekyll
+          
+          # Create 404.html for client-side routing on GitHub Pages
+          cat > docs/404.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Traffic-Based Route Guidance System</title>
+              <script>
+                var segmentCount = 0;
+                var l = window.location;
+                l.replace(
+                  l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+                  '/Traffic-based-Route-Guidance-System/?p=' +
+                  l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+                  (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+                  l.hash
+                );
+              </script>
+            </head>
+            <body>
+            </body>
+          </html>
+          EOF
         run: |
           if [ -d "docs" ]; then
             echo "✓ Build successful - docs folder created"

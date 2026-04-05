@@ -8,6 +8,7 @@ const frontendDir = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/Traffic-based-Route-Guidance-System/',
   root: frontendDir,
   build: {
     outDir: path.resolve(frontendDir, '../docs'),
