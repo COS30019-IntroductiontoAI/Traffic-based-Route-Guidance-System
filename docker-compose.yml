@@ -1,0 +1,30 @@
+# docker-compose.yml
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./config:/app/config
+      - ./src/results/predictions:/app/src/results/predictions
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=0.0.0.0
+      - PORT=8000
+    command: python -m backend.api_server
+
+  frontend:
+    build:
+      context: .
+    ports:
+      - "5173:5173" 
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://127.0.0.1:8001
+    depends_on:
+      - backend

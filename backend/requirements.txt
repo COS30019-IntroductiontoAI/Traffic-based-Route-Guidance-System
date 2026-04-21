@@ -4,3 +4,4 @@ pydantic
 gunicorn
 python-dotenv
 pandas
+scikit-learn

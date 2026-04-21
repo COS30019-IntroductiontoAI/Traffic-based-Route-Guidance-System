@@ -1,0 +1,31 @@
+# Ignore everything by default; re-include only files needed by Docker builds.
+**
+
+# Shared manifests
+!package.json
+!package-lock.json
+!Dockerfile
+
+# Frontend app sources
+!frontend/
+!frontend/**
+
+# Backend runtime sources and config
+!backend/
+!backend/**
+!config/
+!config/**
+
+# Backend prediction artifacts referenced by backend/Dockerfile
+!src/
+!src/results/
+!src/results/predictions/
+!src/results/predictions/**
+
+# Explicitly ignore heavy/generated dev caches
+node_modules
+frontend/node_modules
+backend/node_modules
+**/__pycache__
+**/*.pyc
+.git
